@@ -69,14 +69,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function fmtDate(dateStr) {
-    if (!dateStr) return '—';
+    if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('en-IN', {
       day: '2-digit', month: 'short', year: 'numeric'
     });
   }
 
   function fmtTime(t) {
-    if (!t) return '—';
+    if (!t) return '-';
     // t can be "HH:MM:SS" or "HH:MM"
     const [h, m] = t.split(':');
     const d = new Date();
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     events.forEach(e => {
       const opt  = document.createElement('option');
       opt.value  = e.id;
-      opt.textContent = `${e.title} — ${fmtDate(e.event_date)}`;
+      opt.textContent = `${e.title} - ${fmtDate(e.event_date)}`;
       // store data attrs for quick preview
       opt.dataset.venue    = e.venue || '';
       opt.dataset.date     = e.event_date || '';
@@ -127,10 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
       runForecastBtn.disabled = true;
       return;
     }
-    document.getElementById('infoVenue').textContent    = opt.dataset.venue    || '—';
+    document.getElementById('infoVenue').textContent    = opt.dataset.venue    || '-';
     document.getElementById('infoDate').textContent     = fmtDate(opt.dataset.date);
     document.getElementById('infoTime').textContent     = `${fmtTime(opt.dataset.start)} – ${fmtTime(opt.dataset.end)}`;
-    document.getElementById('infoCapacity').textContent = opt.dataset.capacity || '—';
+    document.getElementById('infoCapacity').textContent = opt.dataset.capacity || '-';
     eventInfo.classList.remove('hidden');
     runForecastBtn.disabled = false;
   });
@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ${pct >= 100
           ? `<div class="alert alert-error">⚠️ Event is predicted to exceed capacity.</div>`
           : pct >= 80
-          ? `<div class="alert alert-warning">⚡ Near capacity — consider reserving overflow.</div>`
+          ? `<div class="alert alert-warning">⚡ Near capacity - consider reserving overflow.</div>`
           : `<div class="alert alert-success">✅ Comfortable occupancy predicted.</div>`
         }
 

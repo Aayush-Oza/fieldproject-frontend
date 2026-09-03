@@ -1,5 +1,5 @@
 // frontend/js/admin/certificates.js
-// Admin certificate oversight — reads all events + their stats,
+// Admin certificate oversight - reads all events + their stats,
 // displays eligibility counts per event (read-only).
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function fmtDate(dateStr) {
-    if (!dateStr) return '—';
+    if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('en-IN', {
       day: '2-digit', month: 'short', year: 'numeric'
     });
@@ -141,13 +141,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tbody.innerHTML = list.map(e => {
       const stats      = statsMap[e.id];
-      const registered = stats ? stats.total_registered  : '—';
-      const checkedIn  = stats ? stats.total_checkedin   : '—';
+      const registered = stats ? stats.total_registered  : '-';
+      const checkedIn  = stats ? stats.total_checkedin   : '-';
 
       // eligible = checked-in count (cert is auto-issued on check-in)
       let eligibleHtml;
       if (!stats) {
-        eligibleHtml = '<span class="text-slate">—</span>';
+        eligibleHtml = '<span class="text-slate">-</span>';
       } else if (stats.total_checkedin === 0) {
         eligibleHtml = '<span class="text-slate">0</span>';
       } else {
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <tr>
           <td>${e.title}</td>
           <td>${fmtDate(e.event_date)}</td>
-          <td>${e.venue || '—'}</td>
+          <td>${e.venue || '-'}</td>
           <td>${e.capacity}</td>
           <td>${registered}</td>
           <td>${checkedIn}</td>

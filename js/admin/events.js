@@ -199,7 +199,7 @@ function renderEventRow(event) {
   );
 
   const venue = escapeHtml(
-    event.venue || '—'
+    event.venue || '-'
   );
 
   const date = formatDate(
@@ -1113,7 +1113,7 @@ function normalizeEvents(data) {
 // ============================================================
 
 function formatDate(value) {
-  if (!value) return '—';
+  if (!value) return '-';
 
   const date =
     new Date(
@@ -1169,7 +1169,7 @@ function formatTimeRange(start, end) {
     formatTime(end);
 
   if (!first && !last) {
-    return '—';
+    return '-';
   }
 
   if (!last) {

@@ -109,9 +109,9 @@ async function loadDashboardStats() {
   } catch (err) {
     console.error('[Admin Dashboard] Stats:', err);
 
-    setText('statEvents', '—');
-    setText('statPublished', '—');
-    setText('statCompleted', '—');
+    setText('statEvents', '-');
+    setText('statPublished', '-');
+    setText('statCompleted', '-');
 
     showToast(
       'Some dashboard statistics could not be loaded.',
@@ -145,8 +145,8 @@ async function loadUserStats() {
   } catch (err) {
     console.error('[Admin Dashboard] User stats:', err);
 
-    setText('statUsers', '—');
-    setText('statVolunteers', '—');
+    setText('statUsers', '-');
+    setText('statVolunteers', '-');
   }
 }
 
@@ -160,10 +160,10 @@ async function loadCertificateStat() {
    * endpoint in the backend supplied for this project.
    *
    * Therefore we intentionally don't invent an API call here.
-   * The card stays as "—" until a real admin endpoint exists.
+   * The card stays as "-" until a real admin endpoint exists.
    */
 
-  setText('statCerts', '—');
+  setText('statCerts', '-');
 }
 
 /* ============================================================
@@ -522,7 +522,7 @@ function renderUserRow(user) {
   );
 
   const email = escapeHtml(
-    user.email || '—'
+    user.email || '-'
   );
 
   const role = user.role || 'participant';
@@ -710,7 +710,7 @@ function formatDate(dateString) {
 }
 
 function formatDateTime(dateString) {
-  if (!dateString) return '—';
+  if (!dateString) return '-';
 
   const date =
     new Date(dateString);
@@ -754,13 +754,13 @@ function formatTime(timeString) {
 }
 
 function getDay(dateString) {
-  if (!dateString) return '—';
+  if (!dateString) return '-';
 
   const date =
     new Date(`${dateString}T00:00:00`);
 
   if (Number.isNaN(date.getTime())) {
-    return '—';
+    return '-';
   }
 
   return date.getDate();
