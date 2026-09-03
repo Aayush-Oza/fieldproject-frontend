@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Volunteers — EventOps Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo">Event<span>Ops</span></span>
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li><a href="volunteers.html" class="active">Volunteers</a></li>
+      <li><a href="occupancy.html">Occupancy</a></li>
+      <li><a href="forecast.html">Forecast</a></li>
+      <li><a href="certificates.html">Certificates</a></li>
+    </ul>
+    <div class="nav-user">
+      <span class="nav-user-name" id="navName"></span>
+      <span class="nav-role-badge role-admin">Admin</span>
+      <button class="nav-logout" id="logoutBtn">Sign out</button>
+    </div>
+  </div>
+</nav>
+
+<main class="dash-main">
+
+  <div class="dash-greeting">
+    <div>
+      <div class="dash-greeting-sub">Manage</div>
+      <div class="dash-greeting-name">Volunteers</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="volunteers">Volunteers</button>
+    <button class="tab-btn" data-tab="users">All Users</button>
+    <button class="tab-btn" data-tab="assignments">Assignments</button>
+  </div>
+
+  <!-- VOLUNTEERS TAB -->
+  <div id="tab-volunteers">
+    <div class="card" style="padding:1rem 1.5rem;margin-bottom:1rem;">
+      <div class="filter-bar">
+        <input type="text" class="form-input filter-search" id="volSearch" placeholder="Search volunteers…" />
+      </div>
+    </div>
+    <div class="card" style="padding:0;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="volTableBody">
+            <tr><td colspan="5"><div class="loading-state"><div class="spinner"></div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS TAB -->
+  <div id="tab-users" class="hidden">
+    <div class="card" style="padding:1rem 1.5rem;margin-bottom:1rem;">
+      <div class="filter-bar">
+        <input type="text" class="form-input filter-search" id="userSearch" placeholder="Search users…" />
+        <select class="form-select filter-select" id="roleFilter">
+          <option value="">All Roles</option>
+          <option value="participant">Participant</option>
+          <option value="volunteer">Volunteer</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="card" style="padding:0;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="userTableBody">
+            <tr><td colspan="5"><div class="loading-state"><div class="spinner"></div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSIGNMENTS TAB -->
+  <div id="tab-assignments" class="hidden">
+    <div class="card" style="padding:1rem 1.5rem;margin-bottom:1rem;">
+      <div class="filter-bar">
+        <select class="form-select" id="assignEventFilter" style="max-width:300px;">
+          <option value="">Select event to view assignments…</option>
+        </select>
+        <button class="btn btn-primary btn-sm" id="assignVolBtn">+ Assign Volunteer</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Volunteer</th><th>Email</th><th>Duty</th><th>Assigned At</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="assignTableBody">
+            <tr><td colspan="5">
+              <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <div class="empty-state-title">Select an event</div>
+                <div class="empty-state-desc">Choose an event above to see its volunteer assignments.</div>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ASSIGN VOLUNTEER MODAL -->
+<div class="modal-overlay hidden" id="assignModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Assign Volunteer</span>
+      <button class="modal-close" id="assignModalClose">✕</button>
+    </div>
+    <div id="assignAlert"></div>
+    <div class="form-group">
+      <label class="form-label">Volunteer</label>
+      <select class="form-select" id="assignVolSelect"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Duty <span class="text-slate">(optional)</span></label>
+      <input type="text" class="form-input" id="assignDuty" placeholder="e.g. Registration Desk, Entry Gate…" />
+    </div>
+    <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+      <button class="btn btn-secondary" id="assignModalClose2">Cancel</button>
+      <button class="btn btn-primary" style="flex:1" id="doAssignBtn">Assign</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/admin/volunteers.js"></script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Events — EventOps Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo">Event<span>Ops</span></span>
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="events.html" class="active">Events</a></li>
+      <li><a href="volunteers.html">Volunteers</a></li>
+      <li><a href="occupancy.html">Occupancy</a></li>
+      <li><a href="forecast.html">Forecast</a></li>
+      <li><a href="certificates.html">Certificates</a></li>
+    </ul>
+    <div class="nav-user">
+      <span class="nav-user-name" id="navName"></span>
+      <span class="nav-role-badge role-admin">Admin</span>
+      <button class="nav-logout" id="logoutBtn">Sign out</button>
+    </div>
+  </div>
+</nav>
+
+<main class="dash-main">
+
+  <div class="dash-greeting">
+    <div>
+      <div class="dash-greeting-sub">Manage</div>
+      <div class="dash-greeting-name">Events</div>
+    </div>
+    <a href="create-event.html" class="btn btn-primary">+ New Event</a>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="card" style="padding:1rem 1.5rem;">
+    <div class="filter-bar">
+      <input type="text" class="form-input filter-search" id="searchInput" placeholder="Search events…" />
+      <select class="form-select filter-select" id="statusFilter">
+        <option value="">All Status</option>
+        <option value="published">Published</option>
+        <option value="draft">Draft</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- EVENTS TABLE -->
+  <div class="card" style="padding:0;">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Venue</th>
+            <th>Capacity</th>
+            <th>Registered</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="eventsTableBody">
+          <tr><td colspan="7"><div class="loading-state"><div class="spinner"></div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- EDIT EVENT MODAL -->
+<div class="modal-overlay hidden" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Edit Event</span>
+      <button class="modal-close" id="editModalClose">✕</button>
+    </div>
+    <div id="editAlert"></div>
+    <div class="form-group">
+      <label class="form-label">Title</label>
+      <input type="text" class="form-input" id="editTitle" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-textarea" id="editDesc"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Venue</label>
+      <input type="text" class="form-input" id="editVenue" />
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="form-group">
+        <label class="form-label">Capacity</label>
+        <input type="number" class="form-input" id="editCapacity" min="1" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-input" id="editDate" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Start Time</label>
+        <input type="time" class="form-input" id="editStart" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">End Time</label>
+        <input type="time" class="form-input" id="editEnd" />
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+      <button class="btn btn-secondary" id="editModalClose2">Cancel</button>
+      <button class="btn btn-primary" style="flex:1" id="saveEditBtn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT STATS MODAL -->
+<div class="modal-overlay hidden" id="statsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="statsModalTitle">Event Stats</span>
+      <button class="modal-close" id="statsModalClose">✕</button>
+    </div>
+    <div id="statsContent">
+      <div class="loading-state"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/admin/events.js"></script>
+</body>
+</html>

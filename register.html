@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account - EventOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css?v=1" />
+  <link rel="stylesheet" href="css/auth.css?v=1" />
+</head>
+
+<body>
+
+  <div class="auth-page">
+    <div class="auth-card">
+
+      <!-- Logo -->
+      <div class="auth-logo">
+        <a href="index.html" class="auth-logo-text">Event<span>Ops</span></a>
+      </div>
+
+      <h1 class="auth-title">Create your account</h1>
+      <p class="auth-subtitle">Join EventOps as a participant</p>
+
+      <!-- Role hint -->
+      <div class="role-hint">
+        <strong>Note:</strong> All new accounts are registered as participants. Admins can promote you to volunteer
+        after you sign up.
+      </div>
+
+      <!-- Alert -->
+      <div class="auth-alert" id="authAlert"></div>
+
+      <!-- Form -->
+      <form class="auth-form" id="registerForm" novalidate>
+
+        <div class="form-group">
+          <label class="form-label" for="name">Full name</label>
+          <input class="form-input" type="text" id="name" name="name" placeholder="Your full name" autocomplete="name"
+            required />
+          <span class="form-error hidden" id="nameError"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email address</label>
+          <input class="form-input" type="email" id="email" name="email" placeholder="you@example.com"
+            autocomplete="email" required />
+          <span class="form-error hidden" id="emailError"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone number <span
+              style="color:var(--slate);font-weight:400">(optional)</span></label>
+          <input class="form-input" type="tel" id="phone" name="phone" placeholder="e.g. 9876543210"
+            autocomplete="tel" />
+          <span class="form-error hidden" id="phoneError"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrap">
+            <input class="form-input" type="password" id="password" name="password" placeholder="Min. 6 characters"
+              autocomplete="new-password" required />
+            <button type="button" class="toggle-pw" id="togglePw" aria-label="Toggle password">👁</button>
+          </div>
+          <span class="form-hint">At least 6 characters</span>
+          <span class="form-error hidden" id="passwordError"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="confirmPassword">Confirm password</label>
+          <div class="input-wrap">
+            <input class="form-input" type="password" id="confirmPassword" name="confirmPassword"
+              placeholder="Repeat your password" autocomplete="new-password" required />
+            <button type="button" class="toggle-pw" id="toggleConfirm" aria-label="Toggle confirm password">👁</button>
+          </div>
+          <span class="form-error hidden" id="confirmError"></span>
+        </div>
+
+        <button type="submit" class="auth-submit" id="submitBtn">Create account</button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="login.html">Sign in</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Toggle password visibility
+    function toggleField(btnId, fieldId) {
+      document.getElementById(btnId).addEventListener('click', function () {
+        const field = document.getElementById(fieldId);
+        field.type = field.type === 'password' ? 'text' : 'password';
+        this.textContent = field.type === 'password' ? '👁' : '🙈';
+      });
+    }
+    toggleField('togglePw', 'password');
+    toggleField('toggleConfirm', 'confirmPassword');
+
+    // Validate and submit
+    document.getElementById('registerForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const btn = document.getElementById('submitBtn');
+      const alertEl = document.getElementById('authAlert');
+
+      // Clear previous state
+      alertEl.className = 'auth-alert';
+      alertEl.textContent = '';
+      ['name', 'email', 'phone', 'password', 'confirm'].forEach(f => {
+        document.getElementById(f + 'Error').classList.add('hidden');
+      });
+
+      let valid = true;
+
+      function showError(id, msg) {
+        const el = document.getElementById(id + 'Error');
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        valid = false;
+      }
+
+      if (!name) showError('name', 'Full name is required');
+      if (!email) showError('email', 'Email is required');
+      else if (!/\S+@\S+\.\S+/.test(email)) showError('email', 'Enter a valid email address');
+      if (phone && !/^\d{10}$/.test(phone)) showError('phone', 'Enter a valid 10-digit phone number');
+      if (!password) showError('password', 'Password is required');
+      else if (password.length < 6) showError('password', 'Password must be at least 6 characters');
+      if (!confirmPassword) showError('confirm', 'Please confirm your password');
+      else if (password !== confirmPassword) showError('confirm', 'Passwords do not match');
+
+      if (!valid) return;
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      try {
+        const result = await Auth.register({ name, email, phone: phone || null, password });
+
+        if (result.success) {
+          alertEl.textContent = 'Account created! Please sign in.';
+          alertEl.className = 'auth-alert success show';
+
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 1500);
+        } else {
+          alertEl.textContent = result.message || 'Registration failed. Please try again.';
+          alertEl.className = 'auth-alert error show';
+        }
+      } catch (err) {
+        alertEl.textContent = 'Something went wrong. Please try again.';
+        alertEl.className = 'auth-alert error show';
+      } finally {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    });
+  </script>
+
+</body>
+
+</html>

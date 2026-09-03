@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Certificates - EventOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/main.css?v=1" />
+  <link rel="stylesheet" href="../css/dashboard.css?v=1" />
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="dashboard.html" class="nav-logo">Event<span>Ops</span></a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="my-registrations.html">My Registrations</a></li>
+        <li><a href="my-certificates.html" class="active">Certificates</a></li>
+      </ul>
+      <div class="nav-user">
+        <span class="nav-user-name" id="navName">-</span>
+        <span class="nav-role-badge role-participant">Participant</span>
+        <button class="nav-logout" id="logoutBtn">Sign out</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="dash-main">
+
+    <section class="dash-greeting">
+      <div class="dash-greeting-inner">
+        <p class="dash-greeting-sub">Your achievements</p>
+        <h1 class="dash-greeting-name">My Certificates</h1>
+      </div>
+    </section>
+
+    <div id="certGrid" class="cert-grid">
+      <div class="loading-state" style="grid-column:1/-1">
+        <div class="spinner"></div><span>Loading certificates…</span>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/hamburger.js"></script>
+  <script src="../js/participant/certificates.js"></script>
+</body>
+</html>

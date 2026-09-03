@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Dashboard - EventOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/main.css?v=1" />
+  <link rel="stylesheet" href="../css/dashboard.css?v=1" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="dashboard.html" class="nav-logo">Event<span>Ops</span></a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html" class="active">Dashboard</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="my-registrations.html">My Registrations</a></li>
+        <li><a href="my-certificates.html">Certificates</a></li>
+      </ul>
+      <div class="nav-user">
+        <span class="nav-user-name" id="navName">-</span>
+        <span class="nav-role-badge role-participant">Participant</span>
+        <button class="nav-logout" id="logoutBtn">Sign out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="dash-main">
+
+    <!-- GREETING -->
+    <section class="dash-greeting">
+      <div class="dash-greeting-inner">
+        <p class="dash-greeting-sub">Good to see you</p>
+        <h1 class="dash-greeting-name" id="greetingName">Loading…</h1>
+      </div>
+      <a href="events.html" class="btn btn-primary">Browse events</a>
+    </section>
+
+    <!-- STATS ROW -->
+    <section class="dash-stats">
+      <div class="stat-card">
+        <span class="stat-value" id="statRegistered">-</span>
+        <span class="stat-label">Registered</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="statAttended">-</span>
+        <span class="stat-label">Attended</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="statCerts">-</span>
+        <span class="stat-label">Certificates</span>
+      </div>
+    </section>
+
+    <!-- CONTENT GRID -->
+    <div class="dash-grid">
+      <section class="card dash-card">
+        <div class="dash-card-header">
+          <h2 class="card-title">Upcoming events</h2>
+          <a href="my-registrations.html" class="dash-card-link">View all</a>
+        </div>
+        <div id="upcomingList" class="dash-event-list">
+          <div class="loading-state"><div class="spinner"></div><span>Loading…</span></div>
+        </div>
+      </section>
+
+      <section class="card dash-card">
+        <div class="dash-card-header">
+          <h2 class="card-title">My certificates</h2>
+          <a href="my-certificates.html" class="dash-card-link">View all</a>
+        </div>
+        <div id="certList" class="dash-cert-list">
+          <div class="loading-state"><div class="spinner"></div><span>Loading…</span></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- AVAILABLE EVENTS -->
+    <section class="dash-section">
+      <div class="dash-section-header">
+        <h2 class="dash-section-title">Open for registration</h2>
+        <a href="events.html" class="dash-card-link">All events →</a>
+      </div>
+      <div id="eventGrid" class="event-grid">
+        <div class="loading-state"><div class="spinner"></div><span>Loading events…</span></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- QR MODAL -->
+  <div class="modal-overlay hidden" id="qrModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Your QR code</h3>
+        <button class="modal-close" id="qrModalClose">✕</button>
+      </div>
+      <div class="qr-modal-body">
+        <p class="qr-event-name" id="qrEventName"></p>
+        <div class="qr-img-wrap">
+          <img id="qrImg" src="" alt="QR Code" />
+        </div>
+        <p class="qr-hint">Show this at the gate for check-in</p>
+        <a class="btn btn-primary btn-full" id="qrDownload" href="#" download>Download QR</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/hamburger.js"></script>
+  <script src="../js/participant/dashboard.js"></script>
+</body>
+</html>

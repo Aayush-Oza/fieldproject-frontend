@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Event — EventOps Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo">Event<span>Ops</span></span>
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li><a href="volunteers.html">Volunteers</a></li>
+      <li><a href="occupancy.html">Occupancy</a></li>
+      <li><a href="forecast.html">Forecast</a></li>
+      <li><a href="certificates.html">Certificates</a></li>
+    </ul>
+    <div class="nav-user">
+      <span class="nav-user-name" id="navName"></span>
+      <span class="nav-role-badge role-admin">Admin</span>
+      <button class="nav-logout" id="logoutBtn">Sign out</button>
+    </div>
+  </div>
+</nav>
+
+<main class="dash-main" style="max-width:760px;">
+
+  <div class="dash-greeting">
+    <div>
+      <div class="dash-greeting-sub"><a href="events.html" class="text-slate" style="text-decoration:none;">← Events</a></div>
+      <div class="dash-greeting-name">Create New Event</div>
+    </div>
+  </div>
+
+  <div id="formAlert"></div>
+
+  <div class="card">
+    <div class="form-group">
+      <label class="form-label">Event Title *</label>
+      <input type="text" class="form-input" id="title" placeholder="e.g. Annual Tech Symposium 2025" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-textarea" id="description" rows="4" placeholder="Describe the event…"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Venue *</label>
+      <input type="text" class="form-input" id="venue" placeholder="e.g. Main Auditorium, Block A" />
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="form-group">
+        <label class="form-label">Capacity *</label>
+        <input type="number" class="form-input" id="capacity" min="1" placeholder="e.g. 200" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Event Date *</label>
+        <input type="date" class="form-input" id="event_date" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Start Time *</label>
+        <input type="time" class="form-input" id="start_time" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">End Time *</label>
+        <input type="time" class="form-input" id="end_time" />
+      </div>
+    </div>
+
+    <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;">
+      <input type="checkbox" id="is_published" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
+      <label for="is_published" class="form-label" style="margin:0;cursor:pointer;">Publish immediately</label>
+    </div>
+
+    <!-- AI FORECAST PREVIEW -->
+    <div style="background:rgba(59,111,232,0.06);border:1px solid rgba(59,111,232,0.15);border-radius:var(--radius);padding:1rem;margin-bottom:1.25rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+        <span style="font-size:0.82rem;font-weight:600;color:var(--blue-light);">🤖 AI Attendance Forecast</span>
+        <button class="btn btn-sm btn-secondary" id="previewForecastBtn" type="button">Preview</button>
+      </div>
+      <div id="forecastPreview" class="text-slate text-sm">Fill in event details, then click Preview to see the AI estimate.</div>
+    </div>
+
+    <div style="display:flex;gap:0.75rem;">
+      <a href="events.html" class="btn btn-secondary">Cancel</a>
+      <button class="btn btn-primary" style="flex:1" id="createBtn">Create Event</button>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/admin/events.js"></script>
+</body>
+</html>

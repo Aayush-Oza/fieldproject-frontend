@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — EventOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo">Event<span>Ops</span></span>
+    <ul class="nav-links">
+      <li><a href="dashboard.html" class="active">Dashboard</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li><a href="volunteers.html">Volunteers</a></li>
+      <li><a href="occupancy.html">Occupancy</a></li>
+      <li><a href="forecast.html">Forecast</a></li>
+      <li><a href="certificates.html">Certificates</a></li>
+    </ul>
+    <div class="nav-user">
+      <span class="nav-user-name" id="navName"></span>
+      <span class="nav-role-badge role-admin">Admin</span>
+      <button class="nav-logout" id="logoutBtn">Sign out</button>
+    </div>
+  </div>
+</nav>
+
+<main class="dash-main">
+
+  <!-- GREETING -->
+  <div class="dash-greeting">
+    <div>
+      <div class="dash-greeting-sub">Admin Command Center</div>
+      <div class="dash-greeting-name">Welcome back, <span id="greetingName">—</span></div>
+    </div>
+    <a href="create-event.html" class="btn btn-primary">+ New Event</a>
+  </div>
+
+  <!-- STATS -->
+  <div class="dash-stats" id="statsGrid">
+    <div class="stat-card"><div class="stat-value" id="statEvents">—</div><div class="stat-label">Total Events</div></div>
+    <div class="stat-card"><div class="stat-value" id="statPublished">—</div><div class="stat-label">Published</div></div>
+    <div class="stat-card"><div class="stat-value" id="statUsers">—</div><div class="stat-label">Registered Users</div></div>
+    <div class="stat-card"><div class="stat-value" id="statVolunteers">—</div><div class="stat-label">Volunteers</div></div>
+    <div class="stat-card"><div class="stat-value" id="statCompleted">—</div><div class="stat-label">Completed Events</div></div>
+    <div class="stat-card"><div class="stat-value" id="statCerts">—</div><div class="stat-label">Certificates Issued</div></div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="dash-grid">
+
+    <!-- UPCOMING EVENTS -->
+    <div class="card">
+      <div class="dash-card-header">
+        <span class="card-title">Upcoming Events</span>
+        <a href="events.html" class="dash-card-link">View all →</a>
+      </div>
+      <div class="dash-event-list" id="upcomingList">
+        <div class="loading-state"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- LIVE OCCUPANCY SNAPSHOT -->
+    <div class="card">
+      <div class="dash-card-header">
+        <span class="card-title">Live Occupancy</span>
+        <a href="occupancy.html" class="dash-card-link">Full view →</a>
+      </div>
+      <div id="occupancySnap">
+        <div class="loading-state"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RECENT USERS -->
+  <div class="card">
+    <div class="dash-card-header">
+      <span class="card-title">Recent Users</span>
+      <a href="#" class="dash-card-link" id="toggleUserTable">Show all</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody">
+          <tr><td colspan="5"><div class="loading-state"><div class="spinner"></div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- TOAST -->
+<div class="toast hidden" id="toast"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/admin/dashboard.js"></script>
+</body>
+</html>

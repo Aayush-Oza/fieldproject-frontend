@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In - EventOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css?v=1" />
+  <link rel="stylesheet" href="css/auth.css?v=1" />
+</head>
+
+<body>
+
+  <div class="auth-page">
+    <div class="auth-card">
+
+      <!-- Logo -->
+      <div class="auth-logo">
+        <a href="index.html" class="auth-logo-text">Event<span>Ops</span></a>
+      </div>
+
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-subtitle">Sign in to your account to continue</p>
+
+      <!-- AlertEl -->
+      <div class="auth-alert" id="authAlert"></div>
+
+      <!-- Form -->
+      <form class="auth-form" id="loginForm" novalidate>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email address</label>
+          <input class="form-input" type="email" id="email" name="email" placeholder="you@example.com"
+            autocomplete="email" required />
+          <span class="form-error hidden" id="emailError"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrap">
+            <input class="form-input" type="password" id="password" name="password" placeholder="Your password"
+              autocomplete="current-password" required />
+            <button type="button" class="toggle-pw" id="togglePw" aria-label="Toggle password">👁</button>
+          </div>
+          <span class="form-error hidden" id="passwordError"></span>
+        </div>
+
+        <button type="submit" class="auth-submit" id="submitBtn">Sign in</button>
+      </form>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="register.html">Create one</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Toggle password visibility
+    document.getElementById('togglePw').addEventListener('click', function () {
+      const pw = document.getElementById('password');
+      pw.type = pw.type === 'password' ? 'text' : 'password';
+      this.textContent = pw.type === 'password' ? '👁' : '🙈';
+    });
+
+    // Handle login form
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('submitBtn');
+      const alertel = document.getElementById('authAlert');
+
+      // Clear previous errors
+      alertel.className = 'auth-alert';
+      alertel.textContent = '';
+
+      // Basic validation
+      let valid = true;
+
+      if (!email) {
+        document.getElementById('emailError').textContent = 'Email is required';
+        document.getElementById('emailError').classList.remove('hidden');
+        valid = false;
+      } else {
+        document.getElementById('emailError').classList.add('hidden');
+      }
+
+      if (!password) {
+        document.getElementById('passwordError').textContent = 'Password is required';
+        document.getElementById('passwordError').classList.remove('hidden');
+        valid = false;
+      } else {
+        document.getElementById('passwordError').classList.add('hidden');
+      }
+
+      if (!valid) return;
+
+      // Loading state
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      try {
+        const result = await Auth.login(email, password);
+
+        if (result.success) {
+          const user = result.user;          // ← was result.data.user
+          const alertEl = document.getElementById('authAlert');
+          alertEl.textContent = 'Welcome back! Redirecting…';
+          alertEl.className = 'auth-alert success show';
+
+          setTimeout(() => {
+            if (user.role === 'admin') window.location.href = 'admin/dashboard.html';
+            else if (user.role === 'volunteer') window.location.href = 'volunteer/dashboard.html';
+            else window.location.href = 'participant/dashboard.html';
+          }, 1000);
+        } else {
+          alertel.textContent = result.message || 'Login failed. Please try again.';
+          alertel.className = 'auth-alert error show';
+        }
+      } catch (err) {
+        alertel.textContent = 'Something went wrong. Please try again.';
+        alertel.className = 'auth-alert error show';
+      } finally {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    });
+  </script>
+
+</body>
+
+</html>

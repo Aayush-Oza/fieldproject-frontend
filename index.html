@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EventOps - Real-Time Event Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/main.css?v=1" />
+  <style>
+    /* ── HERO ── */
+    .hero {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 140px 2rem 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(59,111,232,0.15);
+      border: 1px solid rgba(59,111,232,0.3);
+      color: var(--blue-light);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.35rem 0.85rem;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+    }
+    .hero-tag::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--blue-light);
+    }
+
+    .hero-title {
+      font-size: 3.25rem;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+    }
+    .hero-title em { font-style: normal; color: var(--blue-light); }
+
+    .hero-desc {
+      color: var(--slate);
+      font-size: 1.05rem;
+      max-width: 480px;
+      margin-bottom: 2.5rem;
+      line-height: 1.7;
+    }
+
+    .hero-actions { display: flex; gap: 1rem; align-items: center; }
+
+    .btn-ghost {
+      color: var(--grey-mid);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color var(--transition);
+    }
+    .btn-ghost:hover { color: var(--white); }
+
+    /* ── MOCKUP ── */
+    .hero-visual {
+      background: var(--navy-mid);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    }
+
+    .mockup-bar {
+      background: var(--navy-light);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mockup-dot:nth-child(1) { background: #FF5F57; }
+    .mockup-dot:nth-child(2) { background: #FEBC2E; }
+    .mockup-dot:nth-child(3) { background: #28C840; }
+    .mockup-title { margin-left: 0.5rem; font-size: 0.78rem; color: var(--slate); font-weight: 500; }
+
+    .mockup-body { padding: 1.25rem; }
+    .mockup-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.75rem; margin-bottom: 1rem; }
+    .mockup-stat { background: var(--navy-light); border-radius: 8px; padding: 0.85rem; border: 1px solid rgba(255,255,255,0.05); }
+    .mockup-stat-val { font-size: 1.4rem; font-weight: 700; line-height: 1; margin-bottom: 0.25rem; }
+    .mockup-stat-val.green { color: var(--green); }
+    .mockup-stat-val.blue  { color: var(--blue-light); }
+    .mockup-stat-val.amber { color: var(--amber); }
+    .mockup-stat-label { font-size: 0.7rem; color: var(--slate); font-weight: 500; }
+
+    .mockup-row { display: flex; gap: 0.75rem; }
+    .mockup-card { flex: 1; background: var(--navy-light); border-radius: 8px; padding: 0.85rem; border: 1px solid rgba(255,255,255,0.05); }
+    .mockup-card-title { font-size: 0.7rem; color: var(--slate); font-weight: 600; margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .mockup-bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 40px; }
+    .mockup-bar-item { flex: 1; background: var(--blue); border-radius: 3px 3px 0 0; opacity: 0.7; }
+    .mockup-bar-item:nth-child(3) { opacity: 1; }
+    .mockup-bar-item:nth-child(5) { opacity: 0.9; background: var(--blue-light); }
+
+    .mockup-checkin-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .mockup-checkin-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; }
+    .mockup-checkin-name { color: var(--grey-mid); }
+    .mockup-badge { padding: 0.15rem 0.5rem; border-radius: 100px; font-size: 0.65rem; font-weight: 600; }
+    .mockup-badge.green { background: rgba(34,197,94,0.15); color: var(--green); }
+    .mockup-badge.amber { background: rgba(245,158,11,0.15); color: var(--amber); }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 2.5rem 0;
+    }
+    .stats-bar-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 2rem;
+      text-align: center;
+    }
+    .stat-item-num { font-size: 2.25rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin-bottom: 0.4rem; }
+    .stat-item-label { font-size: 0.85rem; color: var(--slate); }
+
+    /* ── FEATURES ── */
+    .features { max-width: var(--max-w); margin: 0 auto; padding: 6rem 2rem; }
+    .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+    .feature-card {
+      background: var(--navy-mid);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 1.75rem;
+      transition: border-color var(--transition);
+    }
+    .feature-card:hover { border-color: rgba(59,111,232,0.4); }
+    .feature-icon { width: 44px; height: 44px; background: rgba(59,111,232,0.12); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1.25rem; }
+    .feature-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.6rem; }
+    .feature-desc { font-size: 0.875rem; color: var(--slate); line-height: 1.65; }
+
+    /* ── ROLES ── */
+    .roles { background: var(--navy-mid); border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 6rem 0; }
+    .roles-inner { max-width: var(--max-w); margin: 0 auto; padding: 0 2rem; }
+    .roles-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 3.5rem; }
+    .role-card { background: var(--navy); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 2rem; }
+    .role-badge { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; margin-bottom: 1.25rem; }
+    .role-badge.admin { background: rgba(59,111,232,0.15); color: var(--blue-light); }
+    .role-badge.vol   { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .role-badge.part  { background: rgba(245,158,11,0.15); color: var(--amber); }
+    .role-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; }
+    .role-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .role-list li { font-size: 0.875rem; color: var(--slate); display: flex; align-items: center; gap: 0.6rem; }
+    .role-list li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--blue-light); flex-shrink: 0; }
+    .role-cta { display: inline-block; margin-top: 1.75rem; color: var(--blue-light); font-size: 0.875rem; font-weight: 600; }
+    .role-cta:hover { text-decoration: none; }
+
+    /* ── CTA ── */
+    .cta-section { max-width: var(--max-w); margin: 0 auto; padding: 6rem 2rem; text-align: center; }
+    .cta-box {
+      background: linear-gradient(135deg, var(--navy-light) 0%, rgba(59,111,232,0.15) 100%);
+      border: 1px solid rgba(59,111,232,0.25);
+      border-radius: 16px;
+      padding: 4rem 2rem;
+    }
+    .cta-box .section-title { max-width: 100%; margin: 0 auto 1rem; font-size: 2rem; }
+    .cta-box .section-desc  { max-width: 480px; margin: 0 auto 2.5rem; }
+    .cta-actions { display: flex; gap: 1rem; justify-content: center; align-items: center; }
+
+    /* ── 768px ── */
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; padding: 110px 1.5rem 60px; gap: 2.5rem; }
+      .hero-title { font-size: 2.25rem; }
+      .hero-desc { max-width: 100%; }
+      .hero-visual { display: none; }
+      .stats-bar-inner { grid-template-columns: repeat(2,1fr); gap: 1.5rem; }
+      .features-grid { grid-template-columns: repeat(2,1fr); }
+      .roles-grid { grid-template-columns: repeat(2,1fr); }
+    }
+
+    /* ── 480px ── */
+    @media (max-width: 480px) {
+      .hero { padding: 100px 1rem 50px; }
+      .hero-title { font-size: 1.85rem; }
+      .hero-actions { flex-direction: column; align-items: flex-start; }
+      .stats-bar-inner { grid-template-columns: repeat(2,1fr); gap: 1rem; }
+      .stat-item-num { font-size: 1.75rem; }
+      .features { padding: 4rem 1rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .roles { padding: 4rem 0; }
+      .roles-inner { padding: 0 1rem; }
+      .roles-grid { grid-template-columns: 1fr; }
+      .cta-section { padding: 4rem 1rem; }
+      .cta-box { padding: 2.5rem 1.25rem; }
+      .cta-actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">Event<span>Ops</span></a>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#roles">Who it's for</a></li>
+        <li><a href="login.html">Sign in</a></li>
+        <li><a href="register.html" class="nav-cta">Get started</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-tag">Real-time operations platform</div>
+      <h1 class="hero-title">Run academic events<br />with <em>full visibility</em></h1>
+      <p class="hero-desc">QR check-ins, live occupancy tracking, AI crowd forecasting, and volunteer coordination - all in one command center built for campus events.</p>
+      <div class="hero-actions">
+        <a href="register.html" class="btn btn-primary">Create your account</a>
+        <a href="login.html" class="btn-ghost">Sign in ›</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="mockup-bar">
+        <div class="mockup-dot"></div>
+        <div class="mockup-dot"></div>
+        <div class="mockup-dot"></div>
+        <span class="mockup-title">Admin Dashboard - Live</span>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-stats">
+          <div class="mockup-stat">
+            <div class="mockup-stat-val green">247</div>
+            <div class="mockup-stat-label">Checked in</div>
+          </div>
+          <div class="mockup-stat">
+            <div class="mockup-stat-val blue">312</div>
+            <div class="mockup-stat-label">Registered</div>
+          </div>
+          <div class="mockup-stat">
+            <div class="mockup-stat-val amber">79%</div>
+            <div class="mockup-stat-label">Occupancy</div>
+          </div>
+        </div>
+        <div class="mockup-row">
+          <div class="mockup-card" style="flex:1.4">
+            <div class="mockup-card-title">Attendance forecast</div>
+            <div class="mockup-bar-chart">
+              <div class="mockup-bar-item" style="height:55%"></div>
+              <div class="mockup-bar-item" style="height:70%"></div>
+              <div class="mockup-bar-item" style="height:90%"></div>
+              <div class="mockup-bar-item" style="height:65%"></div>
+              <div class="mockup-bar-item" style="height:100%"></div>
+              <div class="mockup-bar-item" style="height:80%"></div>
+            </div>
+          </div>
+          <div class="mockup-card" style="flex:1">
+            <div class="mockup-card-title">Recent check-ins</div>
+            <div class="mockup-checkin-list">
+              <div class="mockup-checkin-item">
+                <span class="mockup-checkin-name">Arjun S.</span>
+                <span class="mockup-badge green">In</span>
+              </div>
+              <div class="mockup-checkin-item">
+                <span class="mockup-checkin-name">Priya M.</span>
+                <span class="mockup-badge green">In</span>
+              </div>
+              <div class="mockup-checkin-item">
+                <span class="mockup-checkin-name">Rahul K.</span>
+                <span class="mockup-badge amber">Pending</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-bar">
+    <div class="stats-bar-inner">
+      <div>
+        <div class="stat-item-num">3</div>
+        <div class="stat-item-label">User roles with separate dashboards</div>
+      </div>
+      <div>
+        <div class="stat-item-num">Real-time</div>
+        <div class="stat-item-label">Occupancy via WebSocket</div>
+      </div>
+      <div>
+        <div class="stat-item-num">AI</div>
+        <div class="stat-item-label">Crowd forecasting built in</div>
+      </div>
+      <div>
+        <div class="stat-item-num">QR</div>
+        <div class="stat-item-label">Instant identity check-in</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="features" id="features">
+    <div class="section-label">Platform capabilities</div>
+    <h2 class="section-title">Everything an event needs, nothing it doesn't</h2>
+    <p class="section-desc">Built for academic institutions running seminars, workshops, and multi-day conferences with complex logistics.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📡</div>
+        <div class="feature-title">Live occupancy tracking</div>
+        <p class="feature-desc">Watch headcounts update in real time via WebSocket. Every check-in pushes to the dashboard instantly - no refresh needed.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <div class="feature-title">AI crowd forecasting</div>
+        <p class="feature-desc">Predict expected attendance before your event starts. The model learns from registration patterns, venue, timing, and capacity.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <div class="feature-title">QR-based check-in</div>
+        <p class="feature-desc">Participants download their unique QR code. Volunteers scan it on-site - fast, duplicate-proof, and fully auditable.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏅</div>
+        <div class="feature-title">Auto certificates</div>
+        <p class="feature-desc">Attendance certificates generate automatically once an event completes. Participants access them instantly from their dashboard.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👥</div>
+        <div class="feature-title">Volunteer management</div>
+        <p class="feature-desc">Assign volunteers to specific events with designated duties. Each volunteer sees only their assignments and check-in logs.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Event analytics</div>
+        <p class="feature-desc">Per-event stats on registrations, check-ins, no-shows, and occupancy utilization - all in one place for post-event review.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="roles" id="roles">
+    <div class="roles-inner">
+      <div class="section-label">Built for every stakeholder</div>
+      <h2 class="section-title">Three roles, three focused experiences</h2>
+      <p class="section-desc">Every user sees only what they need. No clutter, no confusion - just the tools their role requires.</p>
+      <div class="roles-grid">
+        <div class="role-card">
+          <span class="role-badge admin">Admin</span>
+          <div class="role-title">Event coordinators</div>
+          <ul class="role-list">
+            <li>Create and publish events</li>
+            <li>Manage volunteer assignments</li>
+            <li>View live occupancy dashboard</li>
+            <li>Run AI attendance forecasts</li>
+            <li>Issue and track certificates</li>
+          </ul>
+          <a href="login.html" class="role-cta">Admin login →</a>
+        </div>
+        <div class="role-card">
+          <span class="role-badge vol">Volunteer</span>
+          <div class="role-title">Event volunteers</div>
+          <ul class="role-list">
+            <li>View assigned events</li>
+            <li>Scan participant QR codes</li>
+            <li>Check-in participants instantly</li>
+            <li>View check-in log per event</li>
+          </ul>
+          <a href="login.html" class="role-cta">Volunteer login →</a>
+        </div>
+        <div class="role-card">
+          <span class="role-badge part">Participant</span>
+          <div class="role-title">Students &amp; attendees</div>
+          <ul class="role-list">
+            <li>Browse published events</li>
+            <li>Register and cancel registrations</li>
+            <li>Download personal QR code</li>
+            <li>Collect attendance certificates</li>
+          </ul>
+          <a href="register.html" class="role-cta">Register now →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="cta-box">
+      <div class="section-label">Get started today</div>
+      <h2 class="section-title">Your next event runs smoother from here</h2>
+      <p class="section-desc">Set up takes minutes. No complex configuration - just create an account and start building your first event.</p>
+      <div class="cta-actions">
+        <a href="register.html" class="btn btn-primary">Create a free account</a>
+        <a href="login.html" class="btn-ghost">Already have an account? Sign in</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>EventOps &mdash; Academic Event Management Platform &nbsp;|&nbsp; <a href="login.html">Sign in</a> &nbsp;|&nbsp; <a href="register.html">Register</a></p>
+  </footer>
+
+</body>
+</html>

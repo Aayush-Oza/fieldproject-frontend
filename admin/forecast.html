@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Forecast — EventOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <style>
+    /* ── FORECAST-SPECIFIC STYLES ── */
+    .forecast-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    /* model status pill */
+    .model-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .model-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .model-status.ready {
+      background: rgba(34,197,94,0.12);
+      color: var(--green);
+      border: 1px solid rgba(34,197,94,0.25);
+    }
+
+    .model-status.ready .model-status-dot { background: var(--green); }
+
+    .model-status.not-ready {
+      background: rgba(239,68,68,0.12);
+      color: var(--red);
+      border: 1px solid rgba(239,68,68,0.25);
+    }
+
+    .model-status.not-ready .model-status-dot { background: var(--red); }
+
+    /* result panel */
+    .forecast-result {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .forecast-number {
+      font-family: var(--font-head);
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: var(--blue-light);
+      line-height: 1;
+    }
+
+    .forecast-label {
+      font-size: 0.8rem;
+      color: var(--slate);
+      font-weight: 500;
+      margin-top: 0.25rem;
+    }
+
+    /* utilization bar */
+    .util-bar-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .util-bar-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--slate);
+    }
+
+    .util-bar-track {
+      height: 10px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .util-bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: var(--blue);
+      transition: width 0.6s ease;
+    }
+
+    .util-bar-fill.high  { background: var(--amber); }
+    .util-bar-fill.full  { background: var(--red); }
+
+    /* features grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+
+    .feature-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+    }
+
+    .feature-key {
+      font-size: 0.72rem;
+      color: var(--slate);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .feature-val {
+      font-size: 0.9rem;
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    /* placeholder state inside result card */
+    .forecast-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 3rem 1rem;
+      color: var(--slate);
+      text-align: center;
+    }
+
+    .forecast-placeholder-icon {
+      font-size: 2.5rem;
+      opacity: 0.4;
+    }
+
+    .forecast-placeholder-text {
+      font-size: 0.875rem;
+      max-width: 240px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .forecast-grid    { grid-template-columns: 1fr; }
+      .features-grid    { grid-template-columns: 1fr; }
+      .forecast-number  { font-size: 2.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo">Event<span>Ops</span></span>
+    <ul class="nav-links">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li><a href="volunteers.html">Volunteers</a></li>
+      <li><a href="occupancy.html">Occupancy</a></li>
+      <li><a href="forecast.html" class="active">Forecast</a></li>
+      <li><a href="certificates.html">Certificates</a></li>
+    </ul>
+    <div class="nav-user">
+      <span class="nav-user-name" id="navName"></span>
+      <span class="nav-role-badge role-admin">Admin</span>
+      <button class="nav-logout" id="logoutBtn">Sign out</button>
+    </div>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div class="nav-drawer" id="navDrawer">
+  <div class="nav-drawer-user">
+    <div>
+      <div class="nav-drawer-name" id="drawerName"></div>
+      <span class="nav-role-badge role-admin">Admin</span>
+    </div>
+  </div>
+  <a href="dashboard.html" class="nav-drawer-link">Dashboard</a>
+  <a href="events.html" class="nav-drawer-link">Events</a>
+  <a href="volunteers.html" class="nav-drawer-link">Volunteers</a>
+  <a href="occupancy.html" class="nav-drawer-link">Occupancy</a>
+  <a href="forecast.html" class="nav-drawer-link active">Forecast</a>
+  <a href="certificates.html" class="nav-drawer-link">Certificates</a>
+  <button class="nav-drawer-logout" id="drawerLogout">Sign out</button>
+</div>
+
+<main class="dash-main">
+
+  <!-- HEADER -->
+  <div class="dash-greeting">
+    <div>
+      <div class="dash-greeting-sub">Admin — AI Crowd Forecasting</div>
+      <div class="dash-greeting-name">Attendance Forecast</div>
+    </div>
+    <div id="modelStatusWrap">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="saved">Forecast Saved Event</button>
+    <button class="tab-btn" data-tab="preview">Preview (Before Saving)</button>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       TAB 1 — SAVED EVENT FORECAST
+  ════════════════════════════════════ -->
+  <div id="tabSaved">
+    <div class="forecast-grid">
+
+      <!-- LEFT: event selector -->
+      <div class="card">
+        <div class="card-title">Select an Event</div>
+
+        <div class="form-group">
+          <label class="form-label">Event</label>
+          <select class="form-select" id="eventSelect">
+            <option value="">— choose an event —</option>
+          </select>
+        </div>
+
+        <!-- event info preview -->
+        <div id="eventInfo" class="hidden" style="margin-top:0.5rem;">
+          <div style="display:flex;flex-direction:column;gap:0.5rem;">
+            <div class="feature-item">
+              <div class="feature-key">Venue</div>
+              <div class="feature-val" id="infoVenue">—</div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-key">Date</div>
+              <div class="feature-val" id="infoDate">—</div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-key">Time</div>
+              <div class="feature-val" id="infoTime">—</div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-key">Capacity</div>
+              <div class="feature-val" id="infoCapacity">—</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-full mt-2" id="runForecastBtn" disabled>
+          Run Forecast
+        </button>
+      </div>
+
+      <!-- RIGHT: result -->
+      <div class="card">
+        <div class="card-title">Forecast Result</div>
+        <div id="savedResult">
+          <div class="forecast-placeholder">
+            <div class="forecast-placeholder-icon">🤖</div>
+            <div class="forecast-placeholder-text">Select an event and click Run Forecast to see the AI prediction.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       TAB 2 — PREVIEW FORECAST
+  ════════════════════════════════════ -->
+  <div id="tabPreview" class="hidden">
+    <div class="forecast-grid">
+
+      <!-- LEFT: manual form -->
+      <div class="card">
+        <div class="card-title">Enter Event Details</div>
+
+        <div class="form-group">
+          <label class="form-label">Capacity <span style="color:var(--red)">*</span></label>
+          <input type="number" class="form-input" id="preCapacity" placeholder="e.g. 200" min="1" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Venue</label>
+          <input type="text" class="form-input" id="preVenue" placeholder="e.g. Main Auditorium" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Event Date <span style="color:var(--red)">*</span></label>
+          <input type="date" class="form-input" id="preDate" />
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">Start Time <span style="color:var(--red)">*</span></label>
+            <input type="time" class="form-input" id="preStart" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Time <span style="color:var(--red)">*</span></label>
+            <input type="time" class="form-input" id="preEnd" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Expected Registrations (optional)</label>
+          <input type="number" class="form-input" id="preRegistered" placeholder="0" min="0" />
+        </div>
+
+        <div id="previewFormError" class="alert alert-error hidden"></div>
+
+        <button class="btn btn-primary btn-full" id="runPreviewBtn">
+          Preview Forecast
+        </button>
+      </div>
+
+      <!-- RIGHT: result -->
+      <div class="card">
+        <div class="card-title">Forecast Result</div>
+        <div id="previewResult">
+          <div class="forecast-placeholder">
+            <div class="forecast-placeholder-icon">🤖</div>
+            <div class="forecast-placeholder-text">Fill in the form and click Preview Forecast.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- TOAST -->
+<div class="toast hidden" id="toast"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/ui.js"></script>
+<script src="../js/admin/forecast.js"></script>
+</body>
+</html>
