@@ -8,9 +8,9 @@
 document.addEventListener('DOMContentLoaded', init);
 
 let selectedEventId = null;
-let stream          = null;
-let scanLoop        = null;
-let recentCheckins  = [];
+let stream = null;
+let scanLoop = null;
+let recentCheckins = [];
 
 /* ══════════════════════════════════════════
    INIT
@@ -83,16 +83,16 @@ function onEventChange() {
   selectedEventId = sel.value ? Number(sel.value) : null;
 
   const scannerCard = document.getElementById('scannerCard');
-  const recentCard  = document.getElementById('recentCard');
+  const recentCard = document.getElementById('recentCard');
 
   if (selectedEventId) {
     if (scannerCard) scannerCard.style.display = '';
-    if (recentCard)  recentCard.style.display  = '';
+    if (recentCard) recentCard.style.display = '';
     loadRecentLog();
   } else {
     stopCamera();
     if (scannerCard) scannerCard.style.display = 'none';
-    if (recentCard)  recentCard.style.display  = 'none';
+    if (recentCard) recentCard.style.display = 'none';
   }
 
   clearResult();
@@ -111,7 +111,7 @@ async function startCamera() {
     await video.play();
 
     document.getElementById('startBtn').disabled = true;
-    document.getElementById('stopBtn').disabled  = false;
+    document.getElementById('stopBtn').disabled = false;
 
     scanLoop = requestAnimationFrame(scanFrame);
   } catch (err) {
@@ -128,9 +128,9 @@ function stopCamera() {
   if (video) video.srcObject = null;
 
   const startBtn = document.getElementById('startBtn');
-  const stopBtn  = document.getElementById('stopBtn');
+  const stopBtn = document.getElementById('stopBtn');
   if (startBtn) startBtn.disabled = false;
-  if (stopBtn)  stopBtn.disabled  = true;
+  if (stopBtn) stopBtn.disabled = true;
 }
 
 function scanFrame() {
@@ -141,7 +141,7 @@ function scanFrame() {
   }
 
   const canvas = document.createElement('canvas');
-  canvas.width  = video.videoWidth;
+  canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   const ctx = canvas.getContext('2d');
   ctx.drawImage(video, 0, 0);
@@ -272,7 +272,7 @@ function fmtDateTime(iso) {
 }
 
 function esc(v) {
-  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function showToast(msg, isError = false) {

@@ -62,12 +62,12 @@ async function loadAssignments() {
    STATS
 ══════════════════════════════════════════ */
 function renderStats(rows) {
-  const today     = new Date().toISOString().split('T')[0];
-  const upcoming  = rows.filter(r => r.event && r.event.event_date >= today && !r.event.is_completed).length;
+  const today = new Date().toISOString().split('T')[0];
+  const upcoming = rows.filter(r => r.event && r.event.event_date >= today && !r.event.is_completed).length;
   const completed = rows.filter(r => r.event?.is_completed).length;
 
-  document.getElementById('statAssigned').textContent  = rows.length;
-  document.getElementById('statUpcoming').textContent  = upcoming;
+  document.getElementById('statAssigned').textContent = rows.length;
+  document.getElementById('statUpcoming').textContent = upcoming;
   document.getElementById('statCompleted').textContent = completed;
 }
 
@@ -95,7 +95,7 @@ function renderTable(rows) {
         ? '<span class="badge badge-blue">Active</span>'
         : '<span class="badge badge-amber">Draft</span>';
 
-    const date      = fmtDate(ev.event_date);
+    const date = fmtDate(ev.event_date);
     const timeRange = `${fmtTime(ev.start_time)} – ${fmtTime(ev.end_time)}`;
 
     return `
@@ -145,7 +145,7 @@ function fmtTime(t) {
 }
 
 function esc(v) {
-  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function showToast(msg, isError = false) {

@@ -21,7 +21,7 @@
   document.body.appendChild(drawer);
 
   const navInner = document.querySelector('.nav-inner');
-  const burger   = document.createElement('button');
+  const burger = document.createElement('button');
   burger.className = 'nav-hamburger';
   burger.id = 'navBurger';
   burger.setAttribute('aria-label', 'Toggle menu');
@@ -49,13 +49,13 @@
     try {
       const raw = sessionStorage.getItem('user');
       if (!raw) return;
-      const u    = JSON.parse(raw);
+      const u = JSON.parse(raw);
       const name = u.full_name || u.name || u.email || '–';
-      const el   = document.getElementById('drawerName');
+      const el = document.getElementById('drawerName');
       if (el) el.textContent = name;
       const navName = document.getElementById('navName');
       if (navName) navName.textContent = name;
-    } catch (_) {}
+    } catch (_) { }
   }
   fillName();
   setTimeout(fillName, 400);

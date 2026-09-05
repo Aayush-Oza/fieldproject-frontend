@@ -3,10 +3,10 @@
 if (!Auth.isLoggedIn()) window.location.href = '../login.html';
 
 const NAV_LINKS = [
-  { href: 'dashboard.html',        label: 'Dashboard' },
-  { href: 'events.html',           label: 'Events' },
+  { href: 'dashboard.html', label: 'Dashboard' },
+  { href: 'events.html', label: 'Events' },
   { href: 'my-registrations.html', label: 'My Registrations' },
-  { href: 'my-certificates.html',  label: 'Certificates' },
+  { href: 'my-certificates.html', label: 'Certificates' },
 ];
 
 Auth.initNav({ links: NAV_LINKS, active: 'My Registrations' });
@@ -30,7 +30,7 @@ function fmtTime(t) {
   return d.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit' });
 }
 
-let allRegs      = [];
+let allRegs = [];
 let activeFilter = 'all';
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -43,7 +43,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 function render() {
-  const el       = document.getElementById('regList');
+  const el = document.getElementById('regList');
   const filtered = activeFilter === 'all' ? allRegs : allRegs.filter(r => r.status === activeFilter);
 
   if (!filtered.length) {
@@ -58,7 +58,7 @@ function render() {
   }
 
   el.innerHTML = filtered.map(r => {
-    const event     = r.event;
+    const event = r.event;
     const cancelled = r.status === 'cancelled';
     const completed = event?.is_completed;
     return `
@@ -96,7 +96,7 @@ function render() {
         onConfirm: async () => {
           const { ok, body } = await Api.put(`/participant/events/${btn.dataset.eventId}/cancel`);
           if (ok) { showToast('Registration cancelled'); await load(); }
-          else    { showToast(body.message || 'Failed', 'error'); }
+          else { showToast(body.message || 'Failed', 'error'); }
         }
       });
     });
@@ -106,18 +106,18 @@ function render() {
 // ── QR Modal ──
 async function openQR(eventId, eventTitle) {
   const modal = document.getElementById('qrModal');
-  const img   = document.getElementById('qrImg');
-  const dl    = document.getElementById('qrDownload');
+  const img = document.getElementById('qrImg');
+  const dl = document.getElementById('qrDownload');
   document.getElementById('qrEventName').textContent = eventTitle;
   img.src = ''; modal.classList.remove('hidden');
   const token = sessionStorage.getItem('token');
   //const url   = `${window.API_BASE_URL || 'http://localhost:5000/api'}/participant/events/${eventId}/qr`;
-  const url   = `${window.API_BASE_URL || 'http://localhost:5000/api'}/participant/events/${eventId}/qr`;
+  const url = `${window.API_BASE_URL || 'http://localhost:5000/api'}/participant/events/${eventId}/qr`;
   try {
-    const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) throw new Error();
     const blob = await res.blob();
-    const obj  = URL.createObjectURL(blob);
+    const obj = URL.createObjectURL(blob);
     img.src = obj; dl.href = obj; dl.download = `qr_event_${eventId}.png`;
   } catch {
     showToast('Could not load QR', 'error');
@@ -126,7 +126,7 @@ async function openQR(eventId, eventTitle) {
 }
 
 document.getElementById('qrModalClose').addEventListener('click', () => document.getElementById('qrModal').classList.add('hidden'));
-document.getElementById('qrModal').addEventListener('click', function(e) { if (e.target === this) this.classList.add('hidden'); });
+document.getElementById('qrModal').addEventListener('click', function (e) { if (e.target === this) this.classList.add('hidden'); });
 
 async function load() {
   const { ok, body } = await Api.get('/participant/registrations');

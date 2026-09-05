@@ -9,9 +9,9 @@
 //   POST   /admin/events/:id/volunteers   { volunteer_id, duty }
 //   DELETE /admin/events/:id/volunteers/:vol_id
 
-let allUsers       = [];   // every user
-let allEvents      = [];   // for assignment dropdown
-let activeTab      = 'volunteers';
+let allUsers = [];   // every user
+let allEvents = [];   // for assignment dropdown
+let activeTab = 'volunteers';
 let selectedEventId = null;
 
 document.addEventListener('DOMContentLoaded', init);
@@ -47,7 +47,7 @@ async function loadUsers() {
     renderUsers();
   } catch (err) {
     console.error('[Volunteers] Users:', err);
-    setTbody('volTableBody',  4, 'Unable to load volunteers.');
+    setTbody('volTableBody', 4, 'Unable to load volunteers.');
     setTbody('userTableBody', 5, 'Unable to load users.');
     showToast('Could not load users.', true);
   }
@@ -80,13 +80,13 @@ async function loadAssignments(eventId) {
    RENDER — VOLUNTEERS TAB
 ══════════════════════════════════════════ */
 function renderVolunteers() {
-  const tbody  = document.getElementById('volTableBody');
+  const tbody = document.getElementById('volTableBody');
   if (!tbody) return;
   const search = document.getElementById('volSearch')?.value.trim().toLowerCase() || '';
 
   const vols = allUsers.filter(u => {
     if (u.role !== 'volunteer') return false;
-    if (search && !`${u.name||''} ${u.full_name||''} ${u.email||''}`.toLowerCase().includes(search)) return false;
+    if (search && !`${u.name || ''} ${u.full_name || ''} ${u.email || ''}`.toLowerCase().includes(search)) return false;
     return true;
   });
 
@@ -98,14 +98,14 @@ function renderVolunteers() {
   }
 
   tbody.innerHTML = vols.map(u => {
-    const name   = u.name || u.full_name || 'Unnamed';
+    const name = u.name || u.full_name || 'Unnamed';
     const joined = fmtDate(u.created_at);
     return `<tr>
       <td><div style="display:flex;align-items:center;gap:0.65rem">
         ${avatar(name)}
         <strong>${esc(name)}</strong>
       </div></td>
-      <td style="color:var(--slate);font-size:0.85rem">${esc(u.email||'-')}</td>
+      <td style="color:var(--slate);font-size:0.85rem">${esc(u.email || '-')}</td>
       <td style="font-size:0.82rem">${esc(joined)}</td>
       <td>
         <button class="btn btn-danger btn-sm" data-action="demote" data-id="${u.id}">Demote</button>
@@ -122,16 +122,16 @@ function renderVolunteers() {
    RENDER — USERS TAB
 ══════════════════════════════════════════ */
 function renderUsers() {
-  const tbody  = document.getElementById('userTableBody');
+  const tbody = document.getElementById('userTableBody');
   if (!tbody) return;
   const search = document.getElementById('userSearch')?.value.trim().toLowerCase() || '';
-  const role   = document.getElementById('roleFilter')?.value || '';
+  const role = document.getElementById('roleFilter')?.value || '';
 
   const users = allUsers.filter(u => {
     if (role && u.role !== role) return false;
-    if (search && !`${u.name||''} ${u.full_name||''} ${u.email||''}`.toLowerCase().includes(search)) return false;
+    if (search && !`${u.name || ''} ${u.full_name || ''} ${u.email || ''}`.toLowerCase().includes(search)) return false;
     return true;
-  }).sort((a, b) => new Date(b.created_at||0) - new Date(a.created_at||0));
+  }).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
   if (!users.length) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--slate)">No users found.</td></tr>`;
@@ -139,8 +139,8 @@ function renderUsers() {
   }
 
   tbody.innerHTML = users.map(u => {
-    const name   = u.name || u.full_name || 'Unnamed';
-    const role   = u.role || 'participant';
+    const name = u.name || u.full_name || 'Unnamed';
+    const role = u.role || 'participant';
     const joined = fmtDate(u.created_at);
     const isAdmin = role === 'admin';
 
@@ -158,10 +158,10 @@ function renderUsers() {
         ${avatar(name)}
         <div>
           <div style="font-weight:600;font-size:0.875rem">${esc(name)}</div>
-          <div style="font-size:0.75rem;color:var(--slate)">${esc(u.email||'-')}</div>
+          <div style="font-size:0.75rem;color:var(--slate)">${esc(u.email || '-')}</div>
         </div>
       </div></td>
-      <td style="font-size:0.82rem;color:var(--slate)">${esc(u.email||'-')}</td>
+      <td style="font-size:0.82rem;color:var(--slate)">${esc(u.email || '-')}</td>
       <td><span class="badge ${roleBadge(role)}">${esc(cap(role))}</span></td>
       <td style="font-size:0.82rem">${esc(joined)}</td>
       <td>${actionBtn}</td>
@@ -172,7 +172,7 @@ function renderUsers() {
     btn.addEventListener('click', () => {
       const id = Number(btn.dataset.id);
       if (btn.dataset.action === 'promote') promoteUser(id);
-      if (btn.dataset.action === 'demote')  demoteUser(id);
+      if (btn.dataset.action === 'demote') demoteUser(id);
     });
   });
 }
@@ -209,7 +209,7 @@ function renderAssignments(assignments, eventId) {
         ${avatar(name)}
         <strong>${esc(name)}</strong>
       </div></td>
-      <td style="font-size:0.82rem;color:var(--slate)">${esc(a.email||'-')}</td>
+      <td style="font-size:0.82rem;color:var(--slate)">${esc(a.email || '-')}</td>
       <td>${a.duty ? `<span class="badge badge-slate">${esc(a.duty)}</span>` : '<span style="color:var(--slate);font-size:0.8rem">—</span>'}</td>
       <td style="font-size:0.82rem">${esc(fmtDate(a.assigned_at || a.created_at))}</td>
       <td>
@@ -280,7 +280,7 @@ function openAssignModal() {
 
 async function doAssign() {
   const volId = Number(document.getElementById('assignVolSelect')?.value);
-  const duty  = document.getElementById('assignDuty')?.value.trim() || null;
+  const duty = document.getElementById('assignDuty')?.value.trim() || null;
 
   if (!volId) { showAlert('Select a volunteer.'); return; }
 
@@ -320,7 +320,7 @@ async function removeAssignment(eventId, volId) {
 ══════════════════════════════════════════ */
 function switchTab(tab) {
   activeTab = tab;
-  ['volunteers','users','assignments'].forEach(t => {
+  ['volunteers', 'users', 'assignments'].forEach(t => {
     document.getElementById(`tab-${t}`)?.classList.toggle('hidden', t !== tab);
   });
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -356,7 +356,7 @@ function bindUI() {
   document.getElementById('assignVolBtn')?.addEventListener('click', openAssignModal);
   document.getElementById('doAssignBtn')?.addEventListener('click', doAssign);
   document.getElementById('assignModalClose')?.addEventListener('click', () => closeModal('assignModal'));
-  document.getElementById('assignCancel')?.addEventListener('click',      () => closeModal('assignModal'));
+  document.getElementById('assignCancel')?.addEventListener('click', () => closeModal('assignModal'));
   document.getElementById('assignModal')?.addEventListener('click', e => {
     if (e.target === e.currentTarget) closeModal('assignModal');
   });
@@ -389,7 +389,7 @@ function hideAlert() {
 function setBtnLoading(btn, text) {
   if (!btn) return;
   if (text) { btn.dataset.orig = btn.textContent; btn.disabled = true; btn.textContent = text; }
-  else      { btn.disabled = false; btn.textContent = btn.dataset.orig || 'Assign'; }
+  else { btn.disabled = false; btn.textContent = btn.dataset.orig || 'Assign'; }
 }
 
 /* ══════════════════════════════════════════
@@ -401,9 +401,9 @@ function getUser() {
 }
 
 function toArray(data) {
-  if (Array.isArray(data))           return data;
-  if (Array.isArray(data?.users))    return data.users;
-  if (Array.isArray(data?.items))    return data.items;
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.users)) return data.users;
+  if (Array.isArray(data?.items)) return data.items;
   if (Array.isArray(data?.volunteers)) return data.volunteers;
   return [];
 }
@@ -414,24 +414,24 @@ function setTbody(id, cols, msg) {
 }
 
 function esc(v) {
-  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function cap(s) { return String(s||'').replace(/^\w/, c => c.toUpperCase()); }
+function cap(s) { return String(s || '').replace(/^\w/, c => c.toUpperCase()); }
 
 function fmtDate(d) {
   if (!d) return '-';
   const dt = new Date(d);
-  return isNaN(dt) ? '-' : dt.toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' });
+  return isNaN(dt) ? '-' : dt.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 function roleBadge(r) {
-  return { admin:'badge-blue', volunteer:'badge-green', participant:'badge-amber' }[r] || 'badge-slate';
+  return { admin: 'badge-blue', volunteer: 'badge-green', participant: 'badge-amber' }[r] || 'badge-slate';
 }
 
 function avatar(name) {
-  const initials = name.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase();
-  return `<div style="width:32px;height:32px;border-radius:50%;background:rgba(59,111,232,0.15);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:var(--blue-light);flex-shrink:0">${initials||'?'}</div>`;
+  const initials = name.trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  return `<div style="width:32px;height:32px;border-radius:50%;background:rgba(59,111,232,0.15);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:var(--blue-light);flex-shrink:0">${initials || '?'}</div>`;
 }
 
 function showToast(msg, isError = false) {

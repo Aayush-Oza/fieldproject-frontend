@@ -3,10 +3,10 @@
 if (!Auth.isLoggedIn()) window.location.href = '../login.html';
 
 const NAV_LINKS = [
-  { href: 'dashboard.html',        label: 'Dashboard' },
-  { href: 'events.html',           label: 'Events' },
+  { href: 'dashboard.html', label: 'Dashboard' },
+  { href: 'events.html', label: 'Events' },
   { href: 'my-registrations.html', label: 'My Registrations' },
-  { href: 'my-certificates.html',  label: 'Certificates' },
+  { href: 'my-certificates.html', label: 'Certificates' },
 ];
 
 Auth.initNav({ links: NAV_LINKS, active: 'Dashboard' });
@@ -26,8 +26,8 @@ function showToast(msg, type = 'success') {
 }
 
 // ── Helpers ──
-function fmtDay(d)  { return new Date(d).getDate(); }
-function fmtMon(d)  { return new Date(d).toLocaleString('en', { month: 'short' }).toUpperCase(); }
+function fmtDay(d) { return new Date(d).getDate(); }
+function fmtMon(d) { return new Date(d).toLocaleString('en', { month: 'short' }).toUpperCase(); }
 function fmtDate(d) { return new Date(d).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' }); }
 function fmtTime(t) {
   const [h, m] = t.split(':');
@@ -112,10 +112,10 @@ function renderEvents(events, myRegs) {
 
   el.innerHTML = events.map(e => {
     const isRegistered = registeredIds.has(e.id);
-    const regCount     = e.registration_count ?? 0;
-    const pct          = Math.min(100, Math.round((regCount / e.capacity) * 100));
-    const fillClass    = pct >= 100 ? 'full' : pct >= 80 ? 'near-full' : '';
-    const full         = pct >= 100;
+    const regCount = e.registration_count ?? 0;
+    const pct = Math.min(100, Math.round((regCount / e.capacity) * 100));
+    const fillClass = pct >= 100 ? 'full' : pct >= 80 ? 'near-full' : '';
+    const full = pct >= 100;
     return `
       <div class="event-card">
         <div class="event-card-top">
@@ -132,10 +132,10 @@ function renderEvents(events, myRegs) {
         </div>
         <div class="event-card-actions">
           ${isRegistered
-            ? `<button class="btn btn-secondary btn-sm qr-btn" data-event-id="${e.id}" data-event-title="${e.title}">Get QR</button>
+        ? `<button class="btn btn-secondary btn-sm qr-btn" data-event-id="${e.id}" data-event-title="${e.title}">Get QR</button>
                <button class="btn btn-danger btn-sm cancel-btn" data-event-id="${e.id}" data-event-title="${e.title}">Cancel</button>`
-            : `<button class="btn btn-primary btn-sm register-btn" data-event-id="${e.id}" ${full ? 'disabled' : ''}>${full ? 'Full' : 'Register'}</button>`
-          }
+        : `<button class="btn btn-primary btn-sm register-btn" data-event-id="${e.id}" ${full ? 'disabled' : ''}>${full ? 'Full' : 'Register'}</button>`
+      }
         </div>
       </div>`;
   }).join('');
@@ -145,7 +145,7 @@ function renderEvents(events, myRegs) {
       btn.disabled = true; btn.textContent = 'Registering…';
       const { ok, body } = await Api.post(`/participant/events/${btn.dataset.eventId}/register`);
       if (ok) { showToast('Registered!'); loadAll(); }
-      else    { showToast(body.message || 'Failed', 'error'); btn.disabled = false; btn.textContent = 'Register'; }
+      else { showToast(body.message || 'Failed', 'error'); btn.disabled = false; btn.textContent = 'Register'; }
     });
   });
 
@@ -158,7 +158,7 @@ function renderEvents(events, myRegs) {
         onConfirm: async () => {
           const { ok, body } = await Api.put(`/participant/events/${btn.dataset.eventId}/cancel`);
           if (ok) { showToast('Registration cancelled'); loadAll(); }
-          else    { showToast(body.message || 'Failed', 'error'); }
+          else { showToast(body.message || 'Failed', 'error'); }
         }
       });
     });
@@ -172,19 +172,19 @@ function renderEvents(events, myRegs) {
 // ── QR Modal ──
 async function openQR(eventId, eventTitle) {
   const modal = document.getElementById('qrModal');
-  const img   = document.getElementById('qrImg');
-  const dl    = document.getElementById('qrDownload');
+  const img = document.getElementById('qrImg');
+  const dl = document.getElementById('qrDownload');
   document.getElementById('qrEventName').textContent = eventTitle;
   img.src = '';
   modal.classList.remove('hidden');
   const token = sessionStorage.getItem('token');
   //const url   = `${window.API_BASE_URL || 'http://localhost:5000/api'}/participant/events/${eventId}/qr`;
-  const url   = `${window.API_BASE_URL || 'http://localhost:5000/api'}/participant/events/${eventId}/qr`;
+  const url = `${window.API_BASE_URL || 'http://localhost:5000/api'}/participant/events/${eventId}/qr`;
   try {
-    const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) throw new Error();
     const blob = await res.blob();
-    const obj  = URL.createObjectURL(blob);
+    const obj = URL.createObjectURL(blob);
     img.src = obj; dl.href = obj; dl.download = `qr_event_${eventId}.png`;
   } catch {
     showToast('Could not load QR', 'error');
@@ -193,7 +193,7 @@ async function openQR(eventId, eventTitle) {
 }
 
 document.getElementById('qrModalClose').addEventListener('click', () => document.getElementById('qrModal').classList.add('hidden'));
-document.getElementById('qrModal').addEventListener('click', function(e) { if (e.target === this) this.classList.add('hidden'); });
+document.getElementById('qrModal').addEventListener('click', function (e) { if (e.target === this) this.classList.add('hidden'); });
 
 // ── Load ──
 async function loadAll() {
@@ -202,14 +202,14 @@ async function loadAll() {
     Api.get('/participant/certificates'),
     Api.get('/participant/events'),
   ]);
-  const regs   = regsRes.ok   ? regsRes.body.data   : [];
-  const certs  = certsRes.ok  ? certsRes.body.data  : [];
+  const regs = regsRes.ok ? regsRes.body.data : [];
+  const certs = certsRes.ok ? certsRes.body.data : [];
   const events = eventsRes.ok ? eventsRes.body.data : [];
 
   const attended = regs.filter(r => r.status === 'registered' && r.event?.is_completed).length;
   document.getElementById('statRegistered').textContent = regs.filter(r => r.status === 'registered').length;
-  document.getElementById('statAttended').textContent   = attended;
-  document.getElementById('statCerts').textContent      = certs.length;
+  document.getElementById('statAttended').textContent = attended;
+  document.getElementById('statCerts').textContent = certs.length;
 
   renderUpcoming(regs);
   renderCerts(certs);

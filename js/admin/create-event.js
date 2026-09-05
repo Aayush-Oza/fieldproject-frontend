@@ -24,13 +24,13 @@ async function createEvent() {
   hideAlert();
 
   const body = {
-    title:        getVal('title'),
-    description:  getVal('description'),
-    venue:        getVal('venue'),
-    capacity:     Number(getVal('capacity')),
-    event_date:   getVal('event_date'),
-    start_time:   getVal('start_time'),
-    end_time:     getVal('end_time'),
+    title: getVal('title'),
+    description: getVal('description'),
+    venue: getVal('venue'),
+    capacity: Number(getVal('capacity')),
+    event_date: getVal('event_date'),
+    start_time: getVal('start_time'),
+    end_time: getVal('end_time'),
     is_published: document.getElementById('is_published')?.checked || false,
   };
 
@@ -56,10 +56,10 @@ async function createEvent() {
    FORECAST PREVIEW
 ══════════════════════════════════════════ */
 async function previewForecast() {
-  const capacity   = getVal('capacity');
+  const capacity = getVal('capacity');
   const event_date = getVal('event_date');
   const start_time = getVal('start_time');
-  const end_time   = getVal('end_time');
+  const end_time = getVal('end_time');
 
   const el = document.getElementById('forecastPreview');
   if (!capacity || !event_date || !start_time || !end_time) {
@@ -71,11 +71,11 @@ async function previewForecast() {
 
   try {
     const res = await Api.post('/admin/forecast/preview', {
-      capacity:         Number(capacity),
-      venue:            getVal('venue') || 'unknown',
+      capacity: Number(capacity),
+      venue: getVal('venue') || 'unknown',
       event_date,
-      start_time:       start_time + ':00',
-      end_time:         end_time   + ':00',
+      start_time: start_time + ':00',
+      end_time: end_time + ':00',
       registered_count: 0,
     });
 
@@ -96,13 +96,13 @@ async function previewForecast() {
    VALIDATE
 ══════════════════════════════════════════ */
 function validate(d) {
-  if (!d.title)                       return 'Title is required.';
-  if (!d.venue)                       return 'Venue is required.';
+  if (!d.title) return 'Title is required.';
+  if (!d.venue) return 'Venue is required.';
   if (!d.capacity || d.capacity <= 0) return 'Capacity must be greater than 0.';
-  if (!d.event_date)                  return 'Event date is required.';
-  if (!d.start_time)                  return 'Start time is required.';
-  if (!d.end_time)                    return 'End time is required.';
-  if (d.start_time >= d.end_time)     return 'Start time must be before end time.';
+  if (!d.event_date) return 'Event date is required.';
+  if (!d.start_time) return 'Start time is required.';
+  if (!d.end_time) return 'End time is required.';
+  if (d.start_time >= d.end_time) return 'Start time must be before end time.';
   return null;
 }
 
@@ -142,7 +142,7 @@ function setLoading(btn, text) {
 }
 
 function esc(v) {
-  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function showToast(msg, isError = false) {

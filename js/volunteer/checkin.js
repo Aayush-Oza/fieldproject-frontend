@@ -8,7 +8,7 @@
 document.addEventListener('DOMContentLoaded', init);
 
 let selectedEventId = null;
-let eventCapacity   = 0;
+let eventCapacity = 0;
 
 /* ══════════════════════════════════════════
    INIT
@@ -74,7 +74,7 @@ function onEventChange() {
   const sel = document.getElementById('eventSelect');
   const opt = sel.options[sel.selectedIndex];
   selectedEventId = sel.value ? Number(sel.value) : null;
-  eventCapacity   = opt ? Number(opt.dataset.capacity || 0) : 0;
+  eventCapacity = opt ? Number(opt.dataset.capacity || 0) : 0;
 
   if (selectedEventId) {
     loadLog();
@@ -112,11 +112,11 @@ function renderStats(count) {
   const fill = eventCapacity > 0 ? Math.min(100, Math.round(count / eventCapacity * 100)) : 0;
   document.getElementById('statCheckins').textContent = count;
   document.getElementById('statCapacity').textContent = eventCapacity || '-';
-  document.getElementById('statFill').textContent     = eventCapacity ? `${fill}%` : '-';
+  document.getElementById('statFill').textContent = eventCapacity ? `${fill}%` : '-';
 }
 
 function resetStats() {
-  ['statCheckins','statCapacity','statFill'].forEach(id => {
+  ['statCheckins', 'statCapacity', 'statFill'].forEach(id => {
     document.getElementById(id).textContent = '-';
   });
 }
@@ -159,7 +159,7 @@ function fmtDateTime(iso) {
 }
 
 function esc(v) {
-  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function showToast(msg, isError = false) {

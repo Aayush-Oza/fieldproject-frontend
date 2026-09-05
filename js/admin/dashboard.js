@@ -46,14 +46,14 @@ async function loadStats() {
 
     if (eventsRes.ok && eventsRes.body?.success) {
       const events = toArray(eventsRes.body.data);
-      setText('statEvents',    events.length);
+      setText('statEvents', events.length);
       setText('statPublished', events.filter(e => e.is_published).length);
       setText('statCompleted', events.filter(e => e.is_completed).length);
     }
 
     if (usersRes.ok && usersRes.body?.success) {
       const users = toArray(usersRes.body.data);
-      setText('statUsers',      users.length);
+      setText('statUsers', users.length);
       setText('statVolunteers', users.filter(u => u.role === 'volunteer').length);
     }
   } catch (err) {
@@ -105,15 +105,15 @@ async function loadUpcomingEvents() {
 }
 
 function renderUpcomingEvent(ev) {
-  const date       = ev.event_date ? new Date(`${ev.event_date}T00:00:00`) : null;
-  const day        = date ? date.getDate() : '-';
-  const mon        = date ? date.toLocaleDateString(undefined, { month: 'short' }).toUpperCase() : '';
-  const dateLabel  = date ? date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date not set';
-  const timeLabel  = fmtTime(ev.start_time);
+  const date = ev.event_date ? new Date(`${ev.event_date}T00:00:00`) : null;
+  const day = date ? date.getDate() : '-';
+  const mon = date ? date.toLocaleDateString(undefined, { month: 'short' }).toUpperCase() : '';
+  const dateLabel = date ? date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date not set';
+  const timeLabel = fmtTime(ev.start_time);
   const registered = Number(ev.registration_count ?? 0);
-  const capacity   = Number(ev.capacity ?? 0);
-  const fill       = capacity > 0 ? Math.min(100, Math.round((registered / capacity) * 100)) : 0;
-  const published  = ev.is_published === true;
+  const capacity = Number(ev.capacity ?? 0);
+  const fill = capacity > 0 ? Math.min(100, Math.round((registered / capacity) * 100)) : 0;
+  const published = ev.is_published === true;
 
   return `
     <div class="dash-event-item">
@@ -163,9 +163,9 @@ async function loadOccupancySnapshot() {
 }
 
 function renderOccupancy(item) {
-  const fill      = Math.min(100, Number(item.fill_rate_pct || 0));
-  const checked   = Number(item.checkin_count || 0);
-  const capacity  = Number(item.capacity || 0);
+  const fill = Math.min(100, Number(item.fill_rate_pct || 0));
+  const checked = Number(item.checkin_count || 0);
+  const capacity = Number(item.capacity || 0);
   const statusCls = fill >= 100 ? 'badge-red' : fill >= 80 ? 'badge-amber' : 'badge-green';
   const statusTxt = fill >= 100 ? 'Full' : fill >= 80 ? 'Near capacity' : 'Safe';
 
@@ -213,11 +213,11 @@ async function loadRecentUsers() {
 }
 
 function renderUserRow(u) {
-  const name    = u.name || u.full_name || 'Unnamed';
-  const email   = u.email || '-';
-  const role    = u.role || 'participant';
-  const joined  = u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
-  const active  = u.is_active !== false;
+  const name = u.name || u.full_name || 'Unnamed';
+  const email = u.email || '-';
+  const role = u.role || 'participant';
+  const joined = u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+  const active = u.is_active !== false;
   const initials = name.trim().split(/\s+/).filter(Boolean).reduce((acc, w, i, arr) =>
     i === 0 ? w[0].toUpperCase() : i === arr.length - 1 ? acc + w[0].toUpperCase() : acc, '');
 
@@ -242,10 +242,10 @@ function renderUserRow(u) {
    SMALL HELPERS
 ══════════════════════════════════════════ */
 function toArray(data) {
-  if (Array.isArray(data))           return data;
-  if (Array.isArray(data?.items))    return data.items;
-  if (Array.isArray(data?.events))   return data.events;
-  if (Array.isArray(data?.users))    return data.users;
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.events)) return data.events;
+  if (Array.isArray(data?.users)) return data.users;
   if (Array.isArray(data?.occupancy)) return data.occupancy;
   return [];
 }
@@ -257,11 +257,11 @@ function setText(id, val) {
 
 function esc(v) {
   return String(v ?? '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function cap(s) { return String(s||'').replace(/^\w/, c => c.toUpperCase()); }
+function cap(s) { return String(s || '').replace(/^\w/, c => c.toUpperCase()); }
 
 function fmtTime(t) {
   if (!t) return '';
@@ -279,8 +279,8 @@ function fmtNum(v) {
 }
 
 function byEventDate(a, b) {
-  return new Date(`${a.event_date||'9999-12-31'}T${a.start_time||'00:00'}`)
-       - new Date(`${b.event_date||'9999-12-31'}T${b.start_time||'00:00'}`);
+  return new Date(`${a.event_date || '9999-12-31'}T${a.start_time || '00:00'}`)
+    - new Date(`${b.event_date || '9999-12-31'}T${b.start_time || '00:00'}`);
 }
 
 function roleBadge(role) {

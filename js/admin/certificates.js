@@ -43,7 +43,7 @@ async function loadData() {
 
     if (!eventsRes.ok || !eventsRes.body?.success) throw new Error('Failed to load events');
 
-    const events    = eventsRes.body.data || [];
+    const events = eventsRes.body.data || [];
     const occupancy = toArray(occupancyRes.body?.data);   // may fail gracefully
     const certCount = certCountRes.body?.data?.count ?? '-';
 
@@ -55,21 +55,21 @@ async function loadData() {
     });
 
     // Stats
-    const total     = events.length;
+    const total = events.length;
     const completed = events.filter(e => e.is_completed).length;
-    document.getElementById('statTotalEvents').textContent     = total;
+    document.getElementById('statTotalEvents').textContent = total;
     document.getElementById('statCompletedEvents').textContent = completed;
-    document.getElementById('statEligible').textContent        = certCount;
+    document.getElementById('statEligible').textContent = certCount;
 
     // Build rows
     allRows = events.map(e => ({
-      id:           e.id,
-      title:        e.title        || '-',
-      event_date:   e.event_date   || '',
-      venue:        e.venue        || '-',
-      capacity:     e.capacity     ?? 0,
-      registered:   e.registration_count ?? 0,
-      checkin:      checkinMap[e.id] ?? 0,
+      id: e.id,
+      title: e.title || '-',
+      event_date: e.event_date || '',
+      venue: e.venue || '-',
+      capacity: e.capacity ?? 0,
+      registered: e.registration_count ?? 0,
+      checkin: checkinMap[e.id] ?? 0,
       is_completed: e.is_completed,
       is_published: e.is_published,
     }));
@@ -93,10 +93,10 @@ function applyFilters() {
   const filtered = allRows.filter(r => {
     const matchSearch = !search || r.title.toLowerCase().includes(search);
     const matchStatus =
-      status === 'all'       ? true :
-      status === 'completed' ? r.is_completed :
-      status === 'active'    ? !r.is_completed :
-      true;
+      status === 'all' ? true :
+        status === 'completed' ? r.is_completed :
+          status === 'active' ? !r.is_completed :
+            true;
     return matchSearch && matchStatus;
   });
 
@@ -154,10 +154,10 @@ function setTbody(html) {
 }
 
 function toArray(data) {
-  if (Array.isArray(data))            return data;
+  if (Array.isArray(data)) return data;
   if (Array.isArray(data?.occupancy)) return data.occupancy;
-  if (Array.isArray(data?.events))    return data.events;
-  if (Array.isArray(data?.items))     return data.items;
+  if (Array.isArray(data?.events)) return data.events;
+  if (Array.isArray(data?.items)) return data.items;
   return [];
 }
 
@@ -173,7 +173,7 @@ function fmtDate(iso) {
 }
 
 function esc(v) {
-  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function showToast(msg, isError = false) {

@@ -1,8 +1,8 @@
 // frontend/js/admin/events.js
 // Requires: api.js, auth.js, admin-hamburger.js
 
-let allEvents     = [];
-let editingId     = null;
+let allEvents = [];
+let editingId = null;
 
 document.addEventListener('DOMContentLoaded', init);
 
@@ -45,7 +45,7 @@ async function loadEvents() {
 }
 
 function renderTable() {
-  const tbody  = document.getElementById('eventsTableBody');
+  const tbody = document.getElementById('eventsTableBody');
   if (!tbody) return;
 
   const search = document.getElementById('searchInput')?.value.trim().toLowerCase() || '';
@@ -53,13 +53,13 @@ function renderTable() {
 
   let events = allEvents.filter(ev => {
     // search
-    if (search && !['title','description','venue'].some(k => String(ev[k]||'').toLowerCase().includes(search))) return false;
+    if (search && !['title', 'description', 'venue'].some(k => String(ev[k] || '').toLowerCase().includes(search))) return false;
     // status
-    if (status === 'published')  return ev.is_published && !ev.is_completed;
-    if (status === 'draft')      return !ev.is_published && !ev.is_completed;
-    if (status === 'completed')  return ev.is_completed;
+    if (status === 'published') return ev.is_published && !ev.is_completed;
+    if (status === 'draft') return !ev.is_published && !ev.is_completed;
+    if (status === 'completed') return ev.is_completed;
     return true;
-  }).sort((a, b) => new Date(b.created_at||0) - new Date(a.created_at||0));
+  }).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
 
   if (!events.length) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--slate)">No events found.</td></tr>';
@@ -72,25 +72,25 @@ function renderTable() {
   tbody.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = Number(btn.dataset.id);
-      if (btn.dataset.action === 'edit')   openEdit(id);
-      if (btn.dataset.action === 'stats')  openStats(id);
+      if (btn.dataset.action === 'edit') openEdit(id);
+      if (btn.dataset.action === 'stats') openStats(id);
       if (btn.dataset.action === 'delete') confirmDelete(id);
     });
   });
 }
 
 function renderRow(ev) {
-  const id         = Number(ev.id);
+  const id = Number(ev.id);
   const registered = Number(ev.registration_count || 0);
-  const capacity   = Number(ev.capacity || 0);
-  const fill       = capacity > 0 ? Math.min(100, Math.round(registered / capacity * 100)) : 0;
-  const date       = ev.event_date ? new Date(`${ev.event_date}T00:00:00`).toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' }) : '-';
-  const timeRange  = [fmtTime(ev.start_time), fmtTime(ev.end_time)].filter(Boolean).join(' – ') || '-';
+  const capacity = Number(ev.capacity || 0);
+  const fill = capacity > 0 ? Math.min(100, Math.round(registered / capacity * 100)) : 0;
+  const date = ev.event_date ? new Date(`${ev.event_date}T00:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+  const timeRange = [fmtTime(ev.start_time), fmtTime(ev.end_time)].filter(Boolean).join(' – ') || '-';
 
   let badge;
-  if      (ev.is_completed)  badge = '<span class="badge badge-slate">Completed</span>';
-  else if (ev.is_published)  badge = '<span class="badge badge-blue">Published</span>';
-  else                        badge = '<span class="badge badge-slate">Draft</span>';
+  if (ev.is_completed) badge = '<span class="badge badge-slate">Completed</span>';
+  else if (ev.is_published) badge = '<span class="badge badge-blue">Published</span>';
+  else badge = '<span class="badge badge-slate">Draft</span>';
 
   return `
     <tr>
@@ -100,7 +100,7 @@ function renderRow(ev) {
       <td>
         <span style="font-size:0.875rem">${registered} / ${capacity}</span>
         <div class="capacity-bar" style="margin-top:0.3rem">
-          <div class="capacity-fill ${fill>=100?'full':fill>=80?'near-full':''}" style="width:${fill}%"></div>
+          <div class="capacity-fill ${fill >= 100 ? 'full' : fill >= 80 ? 'near-full' : ''}" style="width:${fill}%"></div>
         </div>
       </td>
       <td>${badge}</td>
@@ -122,20 +122,20 @@ function openEdit(id) {
   if (!ev) return;
   editingId = id;
 
-  setVal('editTitle',    ev.title || '');
-  setVal('editDesc',     ev.description || '');
-  setVal('editVenue',    ev.venue || '');
+  setVal('editTitle', ev.title || '');
+  setVal('editDesc', ev.description || '');
+  setVal('editVenue', ev.venue || '');
   setVal('editCapacity', ev.capacity ?? '');
-  setVal('editDate',     ev.event_date || '');
-  setVal('editStart',    normTime(ev.start_time));
-  setVal('editEnd',      normTime(ev.end_time));
+  setVal('editDate', ev.event_date || '');
+  setVal('editStart', normTime(ev.start_time));
+  setVal('editEnd', normTime(ev.end_time));
   hideAlert();
   // Show Publish button only for drafts
-const publishBtn = document.getElementById('publishBtn');
-if (publishBtn) {
-  const isDraft = !ev.is_published && !ev.is_completed;
-  publishBtn.classList.toggle('hidden', !isDraft);
-}
+  const publishBtn = document.getElementById('publishBtn');
+  if (publishBtn) {
+    const isDraft = !ev.is_published && !ev.is_completed;
+    publishBtn.classList.toggle('hidden', !isDraft);
+  }
   showModal('editModal');
 }
 
@@ -143,13 +143,13 @@ async function saveEdit() {
   if (!editingId) return;
 
   const body = {
-    title:       getVal('editTitle'),
+    title: getVal('editTitle'),
     description: getVal('editDesc'),
-    venue:       getVal('editVenue'),
-    capacity:    Number(getVal('editCapacity')),
-    event_date:  getVal('editDate'),
-    start_time:  getVal('editStart'),
-    end_time:    getVal('editEnd'),
+    venue: getVal('editVenue'),
+    capacity: Number(getVal('editCapacity')),
+    event_date: getVal('editDate'),
+    start_time: getVal('editStart'),
+    end_time: getVal('editEnd'),
   };
 
   const err = validateForm(body);
@@ -173,13 +173,13 @@ async function saveEdit() {
 }
 
 function validateForm(d) {
-  if (!d.title)                         return 'Title is required.';
-  if (!d.venue)                         return 'Venue is required.';
-  if (!d.capacity || d.capacity <= 0)   return 'Capacity must be greater than 0.';
-  if (!d.event_date)                    return 'Date is required.';
-  if (!d.start_time)                    return 'Start time is required.';
-  if (!d.end_time)                      return 'End time is required.';
-  if (d.start_time >= d.end_time)       return 'Start time must be before end time.';
+  if (!d.title) return 'Title is required.';
+  if (!d.venue) return 'Venue is required.';
+  if (!d.capacity || d.capacity <= 0) return 'Capacity must be greater than 0.';
+  if (!d.event_date) return 'Date is required.';
+  if (!d.start_time) return 'Start time is required.';
+  if (!d.end_time) return 'End time is required.';
+  if (d.start_time >= d.end_time) return 'Start time must be before end time.';
   return null;
 }
 
@@ -191,7 +191,7 @@ async function openStats(id) {
   if (!ev) return;
 
   const content = document.getElementById('statsContent');
-  const title   = document.getElementById('statsModalTitle');
+  const title = document.getElementById('statsModalTitle');
   if (title) title.textContent = ev.title || 'Event Stats';
   if (content) content.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
   showModal('statsModal');
@@ -210,17 +210,17 @@ function renderStats(s) {
   const content = document.getElementById('statsContent');
   if (!content) return;
 
-  const cap      = Number(s.capacity || 0);
-  const reg      = Number(s.total_registered || 0);
-  const checked  = Number(s.total_checkedin || 0);
-  const occ      = Number(s.occupancy_percent || 0);
-  const st       = s.status || 'safe';
+  const cap = Number(s.capacity || 0);
+  const reg = Number(s.total_registered || 0);
+  const checked = Number(s.total_checkedin || 0);
+  const occ = Number(s.occupancy_percent || 0);
+  const st = s.status || 'safe';
   const badgeCls = st === 'full' ? 'badge-red' : st === 'near' ? 'badge-amber' : 'badge-green';
   const badgeTxt = st === 'full' ? 'Full' : st === 'near' ? 'Near capacity' : 'Safe';
 
   content.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
-      ${[['Capacity',cap],['Registered',reg],['Checked in',checked],['Occupancy',fmtNum(occ)+'%']].map(([label,val])=>`
+      ${[['Capacity', cap], ['Registered', reg], ['Checked in', checked], ['Occupancy', fmtNum(occ) + '%']].map(([label, val]) => `
         <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius);padding:1rem;text-align:center">
           <div style="font-size:0.75rem;color:var(--slate);margin-bottom:0.3rem">${label}</div>
           <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-head)">${val}</div>
@@ -262,11 +262,11 @@ function bindUI() {
   document.getElementById('publishBtn')?.addEventListener('click', publishEvent);
   document.getElementById('saveEditBtn')?.addEventListener('click', saveEdit);
   document.getElementById('editModalClose')?.addEventListener('click', () => closeModal('editModal'));
-  document.getElementById('editCancel')?.addEventListener('click',    () => closeModal('editModal'));
+  document.getElementById('editCancel')?.addEventListener('click', () => closeModal('editModal'));
   document.getElementById('statsModalClose')?.addEventListener('click', () => closeModal('statsModal'));
 
   // Backdrop click closes
-  ['editModal','statsModal'].forEach(id => {
+  ['editModal', 'statsModal'].forEach(id => {
     document.getElementById(id)?.addEventListener('click', e => {
       if (e.target === e.currentTarget) closeModal(id);
     });
@@ -280,7 +280,7 @@ function bindUI() {
 /* ══════════════════════════════════════════
    MODAL HELPERS
 ══════════════════════════════════════════ */
-function showModal(id)  { document.getElementById(id)?.classList.replace('hidden','open') || document.getElementById(id)?.classList.remove('hidden'); }
+function showModal(id) { document.getElementById(id)?.classList.replace('hidden', 'open') || document.getElementById(id)?.classList.remove('hidden'); }
 function closeModal(id) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -321,17 +321,17 @@ function getUser() {
 }
 
 function toArray(data) {
-  if (Array.isArray(data))          return data;
-  if (Array.isArray(data?.events))  return data.events;
-  if (Array.isArray(data?.items))   return data.items;
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.events)) return data.events;
+  if (Array.isArray(data?.items)) return data.items;
   return [];
 }
 
-function getVal(id)       { return document.getElementById(id)?.value.trim() || ''; }
-function setVal(id, val)  { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
+function getVal(id) { return document.getElementById(id)?.value.trim() || ''; }
+function setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
 
 function esc(v) {
-  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function fmtTime(t) {
@@ -350,7 +350,7 @@ function fmtNum(v) {
 function normTime(t) {
   if (!t) return '';
   const m = String(t).match(/^(\d{1,2}):(\d{2})/);
-  return m ? String(Number(m[1])).padStart(2,'0') + ':' + m[2] : String(t);
+  return m ? String(Number(m[1])).padStart(2, '0') + ':' + m[2] : String(t);
 }
 
 function showToast(msg, isError = false) {

@@ -119,9 +119,9 @@ async function loadEvents() {
 ══════════════════════════════════════════ */
 function onEventSelect() {
   const select = document.getElementById('eventSelect');
-  const info   = document.getElementById('eventInfo');
+  const info = document.getElementById('eventInfo');
   const runBtn = document.getElementById('runForecastBtn');
-  const opt    = select.options[select.selectedIndex];
+  const opt = select.options[select.selectedIndex];
 
   if (!select.value) {
     info?.classList.add('hidden');
@@ -131,9 +131,9 @@ function onEventSelect() {
 
   try {
     const ev = JSON.parse(opt.dataset.json);
-    document.getElementById('infoVenue').textContent    = ev.venue    || '-';
-    document.getElementById('infoDate').textContent     = fmtDate(ev.event_date) || '-';
-    document.getElementById('infoTime').textContent     = `${ev.start_time || '-'} – ${ev.end_time || '-'}`;
+    document.getElementById('infoVenue').textContent = ev.venue || '-';
+    document.getElementById('infoDate').textContent = fmtDate(ev.event_date) || '-';
+    document.getElementById('infoTime').textContent = `${ev.start_time || '-'} – ${ev.end_time || '-'}`;
     document.getElementById('infoCapacity').textContent = ev.capacity || '-';
     info?.classList.remove('hidden');
     if (runBtn) runBtn.disabled = false;
@@ -174,9 +174,9 @@ async function runPreviewForecast() {
   errEl?.classList.add('hidden');
 
   const capacity = document.getElementById('preCapacity')?.value;
-  const date     = document.getElementById('preDate')?.value;
-  const start    = document.getElementById('preStart')?.value;
-  const end      = document.getElementById('preEnd')?.value;
+  const date = document.getElementById('preDate')?.value;
+  const start = document.getElementById('preStart')?.value;
+  const end = document.getElementById('preEnd')?.value;
 
   // Validate
   if (!capacity || !date || !start || !end) {
@@ -199,11 +199,11 @@ async function runPreviewForecast() {
   setResultLoading('previewResult');
 
   const payload = {
-    capacity:         Number(capacity),
-    venue:            document.getElementById('preVenue')?.value || 'unknown',
-    event_date:       date,
-    start_time:       start + ':00',
-    end_time:         end   + ':00',
+    capacity: Number(capacity),
+    venue: document.getElementById('preVenue')?.value || 'unknown',
+    event_date: date,
+    start_time: start + ':00',
+    end_time: end + ':00',
     registered_count: Number(document.getElementById('preRegistered')?.value || 0),
   };
 
@@ -226,10 +226,10 @@ function renderResult(containerId, data) {
   const el = document.getElementById(containerId);
   if (!el) return;
 
-  const predicted  = data.predicted_attendance ?? 0;
-  const capacity   = data.capacity ?? 0;
-  const util       = data.utilization_pct ?? 0;
-  const features   = data.features_used || {};
+  const predicted = data.predicted_attendance ?? 0;
+  const capacity = data.capacity ?? 0;
+  const util = data.utilization_pct ?? 0;
+  const features = data.features_used || {};
 
   const barClass = util >= 100 ? 'full' : util >= 80 ? 'high' : '';
   const utilCapped = Math.min(util, 100);
@@ -257,12 +257,12 @@ function renderResult(containerId, data) {
           Features Used
         </div>
         <div class="features-grid">
-          ${featureItem('Capacity',         features.capacity         ?? '-')}
-          ${featureItem('Day of Week',      dayName(features.day_of_week))}
-          ${featureItem('Month',            monthName(features.month))}
-          ${featureItem('Start Hour',       features.start_hour !== undefined ? `${features.start_hour}:00` : '-')}
-          ${featureItem('Duration',         features.duration_hours !== undefined ? `${features.duration_hours}h` : '-')}
-          ${featureItem('Registrations',    features.registered_count ?? 0)}
+          ${featureItem('Capacity', features.capacity ?? '-')}
+          ${featureItem('Day of Week', dayName(features.day_of_week))}
+          ${featureItem('Month', monthName(features.month))}
+          ${featureItem('Start Hour', features.start_hour !== undefined ? `${features.start_hour}:00` : '-')}
+          ${featureItem('Duration', features.duration_hours !== undefined ? `${features.duration_hours}h` : '-')}
+          ${featureItem('Registrations', features.registered_count ?? 0)}
         </div>
       </div>
 
@@ -318,15 +318,15 @@ function fmtDate(iso) {
 }
 
 function dayName(n) {
-  return ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][n] ?? '-';
+  return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][n] ?? '-';
 }
 
 function monthName(n) {
-  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][n - 1] ?? '-';
+  return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][n - 1] ?? '-';
 }
 
 function esc(v) {
-  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function showToast(msg, isError = false) {
