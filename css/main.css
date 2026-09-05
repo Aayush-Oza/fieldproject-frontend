@@ -612,3 +612,7 @@ footer a:hover { color: var(--blue-light); }
 
   .empty-state { padding: 3rem 1rem; }
 }
+/* Fix: prevent grid children from overflowing */
+.form-group {
+  min-width: 0;
+}

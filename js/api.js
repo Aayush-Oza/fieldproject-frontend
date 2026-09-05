@@ -1,7 +1,8 @@
 // frontend/js/api.js
 // Central API helper. Reads token from sessionStorage (per-tab isolation).
 
-const API_BASE = window.API_BASE_URL || 'http://localhost:5000/api';
+//const API_BASE = window.API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_WS = 'https://fieldproject-backend.onrender.com/api';
 
 const Api = {
   async _request(path, opts = {}) {
