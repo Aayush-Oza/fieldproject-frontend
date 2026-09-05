@@ -54,7 +54,8 @@ function connectSocket() {
     return;
   }
   try {
-    socket = io('http://localhost:5000', {
+    // ✅ To this:
+    socket = io('https://fieldproject-backend.onrender.com', {
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 5,
     });
