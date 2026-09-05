@@ -6,17 +6,15 @@
   <title>AI Forecast - EventOps</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/main.css" />
-  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/main.css?v=1" />
+  <link rel="stylesheet" href="../css/dashboard.css?v=1" />
   <style>
-    /* ── FORECAST-SPECIFIC STYLES ── */
     .forecast-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1.5rem;
     }
 
-    /* model status pill */
     .model-status {
       display: inline-flex;
       align-items: center;
@@ -50,7 +48,6 @@
 
     .model-status.not-ready .model-status-dot { background: var(--red); }
 
-    /* result panel */
     .forecast-result {
       display: flex;
       flex-direction: column;
@@ -72,7 +69,6 @@
       margin-top: 0.25rem;
     }
 
-    /* utilization bar */
     .util-bar-wrap {
       display: flex;
       flex-direction: column;
@@ -100,10 +96,9 @@
       transition: width 0.6s ease;
     }
 
-    .util-bar-fill.high  { background: var(--amber); }
-    .util-bar-fill.full  { background: var(--red); }
+    .util-bar-fill.high { background: var(--amber); }
+    .util-bar-fill.full { background: var(--red); }
 
-    /* features grid */
     .features-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -132,7 +127,6 @@
       font-weight: 600;
     }
 
-    /* placeholder state inside result card */
     .forecast-placeholder {
       display: flex;
       flex-direction: column;
@@ -144,10 +138,7 @@
       text-align: center;
     }
 
-    .forecast-placeholder-icon {
-      font-size: 2.5rem;
-      opacity: 0.4;
-    }
+    .forecast-placeholder-icon { font-size: 2.5rem; opacity: 0.4; }
 
     .forecast-placeholder-text {
       font-size: 0.875rem;
@@ -156,18 +147,17 @@
     }
 
     @media (max-width: 768px) {
-      .forecast-grid    { grid-template-columns: 1fr; }
-      .features-grid    { grid-template-columns: 1fr; }
-      .forecast-number  { font-size: 2.75rem; }
+      .forecast-grid   { grid-template-columns: 1fr; }
+      .features-grid   { grid-template-columns: 1fr; }
+      .forecast-number { font-size: 2.75rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <span class="nav-logo">Event<span>Ops</span></span>
+    <a href="dashboard.html" class="nav-logo">Event<span>Ops</span></a>
     <ul class="nav-links">
       <li><a href="dashboard.html">Dashboard</a></li>
       <li><a href="events.html">Events</a></li>
@@ -181,55 +171,29 @@
       <span class="nav-role-badge role-admin">Admin</span>
       <button class="nav-logout" id="logoutBtn">Sign out</button>
     </div>
-    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+    <!-- hamburger + drawer injected by admin-hamburger.js -->
   </div>
 </nav>
 
-<!-- MOBILE DRAWER -->
-<div class="nav-drawer" id="navDrawer">
-  <div class="nav-drawer-user">
-    <div>
-      <div class="nav-drawer-name" id="drawerName"></div>
-      <span class="nav-role-badge role-admin">Admin</span>
-    </div>
-  </div>
-  <a href="dashboard.html" class="nav-drawer-link">Dashboard</a>
-  <a href="events.html" class="nav-drawer-link">Events</a>
-  <a href="volunteers.html" class="nav-drawer-link">Volunteers</a>
-  <a href="occupancy.html" class="nav-drawer-link">Occupancy</a>
-  <a href="forecast.html" class="nav-drawer-link active">Forecast</a>
-  <a href="certificates.html" class="nav-drawer-link">Certificates</a>
-  <button class="nav-drawer-logout" id="drawerLogout">Sign out</button>
-</div>
-
 <main class="dash-main">
 
-  <!-- HEADER -->
   <div class="dash-greeting">
     <div>
-      <div class="dash-greeting-sub">Admin - AI Crowd Forecasting</div>
+      <div class="dash-greeting-sub">Admin · AI Crowd Forecasting</div>
       <div class="dash-greeting-name">Attendance Forecast</div>
     </div>
-    <div id="modelStatusWrap">
-      <!-- filled by JS -->
-    </div>
+    <div id="modelStatusWrap"></div>
   </div>
 
-  <!-- TAB BAR -->
   <div class="tab-bar">
     <button class="tab-btn active" data-tab="saved">Forecast Saved Event</button>
     <button class="tab-btn" data-tab="preview">Preview (Before Saving)</button>
   </div>
 
-  <!-- ═══════════════════════════════════
-       TAB 1 - SAVED EVENT FORECAST
-  ════════════════════════════════════ -->
+  <!-- TAB 1 -->
   <div id="tabSaved">
     <div class="forecast-grid">
 
-      <!-- LEFT: event selector -->
       <div class="card">
         <div class="card-title">Select an Event</div>
 
@@ -240,7 +204,6 @@
           </select>
         </div>
 
-        <!-- event info preview -->
         <div id="eventInfo" class="hidden" style="margin-top:0.5rem;">
           <div style="display:flex;flex-direction:column;gap:0.5rem;">
             <div class="feature-item">
@@ -267,7 +230,6 @@
         </button>
       </div>
 
-      <!-- RIGHT: result -->
       <div class="card">
         <div class="card-title">Forecast Result</div>
         <div id="savedResult">
@@ -281,13 +243,10 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════
-       TAB 2 - PREVIEW FORECAST
-  ════════════════════════════════════ -->
+  <!-- TAB 2 -->
   <div id="tabPreview" class="hidden">
     <div class="forecast-grid">
 
-      <!-- LEFT: manual form -->
       <div class="card">
         <div class="card-title">Enter Event Details</div>
 
@@ -329,7 +288,6 @@
         </button>
       </div>
 
-      <!-- RIGHT: result -->
       <div class="card">
         <div class="card-title">Forecast Result</div>
         <div id="previewResult">
@@ -345,12 +303,11 @@
 
 </main>
 
-<!-- TOAST -->
 <div class="toast hidden" id="toast"></div>
 
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/ui.js"></script>
-<script src="../js/admin/forecast.js"></script>
+<script src="../js/api.js?v=1"></script>
+<script src="../js/auth.js?v=1"></script>
+<script src="../js/admin/admin-hamburger.js?v=1"></script>
+<script src="../js/admin/forecast.js?v=1"></script>
 </body>
 </html>

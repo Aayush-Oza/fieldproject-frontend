@@ -1,86 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Live Occupancy - EventOps Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/main.css" />
-  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="../css/main.css?v=1" />
+  <link rel="stylesheet" href="../css/dashboard.css?v=1" />
 </head>
+
 <body>
 
-<nav>
-  <div class="nav-inner">
-    <span class="nav-logo">Event<span>Ops</span></span>
-    <ul class="nav-links">
-      <li><a href="dashboard.html">Dashboard</a></li>
-      <li><a href="events.html">Events</a></li>
-      <li><a href="volunteers.html">Volunteers</a></li>
-      <li><a href="occupancy.html" class="active">Occupancy</a></li>
-      <li><a href="forecast.html">Forecast</a></li>
-      <li><a href="certificates.html">Certificates</a></li>
-    </ul>
-    <div class="nav-user">
-      <span class="nav-user-name" id="navName"></span>
-      <span class="nav-role-badge role-admin">Admin</span>
-      <button class="nav-logout" id="logoutBtn">Sign out</button>
+  <nav>
+    <div class="nav-inner">
+      <a href="dashboard.html" class="nav-logo">Event<span>Ops</span></a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="events.html">Events</a></li>
+        <li><a href="volunteers.html">Volunteers</a></li>
+        <li><a href="occupancy.html" class="active">Occupancy</a></li>
+        <li><a href="forecast.html">Forecast</a></li>
+        <li><a href="certificates.html">Certificates</a></li>
+      </ul>
+      <div class="nav-user">
+        <span class="nav-user-name" id="navName"></span>
+        <span class="nav-role-badge role-admin">Admin</span>
+        <button class="nav-logout" id="logoutBtn">Sign out</button>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
-<main class="dash-main">
+  <main class="dash-main">
 
-  <div class="dash-greeting">
-    <div>
-      <div class="dash-greeting-sub">Real-time</div>
-      <div class="dash-greeting-name">Live Occupancy</div>
+    <div class="dash-greeting">
+      <div>
+        <div class="dash-greeting-sub">Real-time</div>
+        <div class="dash-greeting-name">Live Occupancy</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <span id="socketStatus" style="font-size:0.8rem;color:var(--slate);">⚪ Connecting…</span>
+        <button class="btn btn-secondary btn-sm" id="refreshBtn">↺ Refresh</button>
+      </div>
     </div>
-    <div style="display:flex;align-items:center;gap:0.75rem;">
-      <span id="socketStatus" style="font-size:0.8rem;color:var(--slate);">⚪ Connecting…</span>
-      <button class="btn btn-secondary btn-sm" id="refreshBtn">↺ Refresh</button>
+
+    <!-- CARDS -->
+    <div id="occupancyGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;">
+      <div class="loading-state" style="grid-column:1/-1;">
+        <div class="spinner"></div>
+      </div>
     </div>
-  </div>
 
-  <!-- OCCUPANCY CARDS GRID -->
-  <div id="occupancyGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;">
-    <div class="loading-state" style="grid-column:1/-1;"><div class="spinner"></div></div>
-  </div>
-
-  <!-- DETAIL TABLE -->
-  <div class="card" style="padding:0;">
-    <div class="dash-card-header" style="padding:1.25rem 1.5rem 0;">
-      <span class="card-title">All Events Detail</span>
-      <span id="lastUpdated" class="text-slate text-xs"></span>
+    <!-- DETAIL TABLE -->
+    <div class="card" style="padding:0;">
+      <div class="dash-card-header" style="padding:1.25rem 1.5rem 0;">
+        <span class="card-title">All Events Detail</span>
+        <span id="lastUpdated" style="font-size:0.75rem;color:var(--slate);"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Checked In</th>
+              <th>Capacity</th>
+              <th>Fill Rate</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="occupancyTableBody">
+            <tr>
+              <td colspan="5">
+                <div class="loading-state">
+                  <div class="spinner"></div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Event</th>
-            <th>Checked In</th>
-            <th>Capacity</th>
-            <th>Fill Rate</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="occupancyTableBody">
-          <tr><td colspan="5"><div class="loading-state"><div class="spinner"></div></div></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
 
-</main>
+  </main>
 
-<div class="toast hidden" id="toast"></div>
+  <div class="toast hidden" id="toast"></div>
 
-<!-- Socket.IO CDN -->
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/ui.js"></script>
-<script src="../js/admin/occupancy.js"></script>
+  <script src="../js/socket.io.min.js?v=1"></script>
+<script src="../js/api.js?v=1"></script>
+<script src="../js/auth.js?v=1"></script>
+<script src="../js/admin/admin-hamburger.js?v=1"></script>
+<script src="../js/admin/occupancy.js?v=1"></script>
 </body>
+
 </html>

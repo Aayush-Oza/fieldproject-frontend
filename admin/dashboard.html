@@ -6,15 +6,15 @@
   <title>Admin Dashboard - EventOps</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/main.css" />
-  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/main.css?v=1" />
+  <link rel="stylesheet" href="../css/dashboard.css?v=1" />
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <span class="nav-logo">Event<span>Ops</span></span>
+    <a href="dashboard.html" class="nav-logo">Event<span>Ops</span></a>
     <ul class="nav-links">
       <li><a href="dashboard.html" class="active">Dashboard</a></li>
       <li><a href="events.html">Events</a></li>
@@ -28,6 +28,7 @@
       <span class="nav-role-badge role-admin">Admin</span>
       <button class="nav-logout" id="logoutBtn">Sign out</button>
     </div>
+    <!-- hamburger injected by admin-hamburger.js -->
   </div>
 </nav>
 
@@ -93,7 +94,7 @@
             <th>Email</th>
             <th>Role</th>
             <th>Joined</th>
-            <th>Actions</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody id="userTableBody">
@@ -108,9 +109,9 @@
 <!-- TOAST -->
 <div class="toast hidden" id="toast"></div>
 
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/ui.js"></script>
-<script src="../js/admin/dashboard.js"></script>
+<script src="../js/api.js?v=1"></script>
+<script src="../js/auth.js?v=1"></script>
+<script src="../js/admin/admin-hamburger.js?v=1"></script>
+<script src="../js/admin/dashboard.js?v=1"></script>
 </body>
 </html>

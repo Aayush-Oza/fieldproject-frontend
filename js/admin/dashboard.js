@@ -1,873 +1,305 @@
-// Admin Dashboard
-// Requires: api.js, auth.js, ui.js
+// frontend/js/admin/dashboard.js
+// Requires: api.js, auth.js, admin-hamburger.js
 
-document.addEventListener('DOMContentLoaded', () => {
-  initNav({
-    links: [
-      { href: '/admin/dashboard.html', label: 'Dashboard' },
-      { href: '/admin/events.html', label: 'Events' },
-      { href: '/admin/volunteers.html', label: 'Volunteers' },
-      { href: '/admin/occupancy.html', label: 'Occupancy' },
-      { href: '/admin/forecast.html', label: 'Forecast' },
-      { href: '/admin/certificates.html', label: 'Certificates' },
-    ],
-    active: 'Dashboard',
-  });
+document.addEventListener('DOMContentLoaded', initDashboard);
 
-  initDashboard();
-});
-
+/* ── INIT ── */
 async function initDashboard() {
-  const user = Auth.getUser();
-
-  if (!user) {
-    window.location.href = '/login.html';
-    return;
-  }
-
-  // Make sure this page is actually being used by an admin.
+  const user = getUser();
+  if (!user) { window.location.href = '../login.html'; return; }
   if (user.role !== 'admin') {
-    window.location.href =
-      user.role === 'volunteer'
-        ? '/volunteer/dashboard.html'
-        : '/participant/dashboard.html';
+    window.location.href = user.role === 'volunteer'
+      ? '../volunteer/dashboard.html'
+      : '../participant/dashboard.html';
     return;
   }
 
-  setGreeting(user);
-  bindDashboardEvents();
+  // Greeting
+  const name = user.name || user.full_name || user.email || 'Admin';
+  setText('greetingName', name);
 
   await Promise.allSettled([
-    loadDashboardStats(),
+    loadStats(),
     loadUpcomingEvents(),
     loadOccupancySnapshot(),
     loadRecentUsers(),
   ]);
 }
 
-/* ============================================================
-   GREETING
-============================================================ */
-
-function setGreeting(user) {
-  const navName = document.getElementById('navName');
-  const greetingName = document.getElementById('greetingName');
-
-  const name =
-    user?.name ||
-    user?.full_name ||
-    user?.email ||
-    'Admin';
-
-  if (navName) {
-    navName.textContent = name;
-  }
-
-  if (greetingName) {
-    greetingName.textContent = name;
-  }
+/* ── AUTH HELPER ── */
+function getUser() {
+  try {
+    const raw = localStorage.getItem('user') || sessionStorage.getItem('user');
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
 }
 
-/* ============================================================
-   DASHBOARD STATS
-============================================================ */
-
-async function loadDashboardStats() {
+/* ══════════════════════════════════════════
+   STATS
+══════════════════════════════════════════ */
+async function loadStats() {
   try {
-    const eventsResult = await Api.get('/admin/events');
-
-    if (!eventsResult.ok || !eventsResult.body?.success) {
-      throw new Error(
-        eventsResult.body?.message || 'Unable to load events'
-      );
-    }
-
-    const events = normalizeArray(eventsResult.body.data);
-
-    const totalEvents = events.length;
-
-    const publishedEvents = events.filter(
-      (event) => event.is_published === true
-    ).length;
-
-    const completedEvents = events.filter(
-      (event) => event.is_completed === true
-    ).length;
-
-    setText('statEvents', totalEvents);
-    setText('statPublished', publishedEvents);
-    setText('statCompleted', completedEvents);
-
-    /*
-     * User count and volunteer count are loaded separately.
-     * We deliberately don't guess these from event data.
-     */
-    await Promise.all([
-      loadUserStats(),
-      loadCertificateStat(),
+    const [eventsRes, usersRes] = await Promise.all([
+      Api.get('/admin/events'),
+      Api.get('/admin/users'),
     ]);
-  } catch (err) {
-    console.error('[Admin Dashboard] Stats:', err);
 
-    setText('statEvents', '-');
-    setText('statPublished', '-');
-    setText('statCompleted', '-');
-
-    showToast(
-      'Some dashboard statistics could not be loaded.',
-      true
-    );
-  }
-}
-
-/* ============================================================
-   USERS / VOLUNTEERS
-============================================================ */
-
-async function loadUserStats() {
-  try {
-    const result = await Api.get('/admin/users');
-
-    if (!result.ok || !result.body?.success) {
-      throw new Error(
-        result.body?.message || 'Unable to load users'
-      );
+    if (eventsRes.ok && eventsRes.body?.success) {
+      const events = toArray(eventsRes.body.data);
+      setText('statEvents',    events.length);
+      setText('statPublished', events.filter(e => e.is_published).length);
+      setText('statCompleted', events.filter(e => e.is_completed).length);
     }
 
-    const users = normalizeArray(result.body.data);
-
-    const volunteers = users.filter(
-      (user) => user.role === 'volunteer'
-    );
-
-    setText('statUsers', users.length);
-    setText('statVolunteers', volunteers.length);
+    if (usersRes.ok && usersRes.body?.success) {
+      const users = toArray(usersRes.body.data);
+      setText('statUsers',      users.length);
+      setText('statVolunteers', users.filter(u => u.role === 'volunteer').length);
+    }
   } catch (err) {
-    console.error('[Admin Dashboard] User stats:', err);
+    console.error('[Dashboard] Stats:', err);
+    showToast('Some stats could not be loaded.', true);
+  }
 
-    setText('statUsers', '-');
-    setText('statVolunteers', '-');
+  // Certificate count — optional endpoint, fails silently if not yet added
+  try {
+    const certsRes = await Api.get('/admin/certificates/count');
+    if (certsRes.ok && certsRes.body?.success) {
+      setText('statCerts', certsRes.body.data?.count ?? '-');
+    }
+  } catch (_) {
+    // endpoint not yet deployed — leave as '-'
   }
 }
 
-/* ============================================================
-   CERTIFICATES
-============================================================ */
-
-async function loadCertificateStat() {
-  /*
-   * There is currently no confirmed admin certificate-list/count
-   * endpoint in the backend supplied for this project.
-   *
-   * Therefore we intentionally don't invent an API call here.
-   * The card stays as "-" until a real admin endpoint exists.
-   */
-
-  setText('statCerts', '-');
-}
-
-/* ============================================================
+/* ══════════════════════════════════════════
    UPCOMING EVENTS
-============================================================ */
-
+══════════════════════════════════════════ */
 async function loadUpcomingEvents() {
-  const container = document.getElementById('upcomingList');
-
-  if (!container) return;
-
-  setLoading(container, 'Loading upcoming events…');
+  const el = document.getElementById('upcomingList');
+  if (!el) return;
 
   try {
-    const result = await Api.get('/admin/events');
+    const res = await Api.get('/admin/events');
+    if (!res.ok || !res.body?.success) throw new Error(res.body?.message);
 
-    if (!result.ok || !result.body?.success) {
-      throw new Error(
-        result.body?.message || 'Unable to load events'
-      );
-    }
-
-    const events = normalizeArray(result.body.data);
-
-    const upcoming = events
-      .filter((event) => !event.is_completed)
-      .sort(compareEvents)
+    const upcoming = toArray(res.body.data)
+      .filter(e => !e.is_completed)
+      .sort(byEventDate)
       .slice(0, 5);
 
     if (!upcoming.length) {
-      container.innerHTML = `
-        <div class="dash-empty">
-          <div class="dash-empty-icon">📅</div>
-          <p>No upcoming events.</p>
-          <a href="/admin/create-event.html">
-            Create your first event
-          </a>
-        </div>
-      `;
+      el.innerHTML = emptyState('📅', 'No upcoming events.', '<a href="create-event.html">Create your first event</a>');
       return;
     }
 
-    container.innerHTML = upcoming
-      .map(renderUpcomingEvent)
-      .join('');
+    el.innerHTML = upcoming.map(renderUpcomingEvent).join('');
   } catch (err) {
-    console.error('[Admin Dashboard] Upcoming events:', err);
-
-    container.innerHTML = `
+    console.error('[Dashboard] Upcoming:', err);
+    el.innerHTML = `
       <div class="dash-empty">
         <p>Unable to load upcoming events.</p>
-        <button
-          type="button"
-          class="btn btn-secondary"
-          data-action="retry-upcoming"
-        >
-          Retry
-        </button>
-      </div>
-    `;
-
-    const retry = container.querySelector(
-      '[data-action="retry-upcoming"]'
-    );
-
-    if (retry) {
-      retry.addEventListener(
-        'click',
-        loadUpcomingEvents
-      );
-    }
+        <button class="btn btn-secondary" onclick="loadUpcomingEvents()">Retry</button>
+      </div>`;
   }
 }
 
-function renderUpcomingEvent(event) {
-  const title = escapeHtml(
-    event.title || 'Untitled event'
-  );
-
-  const venue = escapeHtml(
-    event.venue || 'Venue not specified'
-  );
-
-  const date = formatDate(event.event_date);
-
-  const startTime = formatTime(event.start_time);
-
-  const registered =
-    Number(event.registration_count ?? 0);
-
-  const capacity =
-    Number(event.capacity ?? 0);
-
-  const fillRate =
-    capacity > 0
-      ? Math.min(
-          100,
-          Math.round((registered / capacity) * 100)
-        )
-      : 0;
-
-  const published = event.is_published === true;
+function renderUpcomingEvent(ev) {
+  const date       = ev.event_date ? new Date(`${ev.event_date}T00:00:00`) : null;
+  const day        = date ? date.getDate() : '-';
+  const mon        = date ? date.toLocaleDateString(undefined, { month: 'short' }).toUpperCase() : '';
+  const dateLabel  = date ? date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date not set';
+  const timeLabel  = fmtTime(ev.start_time);
+  const registered = Number(ev.registration_count ?? 0);
+  const capacity   = Number(ev.capacity ?? 0);
+  const fill       = capacity > 0 ? Math.min(100, Math.round((registered / capacity) * 100)) : 0;
+  const published  = ev.is_published === true;
 
   return `
-    <div class="dash-event-row">
-
+    <div class="dash-event-item">
       <div class="dash-event-date">
-        <strong>${escapeHtml(getDay(event.event_date))}</strong>
-        <span>${escapeHtml(getMonth(event.event_date))}</span>
+        <span class="dash-event-date-day">${esc(day)}</span>
+        <span class="dash-event-date-mon">${esc(mon)}</span>
       </div>
-
       <div class="dash-event-info">
-        <h4>${title}</h4>
-
-        <p>
-          ${escapeHtml(date)}
-          ${startTime ? ` · ${escapeHtml(startTime)}` : ''}
-        </p>
-
-        <p class="dash-event-venue">
-          ${venue}
-        </p>
+        <div class="dash-event-title">${esc(ev.title || 'Untitled')}</div>
+        <div class="dash-event-meta">${esc(dateLabel)}${timeLabel ? ` · ${esc(timeLabel)}` : ''} · ${esc(ev.venue || 'Venue TBD')}</div>
       </div>
-
-      <div class="dash-event-meta">
-
-        <span class="dash-status ${
-          published
-            ? 'dash-status-success'
-            : 'dash-status-muted'
-        }">
-          ${published ? 'Published' : 'Draft'}
-        </span>
-
-        <span class="dash-event-capacity">
-          ${registered} / ${capacity}
-        </span>
-
-        <div class="dash-progress">
-          <div
-            class="dash-progress-bar"
-            style="width:${fillRate}%"
-          ></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.35rem;flex-shrink:0">
+        <span class="badge ${published ? 'badge-blue' : 'badge-slate'}">${published ? 'Published' : 'Draft'}</span>
+        <span style="font-size:0.75rem;color:var(--slate)">${registered}/${capacity}</span>
+        <div class="capacity-bar" style="width:80px">
+          <div class="capacity-fill ${fill >= 100 ? 'full' : fill >= 80 ? 'near-full' : ''}" style="width:${fill}%"></div>
         </div>
-
       </div>
-
-    </div>
-  `;
+    </div>`;
 }
 
-/* ============================================================
+/* ══════════════════════════════════════════
    LIVE OCCUPANCY
-============================================================ */
-
+══════════════════════════════════════════ */
 async function loadOccupancySnapshot() {
-  const container =
-    document.getElementById('occupancySnap');
-
-  if (!container) return;
-
-  setLoading(container, 'Loading live occupancy…');
+  const el = document.getElementById('occupancySnap');
+  if (!el) return;
 
   try {
-    const result =
-      await Api.get('/admin/occupancy');
+    const res = await Api.get('/admin/occupancy');
+    if (!res.ok || !res.body?.success) throw new Error(res.body?.message);
 
-    if (!result.ok || !result.body?.success) {
-      throw new Error(
-        result.body?.message ||
-          'Unable to load occupancy'
-      );
-    }
+    const items = toArray(res.body.data)
+      .sort((a, b) => Number(b.fill_rate_pct || 0) - Number(a.fill_rate_pct || 0))
+      .slice(0, 5);
 
-    const occupancy =
-      normalizeArray(result.body.data);
-
-    if (!occupancy.length) {
-      container.innerHTML = `
-        <div class="dash-empty">
-          <div class="dash-empty-icon">📊</div>
-          <p>No live events right now.</p>
-        </div>
-      `;
+    if (!items.length) {
+      el.innerHTML = emptyState('📊', 'No live events right now.');
       return;
     }
 
-    const sorted = occupancy
-      .sort(
-        (a, b) =>
-          Number(b.fill_rate_pct || 0) -
-          Number(a.fill_rate_pct || 0)
-      )
-      .slice(0, 5);
-
-    container.innerHTML = sorted
-      .map(renderOccupancy)
-      .join('');
+    el.innerHTML = items.map(renderOccupancy).join('');
   } catch (err) {
-    console.error(
-      '[Admin Dashboard] Occupancy:',
-      err
-    );
-
-    container.innerHTML = `
-      <div class="dash-empty">
-        <p>Live occupancy unavailable.</p>
-      </div>
-    `;
+    console.error('[Dashboard] Occupancy:', err);
+    el.innerHTML = '<div class="dash-empty"><p>Live occupancy unavailable.</p></div>';
   }
 }
 
 function renderOccupancy(item) {
-  const title = escapeHtml(
-    item.event_title || 'Event'
-  );
-
-  const capacity = Number(
-    item.capacity || 0
-  );
-
-  const checkedIn = Number(
-    item.checkin_count || 0
-  );
-
-  const fillRate = Math.min(
-    100,
-    Number(item.fill_rate_pct || 0)
-  );
-
-  let status = 'Safe';
-
-  if (fillRate >= 100) {
-    status = 'Full';
-  } else if (fillRate >= 80) {
-    status = 'Near capacity';
-  }
+  const fill      = Math.min(100, Number(item.fill_rate_pct || 0));
+  const checked   = Number(item.checkin_count || 0);
+  const capacity  = Number(item.capacity || 0);
+  const statusCls = fill >= 100 ? 'badge-red' : fill >= 80 ? 'badge-amber' : 'badge-green';
+  const statusTxt = fill >= 100 ? 'Full' : fill >= 80 ? 'Near capacity' : 'Safe';
 
   return `
-    <div class="dash-occupancy-row">
-
-      <div class="dash-occupancy-main">
-        <strong>${title}</strong>
-
-        <span>
-          ${checkedIn} / ${capacity} checked in
-        </span>
+    <div class="dash-event-item" style="flex-direction:column;align-items:stretch;gap:0.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong style="font-size:0.9rem">${esc(item.event_title || 'Event')}</strong>
+        <span class="badge ${statusCls}">${statusTxt}</span>
       </div>
-
-      <div class="dash-occupancy-right">
-
-        <span class="dash-occupancy-percent">
-          ${formatNumber(fillRate)}%
-        </span>
-
-        <span class="dash-status ${getOccupancyClass(fillRate)}">
-          ${status}
-        </span>
-
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;color:var(--slate)">
+        <span>${checked} / ${capacity} checked in</span>
+        <span style="font-weight:600;color:var(--white)">${fmtNum(fill)}%</span>
       </div>
-
-      <div class="dash-progress">
-        <div
-          class="dash-progress-bar"
-          style="width:${fillRate}%"
-        ></div>
+      <div class="capacity-bar">
+        <div class="capacity-fill ${fill >= 100 ? 'full' : fill >= 80 ? 'near-full' : ''}" style="width:${fill}%"></div>
       </div>
-
-    </div>
-  `;
+    </div>`;
 }
 
-function getOccupancyClass(rate) {
-  if (rate >= 100) {
-    return 'dash-status-danger';
-  }
-
-  if (rate >= 80) {
-    return 'dash-status-warning';
-  }
-
-  return 'dash-status-success';
-}
-
-/* ============================================================
+/* ══════════════════════════════════════════
    RECENT USERS
-============================================================ */
-
+══════════════════════════════════════════ */
 async function loadRecentUsers() {
-  const tbody =
-    document.getElementById('userTableBody');
-
+  const tbody = document.getElementById('userTableBody');
   if (!tbody) return;
 
-  tbody.innerHTML = `
-    <tr>
-      <td colspan="5" class="table-loading">
-        Loading users…
-      </td>
-    </tr>
-  `;
-
   try {
-    const result =
-      await Api.get('/admin/users');
+    const res = await Api.get('/admin/users');
+    if (!res.ok || !res.body?.success) throw new Error(res.body?.message);
 
-    if (!result.ok || !result.body?.success) {
-      throw new Error(
-        result.body?.message ||
-          'Unable to load users'
-      );
-    }
-
-    const users =
-      normalizeArray(result.body.data);
-
-    const recent = users
-      .sort(compareUsers)
+    const users = toArray(res.body.data)
+      .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
       .slice(0, 10);
 
-    if (!recent.length) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="5" class="table-empty">
-            No users found.
-          </td>
-        </tr>
-      `;
+    if (!users.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No users found.</td></tr>';
       return;
     }
 
-    tbody.innerHTML = recent
-      .map(renderUserRow)
-      .join('');
+    tbody.innerHTML = users.map(renderUserRow).join('');
   } catch (err) {
-    console.error(
-      '[Admin Dashboard] Recent users:',
-      err
-    );
-
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5" class="table-empty">
-          Unable to load users.
-        </td>
-      </tr>
-    `;
+    console.error('[Dashboard] Users:', err);
+    tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Unable to load users.</td></tr>';
   }
 }
 
-function renderUserRow(user) {
-  const name = escapeHtml(
-    user.name ||
-      user.full_name ||
-      'Unnamed user'
-  );
-
-  const email = escapeHtml(
-    user.email || '-'
-  );
-
-  const role = user.role || 'participant';
-
-  const created = formatDateTime(
-    user.created_at
-  );
-
-  const active =
-    user.is_active !== false;
+function renderUserRow(u) {
+  const name    = u.name || u.full_name || 'Unnamed';
+  const email   = u.email || '-';
+  const role    = u.role || 'participant';
+  const joined  = u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+  const active  = u.is_active !== false;
+  const initials = name.trim().split(/\s+/).filter(Boolean).reduce((acc, w, i, arr) =>
+    i === 0 ? w[0].toUpperCase() : i === arr.length - 1 ? acc + w[0].toUpperCase() : acc, '');
 
   return `
     <tr>
-
       <td>
-        <div class="user-cell">
-          <div class="user-avatar">
-            ${escapeHtml(getInitials(name))}
-          </div>
-
+        <div style="display:flex;align-items:center;gap:0.65rem">
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(59,111,232,0.15);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--blue-light);flex-shrink:0">${esc(initials || 'U')}</div>
           <div>
-            <strong>${name}</strong>
-            <small>${email}</small>
+            <div style="font-weight:600;font-size:0.875rem">${esc(name)}</div>
+            <div style="font-size:0.75rem;color:var(--slate)">${esc(email)}</div>
           </div>
         </div>
       </td>
-
-      <td>
-        <span class="role-badge role-${escapeHtml(role)}">
-          ${escapeHtml(capitalize(role))}
-        </span>
-      </td>
-
-      <td>
-        ${escapeHtml(created)}
-      </td>
-
-      <td>
-        <span class="${
-          active
-            ? 'status-active'
-            : 'status-inactive'
-        }">
-          ${active ? 'Active' : 'Disabled'}
-        </span>
-      </td>
-
-    </tr>
-  `;
+      <td><span class="badge ${roleBadge(role)}">${esc(cap(role))}</span></td>
+      <td style="font-size:0.82rem">${esc(joined)}</td>
+      <td><span style="font-size:0.78rem;font-weight:600;color:${active ? 'var(--green)' : 'var(--slate)'}">${active ? 'Active' : 'Disabled'}</span></td>
+    </tr>`;
 }
 
-/* ============================================================
-   DASHBOARD CONTROLS
-============================================================ */
-
-function bindDashboardEvents() {
-  const toggle =
-    document.getElementById('toggleUserTable');
-
-  const tableSection =
-    document.getElementById('userTableSection');
-
-  if (toggle && tableSection) {
-    toggle.addEventListener('click', () => {
-      const hidden =
-        tableSection.classList.toggle('hidden');
-
-      toggle.textContent =
-        hidden
-          ? 'Show users'
-          : 'Hide users';
-    });
-  }
-
-  const createEvent =
-    document.querySelector(
-      'a[href$="create-event.html"]'
-    );
-
-  if (createEvent) {
-    createEvent.addEventListener(
-      'click',
-      () => {
-        // Allow normal navigation.
-      }
-    );
-  }
-}
-
-/* ============================================================
-   HELPERS
-============================================================ */
-
-function normalizeArray(data) {
-  if (Array.isArray(data)) {
-    return data;
-  }
-
-  if (Array.isArray(data?.items)) {
-    return data.items;
-  }
-
-  if (Array.isArray(data?.events)) {
-    return data.events;
-  }
-
-  if (Array.isArray(data?.users)) {
-    return data.users;
-  }
-
-  if (Array.isArray(data?.occupancy)) {
-    return data.occupancy;
-  }
-
+/* ══════════════════════════════════════════
+   SMALL HELPERS
+══════════════════════════════════════════ */
+function toArray(data) {
+  if (Array.isArray(data))           return data;
+  if (Array.isArray(data?.items))    return data.items;
+  if (Array.isArray(data?.events))   return data.events;
+  if (Array.isArray(data?.users))    return data.users;
+  if (Array.isArray(data?.occupancy)) return data.occupancy;
   return [];
 }
 
-function setText(id, value) {
-  const element =
-    document.getElementById(id);
-
-  if (element) {
-    element.textContent = value;
-  }
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
 }
 
-function setLoading(element, text) {
-  element.innerHTML = `
-    <div class="dash-loading">
-      ${escapeHtml(text)}
-    </div>
-  `;
+function esc(v) {
+  return String(v ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function compareEvents(a, b) {
-  const aDate =
-    new Date(
-      `${a.event_date || '9999-12-31'}T${
-        a.start_time || '00:00'
-      }`
-    ).getTime();
+function cap(s) { return String(s||'').replace(/^\w/, c => c.toUpperCase()); }
 
-  const bDate =
-    new Date(
-      `${b.event_date || '9999-12-31'}T${
-        b.start_time || '00:00'
-      }`
-    ).getTime();
-
-  return aDate - bDate;
+function fmtTime(t) {
+  if (!t) return '';
+  const m = String(t).match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return String(t);
+  let h = Number(m[1]); const min = m[2];
+  const p = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${h}:${min} ${p}`;
 }
 
-function compareUsers(a, b) {
-  const aDate =
-    new Date(
-      a.created_at || 0
-    ).getTime();
-
-  const bDate =
-    new Date(
-      b.created_at || 0
-    ).getTime();
-
-  return bDate - aDate;
+function fmtNum(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? (Number.isInteger(n) ? String(n) : n.toFixed(1)) : '0';
 }
 
-function formatDate(dateString) {
-  if (!dateString) return 'Date not set';
-
-  const date =
-    new Date(`${dateString}T00:00:00`);
-
-  if (Number.isNaN(date.getTime())) {
-    return String(dateString);
-  }
-
-  return date.toLocaleDateString(
-    undefined,
-    {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    }
-  );
+function byEventDate(a, b) {
+  return new Date(`${a.event_date||'9999-12-31'}T${a.start_time||'00:00'}`)
+       - new Date(`${b.event_date||'9999-12-31'}T${b.start_time||'00:00'}`);
 }
 
-function formatDateTime(dateString) {
-  if (!dateString) return '-';
-
-  const date =
-    new Date(dateString);
-
-  if (Number.isNaN(date.getTime())) {
-    return String(dateString);
-  }
-
-  return date.toLocaleDateString(
-    undefined,
-    {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    }
-  );
+function roleBadge(role) {
+  return { admin: 'badge-blue', volunteer: 'badge-green', participant: 'badge-amber' }[role] || 'badge-slate';
 }
 
-function formatTime(timeString) {
-  if (!timeString) return '';
-
-  const match =
-    String(timeString).match(
-      /^(\d{1,2}):(\d{2})/
-    );
-
-  if (!match) {
-    return String(timeString);
-  }
-
-  let hour = Number(match[1]);
-  const minute = match[2];
-
-  const period =
-    hour >= 12 ? 'PM' : 'AM';
-
-  hour =
-    hour % 12 || 12;
-
-  return `${hour}:${minute} ${period}`;
+function emptyState(icon, msg, extra = '') {
+  return `<div class="dash-empty" style="text-align:center;padding:2rem;color:var(--slate)">
+    <div style="font-size:2rem;margin-bottom:0.5rem">${icon}</div>
+    <p>${msg}</p>${extra}
+  </div>`;
 }
 
-function getDay(dateString) {
-  if (!dateString) return '-';
-
-  const date =
-    new Date(`${dateString}T00:00:00`);
-
-  if (Number.isNaN(date.getTime())) {
-    return '-';
-  }
-
-  return date.getDate();
-}
-
-function getMonth(dateString) {
-  if (!dateString) return '';
-
-  const date =
-    new Date(`${dateString}T00:00:00`);
-
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
-
-  return date
-    .toLocaleDateString(
-      undefined,
-      { month: 'short' }
-    )
-    .toUpperCase();
-}
-
-function getInitials(name) {
-  const words =
-    String(name)
-      .trim()
-      .split(/\s+/)
-      .filter(Boolean);
-
-  if (!words.length) {
-    return 'U';
-  }
-
-  if (words.length === 1) {
-    return words[0]
-      .slice(0, 2)
-      .toUpperCase();
-  }
-
-  return (
-    words[0][0] +
-    words[words.length - 1][0]
-  ).toUpperCase();
-}
-
-function capitalize(value) {
-  const str = String(value || '');
-
-  return str
-    ? str.charAt(0).toUpperCase() +
-        str.slice(1)
-    : '';
-}
-
-function formatNumber(value) {
-  const number = Number(value);
-
-  if (!Number.isFinite(number)) {
-    return '0';
-  }
-
-  return Number.isInteger(number)
-    ? String(number)
-    : number.toFixed(1);
-}
-
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-function showToast(message, isError = false) {
-  const toast =
-    document.getElementById('toast');
-
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('toast');
   if (!toast) return;
-
-  toast.textContent = message;
-
-  toast.classList.remove(
-    'show',
-    'error'
-  );
-
-  if (isError) {
-    toast.classList.add('error');
-  }
-
-  // Force reflow so repeated toasts animate.
-  void toast.offsetWidth;
-
-  toast.classList.add('show');
-
-  clearTimeout(
-    showToast._timer
-  );
-
-  showToast._timer =
-    setTimeout(() => {
-      toast.classList.remove(
-        'show',
-        'error'
-      );
-    }, 3500);
+  toast.textContent = msg;
+  toast.className = `toast${isError ? ' toast-error' : ' toast-success'}`;
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.add('toast-hide'), 3200);
+  setTimeout(() => { toast.className = 'toast hidden'; }, 3700);
 }

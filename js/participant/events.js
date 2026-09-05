@@ -125,7 +125,7 @@ async function openQR(eventId, eventTitle) {
   const dl    = document.getElementById('qrDownload');
   document.getElementById('qrEventName').textContent = eventTitle;
   img.src = ''; modal.classList.remove('hidden');
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   const url   = `${window.API_BASE_URL || 'http://localhost:5000/api'}/participant/events/${eventId}/qr`;
   try {
     const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });

@@ -6,15 +6,14 @@
   <title>Certificates - EventOps</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/main.css" />
-  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/main.css?v=1" />
+  <link rel="stylesheet" href="../css/dashboard.css?v=1" />
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <span class="nav-logo">Event<span>Ops</span></span>
+    <a href="dashboard.html" class="nav-logo">Event<span>Ops</span></a>
     <ul class="nav-links">
       <li><a href="dashboard.html">Dashboard</a></li>
       <li><a href="events.html">Events</a></li>
@@ -28,41 +27,21 @@
       <span class="nav-role-badge role-admin">Admin</span>
       <button class="nav-logout" id="logoutBtn">Sign out</button>
     </div>
-    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+    <!-- hamburger + drawer injected by admin-hamburger.js -->
   </div>
 </nav>
 
-<!-- MOBILE DRAWER -->
-<div class="nav-drawer" id="navDrawer">
-  <div class="nav-drawer-user">
-    <div>
-      <div class="nav-drawer-name" id="drawerName"></div>
-      <span class="nav-role-badge role-admin">Admin</span>
-    </div>
-  </div>
-  <a href="dashboard.html" class="nav-drawer-link">Dashboard</a>
-  <a href="events.html" class="nav-drawer-link">Events</a>
-  <a href="volunteers.html" class="nav-drawer-link">Volunteers</a>
-  <a href="occupancy.html" class="nav-drawer-link">Occupancy</a>
-  <a href="forecast.html" class="nav-drawer-link">Forecast</a>
-  <a href="certificates.html" class="nav-drawer-link active">Certificates</a>
-  <button class="nav-drawer-logout" id="drawerLogout">Sign out</button>
-</div>
-
 <main class="dash-main">
 
-  <!-- HEADER -->
   <div class="dash-greeting">
     <div>
-      <div class="dash-greeting-sub">Admin - Certificate Oversight</div>
+      <div class="dash-greeting-sub">Admin · Certificate Oversight</div>
       <div class="dash-greeting-name">Certificates</div>
     </div>
   </div>
 
-  <!-- SUMMARY STATS -->
-  <div class="dash-stats" id="certStatsGrid" style="grid-template-columns: repeat(3,1fr);">
+  <!-- STATS -->
+  <div class="dash-stats" id="certStatsGrid" style="grid-template-columns:repeat(3,1fr);">
     <div class="stat-card">
       <div class="stat-value" id="statTotalEvents">-</div>
       <div class="stat-label">Total Events</div>
@@ -78,14 +57,9 @@
   </div>
 
   <!-- FILTER BAR -->
-  <div class="card" style="padding: 1rem 1.5rem;">
+  <div class="card" style="padding:1rem 1.5rem;">
     <div class="filter-bar">
-      <input
-        type="text"
-        class="form-input filter-search"
-        id="searchInput"
-        placeholder="Search by event title…"
-      />
+      <input type="text" class="form-input filter-search" id="searchInput" placeholder="Search by event title…" />
       <select class="form-select filter-select" id="statusFilter">
         <option value="all">All Events</option>
         <option value="completed">Completed Only</option>
@@ -95,13 +69,12 @@
   </div>
 
   <!-- TABLE -->
-  <div class="card" style="padding: 0;">
-    <div class="dash-card-header" style="padding: 1.25rem 1.5rem 0;">
+  <div class="card" style="padding:0;">
+    <div class="dash-card-header" style="padding:1.25rem 1.5rem 0;">
       <span class="card-title">Certificate Eligibility by Event</span>
       <span class="text-slate text-sm" id="tableCount"></span>
     </div>
-
-    <div class="table-wrap" style="border: none; border-radius: 0 0 var(--radius-lg) var(--radius-lg);">
+    <div class="table-wrap" style="border:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);">
       <table>
         <thead>
           <tr>
@@ -116,11 +89,7 @@
           </tr>
         </thead>
         <tbody id="certTableBody">
-          <tr>
-            <td colspan="8">
-              <div class="loading-state"><div class="spinner"></div></div>
-            </td>
-          </tr>
+          <tr><td colspan="8"><div class="loading-state"><div class="spinner"></div></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -128,12 +97,11 @@
 
 </main>
 
-<!-- TOAST -->
 <div class="toast hidden" id="toast"></div>
 
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/ui.js"></script>
-<script src="../js/admin/certificates.js"></script>
+<script src="../js/api.js?v=1"></script>
+<script src="../js/auth.js?v=1"></script>
+<script src="../js/admin/admin-hamburger.js?v=1"></script>
+<script src="../js/admin/certificates.js?v=1"></script>
 </body>
 </html>

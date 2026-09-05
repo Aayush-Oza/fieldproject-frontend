@@ -6,14 +6,14 @@
   <title>Events - EventOps Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/main.css" />
-  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/main.css?v=1" />
+  <link rel="stylesheet" href="../css/dashboard.css?v=1" />
 </head>
 <body>
 
 <nav>
   <div class="nav-inner">
-    <span class="nav-logo">Event<span>Ops</span></span>
+    <a href="dashboard.html" class="nav-logo">Event<span>Ops</span></a>
     <ul class="nav-links">
       <li><a href="dashboard.html">Dashboard</a></li>
       <li><a href="events.html" class="active">Events</a></li>
@@ -60,16 +60,15 @@
         <thead>
           <tr>
             <th>Title</th>
-            <th>Date</th>
+            <th>Date & Time</th>
             <th>Venue</th>
-            <th>Capacity</th>
             <th>Registered</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody id="eventsTableBody">
-          <tr><td colspan="7"><div class="loading-state"><div class="spinner"></div></div></td></tr>
+          <tr><td colspan="6"><div class="loading-state"><div class="spinner"></div></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -77,14 +76,14 @@
 
 </main>
 
-<!-- EDIT EVENT MODAL -->
+<!-- EDIT MODAL -->
 <div class="modal-overlay hidden" id="editModal">
   <div class="modal">
     <div class="modal-header">
       <span class="modal-title">Edit Event</span>
       <button class="modal-close" id="editModalClose">✕</button>
     </div>
-    <div id="editAlert"></div>
+    <div class="alert alert-error hidden" id="editAlert"></div>
     <div class="form-group">
       <label class="form-label">Title</label>
       <input type="text" class="form-input" id="editTitle" />
@@ -116,13 +115,14 @@
       </div>
     </div>
     <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
-      <button class="btn btn-secondary" id="editModalClose2">Cancel</button>
-      <button class="btn btn-primary" style="flex:1" id="saveEditBtn">Save Changes</button>
-    </div>
+  <button class="btn btn-secondary" id="editCancel">Cancel</button>
+  <button class="btn btn-success hidden" id="publishBtn">Publish</button>
+  <button class="btn btn-primary" style="flex:1" id="saveEditBtn">Save Changes</button>
+</div>
   </div>
 </div>
 
-<!-- EVENT STATS MODAL -->
+<!-- STATS MODAL -->
 <div class="modal-overlay hidden" id="statsModal">
   <div class="modal">
     <div class="modal-header">
@@ -137,9 +137,9 @@
 
 <div class="toast hidden" id="toast"></div>
 
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/ui.js"></script>
-<script src="../js/admin/events.js"></script>
+<script src="../js/api.js?v=1"></script>
+<script src="../js/auth.js?v=1"></script>
+<script src="../js/admin/admin-hamburger.js?v=1"></script>
+<script src="../js/admin/events.js?v=1"></script>
 </body>
 </html>

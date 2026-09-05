@@ -1,286 +1,340 @@
 // frontend/js/admin/forecast.js
-// AI Crowd Forecasting page.
-// Tabs: (1) forecast a saved event, (2) preview forecast before saving.
+// Requires: api.js, auth.js
+//
+// REST endpoints used:
+//   GET  /admin/forecast/status            → model status
+//   GET  /admin/forecast/events/:id        → forecast for saved event
+//   POST /admin/forecast/preview           → forecast from manual form
+//   GET  /admin/events                     → populate event dropdown
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', init);
 
-  // ── auth guard ──
-  const token = localStorage.getItem('token');
-  const role  = localStorage.getItem('role');
-  if (!token || role !== 'admin') {
-    window.location.href = '../login.html';
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+async function init() {
+  const user = getUser();
+  if (!user) { window.location.href = '../login.html'; return; }
+  if (user.role !== 'admin') {
+    window.location.href = user.role === 'volunteer'
+      ? '../volunteer/dashboard.html'
+      : '../participant/dashboard.html';
     return;
   }
 
-  // ── nav user info ──
-  const name = localStorage.getItem('name') || 'Admin';
-  const navName    = document.getElementById('navName');
-  const drawerName = document.getElementById('drawerName');
-  if (navName)    navName.textContent    = name;
-  if (drawerName) drawerName.textContent = name;
+  // nav name
+  const navName = document.getElementById('navName');
+  if (navName) navName.textContent = user.name || user.email || 'Admin';
 
-  // ── logout ──
-  const logoutHandler = () => {
-    localStorage.clear();
-    window.location.href = '../login.html';
-  };
-  document.getElementById('logoutBtn')?.addEventListener('click', logoutHandler);
-  document.getElementById('drawerLogout')?.addEventListener('click', logoutHandler);
+  // logout
+  document.getElementById('logoutBtn')?.addEventListener('click', logout);
+  document.getElementById('drawerLogout')?.addEventListener('click', logout);
 
-  // ── mobile hamburger ──
-  const hamburger = document.getElementById('hamburger');
-  const navDrawer = document.getElementById('navDrawer');
-  hamburger?.addEventListener('click', () => {
-    hamburger.classList.toggle('open');
-    navDrawer.classList.toggle('open');
-  });
+  initTabs();
+  await loadModelStatus();
+  await loadEvents();
 
-  // ── DOM refs ──
-  const modelStatusWrap = document.getElementById('modelStatusWrap');
-  const tabBtns         = document.querySelectorAll('.tab-btn');
-  const tabSaved        = document.getElementById('tabSaved');
-  const tabPreview      = document.getElementById('tabPreview');
+  document.getElementById('eventSelect')?.addEventListener('change', onEventSelect);
+  document.getElementById('runForecastBtn')?.addEventListener('click', runSavedForecast);
+  document.getElementById('runPreviewBtn')?.addEventListener('click', runPreviewForecast);
+}
 
-  // tab 1
-  const eventSelect    = document.getElementById('eventSelect');
-  const eventInfo      = document.getElementById('eventInfo');
-  const runForecastBtn = document.getElementById('runForecastBtn');
-  const savedResult    = document.getElementById('savedResult');
+/* ══════════════════════════════════════════
+   TABS
+══════════════════════════════════════════ */
+function initTabs() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
 
-  // tab 2
-  const preCapacity    = document.getElementById('preCapacity');
-  const preVenue       = document.getElementById('preVenue');
-  const preDate        = document.getElementById('preDate');
-  const preStart       = document.getElementById('preStart');
-  const preEnd         = document.getElementById('preEnd');
-  const preRegistered  = document.getElementById('preRegistered');
-  const previewFormErr = document.getElementById('previewFormError');
-  const runPreviewBtn  = document.getElementById('runPreviewBtn');
-  const previewResult  = document.getElementById('previewResult');
-
-  // ── helpers ──
-  function showToast(msg, type = 'error') {
-    const t = document.getElementById('toast');
-    if (!t) return;
-    t.textContent = msg;
-    t.className   = `toast toast-${type}`;
-    setTimeout(() => t.classList.add('toast-hide'), 3500);
-    setTimeout(() => { t.className = 'toast hidden'; }, 3900);
-  }
-
-  function fmtDate(dateStr) {
-    if (!dateStr) return '-';
-    return new Date(dateStr).toLocaleDateString('en-IN', {
-      day: '2-digit', month: 'short', year: 'numeric'
+      const tab = btn.dataset.tab;
+      document.getElementById('tabSaved').classList.toggle('hidden', tab !== 'saved');
+      document.getElementById('tabPreview').classList.toggle('hidden', tab !== 'preview');
     });
-  }
+  });
+}
 
-  function fmtTime(t) {
-    if (!t) return '-';
-    // t can be "HH:MM:SS" or "HH:MM"
-    const [h, m] = t.split(':');
-    const d = new Date();
-    d.setHours(+h, +m);
-    return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-  }
+/* ══════════════════════════════════════════
+   MODEL STATUS
+══════════════════════════════════════════ */
+async function loadModelStatus() {
+  const wrap = document.getElementById('modelStatusWrap');
+  if (!wrap) return;
 
-  // ── model status badge ──
-  async function loadModelStatus() {
+  try {
     const res = await Api.get('/admin/forecast/status');
-    if (!res.ok) {
-      modelStatusWrap.innerHTML = `<span class="model-status not-ready"><span class="model-status-dot"></span>Status unknown</span>`;
-      return;
-    }
+    if (!res.ok || !res.body?.success) throw new Error();
+
     const d = res.body.data;
     if (d.model_trained) {
-      const kb = d.model_size_kb ? `· ${d.model_size_kb} KB` : '';
-      modelStatusWrap.innerHTML = `<span class="model-status ready"><span class="model-status-dot"></span>Model Ready ${kb}</span>`;
-    } else {
-      modelStatusWrap.innerHTML = `<span class="model-status not-ready"><span class="model-status-dot"></span>Model Not Trained</span>`;
-    }
-  }
-
-  // ── load events into select ──
-  async function loadEvents() {
-    const res = await Api.get('/admin/events');
-    if (!res.ok) { showToast('Failed to load events'); return; }
-    const events = res.body.data || [];
-    events.forEach(e => {
-      const opt  = document.createElement('option');
-      opt.value  = e.id;
-      opt.textContent = `${e.title} - ${fmtDate(e.event_date)}`;
-      // store data attrs for quick preview
-      opt.dataset.venue    = e.venue || '';
-      opt.dataset.date     = e.event_date || '';
-      opt.dataset.start    = e.start_time || '';
-      opt.dataset.end      = e.end_time || '';
-      opt.dataset.capacity = e.capacity || '';
-      eventSelect.appendChild(opt);
-    });
-  }
-
-  // ── event select change → show info ──
-  eventSelect.addEventListener('change', () => {
-    const opt = eventSelect.options[eventSelect.selectedIndex];
-    if (!opt.value) {
-      eventInfo.classList.add('hidden');
-      runForecastBtn.disabled = true;
-      return;
-    }
-    document.getElementById('infoVenue').textContent    = opt.dataset.venue    || '-';
-    document.getElementById('infoDate').textContent     = fmtDate(opt.dataset.date);
-    document.getElementById('infoTime').textContent     = `${fmtTime(opt.dataset.start)} – ${fmtTime(opt.dataset.end)}`;
-    document.getElementById('infoCapacity').textContent = opt.dataset.capacity || '-';
-    eventInfo.classList.remove('hidden');
-    runForecastBtn.disabled = false;
-  });
-
-  // ── build result HTML ──
-  function buildResultHTML(data) {
-    const pct        = data.utilization_pct ?? 0;
-    const predicted  = data.predicted_attendance ?? 0;
-    const capacity   = data.capacity ?? 0;
-    const features   = data.features_used || {};
-
-    const fillClass  = pct >= 100 ? 'full' : pct >= 80 ? 'high' : '';
-
-    const featureLabels = {
-      capacity:         'Capacity',
-      day_of_week:      'Day of Week',
-      month:            'Month',
-      start_hour:       'Start Hour',
-      duration_hours:   'Duration (hrs)',
-      venue_encoded:    'Venue Code',
-      registered_count: 'Registered',
-    };
-
-    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-
-    const featuresHTML = Object.entries(features).map(([k, v]) => {
-      const label = featureLabels[k] || k;
-      const val   = k === 'day_of_week' ? (days[v] || v)
-                  : k === 'duration_hours' ? `${v}h`
-                  : v;
-      return `
-        <div class="feature-item">
-          <div class="feature-key">${label}</div>
-          <div class="feature-val">${val}</div>
+      wrap.innerHTML = `
+        <div class="model-status ready">
+          <span class="model-status-dot"></span>
+          Model Ready · ${d.model_size_kb} KB · updated ${fmtDate(d.last_modified)}
         </div>`;
-    }).join('');
-
-    return `
-      <div class="forecast-result">
-        <div>
-          <div class="forecast-number">${predicted}</div>
-          <div class="forecast-label">Predicted Attendees of ${capacity} capacity</div>
-        </div>
-
-        <div class="util-bar-wrap">
-          <div class="util-bar-header">
-            <span>Utilization</span>
-            <span>${pct}%</span>
-          </div>
-          <div class="util-bar-track">
-            <div class="util-bar-fill ${fillClass}" style="width:${Math.min(pct,100)}%"></div>
-          </div>
-        </div>
-
-        ${pct >= 100
-          ? `<div class="alert alert-error">⚠️ Event is predicted to exceed capacity.</div>`
-          : pct >= 80
-          ? `<div class="alert alert-warning">⚡ Near capacity - consider reserving overflow.</div>`
-          : `<div class="alert alert-success">✅ Comfortable occupancy predicted.</div>`
-        }
-
-        <div>
-          <div class="section-label" style="margin-bottom:0.5rem;">Features Used by Model</div>
-          <div class="features-grid">${featuresHTML}</div>
-        </div>
+    } else {
+      wrap.innerHTML = `
+        <div class="model-status not-ready">
+          <span class="model-status-dot"></span>
+          Model not trained — run <code>python -m ai.train</code>
+        </div>`;
+    }
+  } catch {
+    wrap.innerHTML = `
+      <div class="model-status not-ready">
+        <span class="model-status-dot"></span>
+        Could not reach model status
       </div>`;
   }
+}
 
-  // ── run saved event forecast ──
-  runForecastBtn.addEventListener('click', async () => {
-    const id = eventSelect.value;
-    if (!id) return;
+/* ══════════════════════════════════════════
+   LOAD EVENTS INTO SELECT
+══════════════════════════════════════════ */
+async function loadEvents() {
+  const select = document.getElementById('eventSelect');
+  if (!select) return;
 
-    runForecastBtn.disabled    = true;
-    runForecastBtn.textContent = 'Running…';
-    savedResult.innerHTML      = `<div class="loading-state"><div class="spinner"></div></div>`;
+  try {
+    const res = await Api.get('/admin/events');
+    if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed');
 
-    const res = await Api.get(`/admin/forecast/events/${id}`);
-
-    runForecastBtn.disabled    = false;
-    runForecastBtn.textContent = 'Run Forecast';
-
-    if (!res.ok) {
-      const msg = res.body.message || 'Forecast failed';
-      savedResult.innerHTML = `<div class="alert alert-error">${msg}</div>`;
-      showToast(msg);
+    const events = res.body.data || [];
+    if (!events.length) {
+      select.innerHTML = '<option value="">No events found</option>';
       return;
     }
 
-    savedResult.innerHTML = buildResultHTML(res.body.data);
-  });
+    select.innerHTML = '<option value="">- choose an event -</option>' +
+      events.map(e => `<option value="${e.id}" data-json='${esc(JSON.stringify(e))}'>${esc(e.title)}</option>`).join('');
+  } catch (err) {
+    select.innerHTML = '<option value="">Failed to load events</option>';
+    showToast('Could not load events.', true);
+  }
+}
 
-  // ── run preview forecast ──
-  runPreviewBtn.addEventListener('click', async () => {
-    previewFormErr.classList.add('hidden');
+/* ══════════════════════════════════════════
+   EVENT SELECT → INFO PREVIEW
+══════════════════════════════════════════ */
+function onEventSelect() {
+  const select = document.getElementById('eventSelect');
+  const info   = document.getElementById('eventInfo');
+  const runBtn = document.getElementById('runForecastBtn');
+  const opt    = select.options[select.selectedIndex];
 
-    const capacity = preCapacity.value.trim();
-    const date     = preDate.value;
-    const start    = preStart.value;
-    const end      = preEnd.value;
+  if (!select.value) {
+    info?.classList.add('hidden');
+    if (runBtn) runBtn.disabled = true;
+    return;
+  }
 
-    if (!capacity || !date || !start || !end) {
-      previewFormErr.textContent = 'Capacity, date, start time and end time are required.';
-      previewFormErr.classList.remove('hidden');
-      return;
+  try {
+    const ev = JSON.parse(opt.dataset.json);
+    document.getElementById('infoVenue').textContent    = ev.venue    || '-';
+    document.getElementById('infoDate').textContent     = fmtDate(ev.event_date) || '-';
+    document.getElementById('infoTime').textContent     = `${ev.start_time || '-'} – ${ev.end_time || '-'}`;
+    document.getElementById('infoCapacity').textContent = ev.capacity || '-';
+    info?.classList.remove('hidden');
+    if (runBtn) runBtn.disabled = false;
+  } catch {
+    info?.classList.add('hidden');
+    if (runBtn) runBtn.disabled = true;
+  }
+}
+
+/* ══════════════════════════════════════════
+   RUN FORECAST — SAVED EVENT
+══════════════════════════════════════════ */
+async function runSavedForecast() {
+  const eventId = document.getElementById('eventSelect')?.value;
+  if (!eventId) return;
+
+  const btn = document.getElementById('runForecastBtn');
+  setLoading(btn, true);
+  setResultLoading('savedResult');
+
+  try {
+    const res = await Api.get(`/admin/forecast/events/${eventId}`);
+    if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Forecast failed');
+    renderResult('savedResult', res.body.data);
+  } catch (err) {
+    renderError('savedResult', err.message);
+    showToast(err.message, true);
+  } finally {
+    setLoading(btn, false);
+  }
+}
+
+/* ══════════════════════════════════════════
+   RUN FORECAST — PREVIEW
+══════════════════════════════════════════ */
+async function runPreviewForecast() {
+  const errEl = document.getElementById('previewFormError');
+  errEl?.classList.add('hidden');
+
+  const capacity = document.getElementById('preCapacity')?.value;
+  const date     = document.getElementById('preDate')?.value;
+  const start    = document.getElementById('preStart')?.value;
+  const end      = document.getElementById('preEnd')?.value;
+
+  // Validate
+  if (!capacity || !date || !start || !end) {
+    if (errEl) {
+      errEl.textContent = 'Capacity, Date, Start Time and End Time are required.';
+      errEl.classList.remove('hidden');
     }
+    return;
+  }
+  if (Number(capacity) < 1) {
+    if (errEl) {
+      errEl.textContent = 'Capacity must be at least 1.';
+      errEl.classList.remove('hidden');
+    }
+    return;
+  }
 
-    // convert HH:MM to HH:MM:SS for backend
-    const toHMS = t => t.length === 5 ? `${t}:00` : t;
+  const btn = document.getElementById('runPreviewBtn');
+  setLoading(btn, true);
+  setResultLoading('previewResult');
 
-    const payload = {
-      capacity:         parseInt(capacity, 10),
-      venue:            preVenue.value.trim() || 'unknown',
-      event_date:       date,
-      start_time:       toHMS(start),
-      end_time:         toHMS(end),
-      registered_count: parseInt(preRegistered.value || '0', 10),
-    };
+  const payload = {
+    capacity:         Number(capacity),
+    venue:            document.getElementById('preVenue')?.value || 'unknown',
+    event_date:       date,
+    start_time:       start + ':00',
+    end_time:         end   + ':00',
+    registered_count: Number(document.getElementById('preRegistered')?.value || 0),
+  };
 
-    runPreviewBtn.disabled    = true;
-    runPreviewBtn.textContent = 'Forecasting…';
-    previewResult.innerHTML   = `<div class="loading-state"><div class="spinner"></div></div>`;
-
+  try {
     const res = await Api.post('/admin/forecast/preview', payload);
+    if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Forecast failed');
+    renderResult('previewResult', res.body.data);
+  } catch (err) {
+    renderError('previewResult', err.message);
+    showToast(err.message, true);
+  } finally {
+    setLoading(btn, false);
+  }
+}
 
-    runPreviewBtn.disabled    = false;
-    runPreviewBtn.textContent = 'Preview Forecast';
+/* ══════════════════════════════════════════
+   RENDER RESULT
+══════════════════════════════════════════ */
+function renderResult(containerId, data) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
 
-    if (!res.ok) {
-      const msg = res.body.message || 'Forecast failed';
-      previewResult.innerHTML = `<div class="alert alert-error">${msg}</div>`;
-      showToast(msg);
-      return;
-    }
+  const predicted  = data.predicted_attendance ?? 0;
+  const capacity   = data.capacity ?? 0;
+  const util       = data.utilization_pct ?? 0;
+  const features   = data.features_used || {};
 
-    previewResult.innerHTML = buildResultHTML(res.body.data);
-  });
+  const barClass = util >= 100 ? 'full' : util >= 80 ? 'high' : '';
+  const utilCapped = Math.min(util, 100);
 
-  // ── tab switching ──
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const tab = btn.dataset.tab;
-      tabSaved.classList.toggle('hidden', tab !== 'saved');
-      tabPreview.classList.toggle('hidden', tab !== 'preview');
-    });
-  });
+  el.innerHTML = `
+    <div class="forecast-result">
 
-  // ── init ──
-  loadModelStatus();
-  loadEvents();
-});
+      <div>
+        <div class="forecast-number">${predicted}</div>
+        <div class="forecast-label">Predicted attendees out of ${capacity} capacity</div>
+      </div>
+
+      <div class="util-bar-wrap">
+        <div class="util-bar-header">
+          <span>Utilization</span>
+          <span>${util}%</span>
+        </div>
+        <div class="util-bar-track">
+          <div class="util-bar-fill ${barClass}" style="width:${utilCapped}%"></div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:0.75rem;color:var(--slate);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.6rem;">
+          Features Used
+        </div>
+        <div class="features-grid">
+          ${featureItem('Capacity',         features.capacity         ?? '-')}
+          ${featureItem('Day of Week',      dayName(features.day_of_week))}
+          ${featureItem('Month',            monthName(features.month))}
+          ${featureItem('Start Hour',       features.start_hour !== undefined ? `${features.start_hour}:00` : '-')}
+          ${featureItem('Duration',         features.duration_hours !== undefined ? `${features.duration_hours}h` : '-')}
+          ${featureItem('Registrations',    features.registered_count ?? 0)}
+        </div>
+      </div>
+
+    </div>`;
+}
+
+function featureItem(key, val) {
+  return `
+    <div class="feature-item">
+      <div class="feature-key">${key}</div>
+      <div class="feature-val">${val}</div>
+    </div>`;
+}
+
+function renderError(containerId, msg) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = `
+    <div class="forecast-placeholder">
+      <div class="forecast-placeholder-icon">⚠️</div>
+      <div class="forecast-placeholder-text">${esc(msg)}</div>
+    </div>`;
+}
+
+function setResultLoading(containerId) {
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+}
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function getUser() {
+  try { return JSON.parse(sessionStorage.getItem('user')); }
+  catch { return null; }
+}
+
+function logout() {
+  sessionStorage.clear();
+  window.location.href = '../login.html';
+}
+
+function setLoading(btn, on) {
+  if (!btn) return;
+  btn.disabled = on;
+  btn.textContent = on ? 'Running…' : (btn.id === 'runPreviewBtn' ? 'Preview Forecast' : 'Run Forecast');
+}
+
+function fmtDate(iso) {
+  if (!iso) return '-';
+  try { return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); }
+  catch { return iso; }
+}
+
+function dayName(n) {
+  return ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][n] ?? '-';
+}
+
+function monthName(n) {
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][n - 1] ?? '-';
+}
+
+function esc(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.className = `toast ${isError ? 'toast-error' : 'toast-success'}`;
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.add('toast-hide'), 3200);
+  setTimeout(() => { toast.className = 'toast hidden'; }, 3700);
+}

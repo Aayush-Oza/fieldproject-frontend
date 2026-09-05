@@ -1,4 +1,6 @@
 // frontend/js/auth.js
+// Uses sessionStorage so each browser tab has its own isolated session.
+// Multiple roles can be tested simultaneously in separate tabs without collision.
 
 const Auth = {
 
@@ -18,8 +20,9 @@ const Auth = {
       const { ok, body } = await Api.post('/auth/login', { email, password });
       if (ok && body.success) {
         const { token, user } = body.data;
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
+        // sessionStorage: isolated per tab, cleared when tab closes
+        sessionStorage.setItem('token', token);
+        sessionStorage.setItem('user', JSON.stringify(user));
         return { success: true, message: body.message, user };
       }
       return { success: false, message: body.message || 'Login failed' };
@@ -30,18 +33,18 @@ const Auth = {
   },
 
   logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login.html';
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    window.location.href = '../login.html';
   },
 
   getUser() {
-    try { return JSON.parse(localStorage.getItem('user')); }
+    try { return JSON.parse(sessionStorage.getItem('user')); }
     catch { return null; }
   },
 
   isLoggedIn() {
-    return !!localStorage.getItem('token');
+    return !!sessionStorage.getItem('token');
   },
 
   redirectIfLoggedIn() {
@@ -49,34 +52,24 @@ const Auth = {
     const user = this.getUser();
     if (!user) return;
     const dest = {
-      admin: '/admin/dashboard.html',
-      volunteer: '/volunteer/dashboard.html',
-      participant: '/participant/dashboard.html',
+      admin:       'admin/dashboard.html',
+      volunteer:   'volunteer/dashboard.html',
+      participant: 'participant/dashboard.html',
     };
-    window.location.href = dest[user.role] || '/participant/dashboard.html';
+    window.location.href = dest[user.role] || 'participant/dashboard.html';
   },
 
   initNav() {
     const user = this.getUser();
-
     if (!user) {
-      window.location.href = '/login.html';
+      window.location.href = '../login.html';
       return null;
     }
-
-    const navName = document.getElementById('navName');
+    const name = user.name || user.full_name || user.email || '';
+    const navName     = document.getElementById('navName');
     const greetingName = document.getElementById('greetingName');
-
-    const name = user.name || user.full_name || user.email || 'Participant';
-
-    if (navName) {
-      navName.textContent = name;
-    }
-
-    if (greetingName) {
-      greetingName.textContent = name;
-    }
-
+    if (navName)      navName.textContent      = name;
+    if (greetingName) greetingName.textContent = name;
     return user;
   },
 };

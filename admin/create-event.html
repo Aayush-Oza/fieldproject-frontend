@@ -6,14 +6,14 @@
   <title>Create Event - EventOps Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/main.css" />
-  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/main.css?v=1" />
+  <link rel="stylesheet" href="../css/dashboard.css?v=1" />
 </head>
 <body>
 
 <nav>
   <div class="nav-inner">
-    <span class="nav-logo">Event<span>Ops</span></span>
+    <a href="dashboard.html" class="nav-logo">Event<span>Ops</span></a>
     <ul class="nav-links">
       <li><a href="dashboard.html">Dashboard</a></li>
       <li><a href="events.html">Events</a></li>
@@ -27,6 +27,7 @@
       <span class="nav-role-badge role-admin">Admin</span>
       <button class="nav-logout" id="logoutBtn">Sign out</button>
     </div>
+    <!-- hamburger + drawer injected by admin-hamburger.js -->
   </div>
 </nav>
 
@@ -34,7 +35,6 @@
 
   <div class="dash-greeting">
     <div>
-      <div class="dash-greeting-sub"><a href="events.html" class="text-slate" style="text-decoration:none;">← Events</a></div>
       <div class="dash-greeting-name">Create New Event</div>
     </div>
   </div>
@@ -100,9 +100,9 @@
 
 <div class="toast hidden" id="toast"></div>
 
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/ui.js"></script>
-<script src="../js/admin/events.js"></script>
+<script src="../js/api.js?v=1"></script>
+<script src="../js/auth.js?v=1"></script>
+<script src="../js/admin/admin-hamburger.js?v=1"></script>
+<script src="../js/admin/create-event.js?v=1"></script>
 </body>
 </html>

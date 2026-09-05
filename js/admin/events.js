@@ -1,1267 +1,381 @@
-// ============================================================
-// ADMIN EVENTS
-// Requires: api.js, auth.js, ui.js
-// ============================================================
+// frontend/js/admin/events.js
+// Requires: api.js, auth.js, admin-hamburger.js
 
-let allEvents = [];
-let editingEventId = null;
-let statsEventId = null;
+let allEvents     = [];
+let editingId     = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-  initNav({
-    links: [
-      { href: '/admin/dashboard.html', label: 'Dashboard' },
-      { href: '/admin/events.html', label: 'Events' },
-      { href: '/admin/volunteers.html', label: 'Volunteers' },
-      { href: '/admin/occupancy.html', label: 'Occupancy' },
-      { href: '/admin/forecast.html', label: 'Forecast' },
-      { href: '/admin/certificates.html', label: 'Certificates' },
-    ],
-    active: 'Events',
-  });
+document.addEventListener('DOMContentLoaded', init);
 
-  initEventsPage();
-});
-
-
-// ============================================================
-// INIT
-// ============================================================
-
-async function initEventsPage() {
-  const user = Auth.getUser();
-
-  if (!user) {
-    window.location.href = '/login.html';
-    return;
-  }
-
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+async function init() {
+  const user = getUser();
+  if (!user) { window.location.href = '../login.html'; return; }
   if (user.role !== 'admin') {
-    window.location.href =
-      user.role === 'volunteer'
-        ? '/volunteer/dashboard.html'
-        : '/participant/dashboard.html';
-
+    window.location.href = user.role === 'volunteer'
+      ? '../volunteer/dashboard.html'
+      : '../participant/dashboard.html';
     return;
   }
-
-  bindEvents();
+  bindUI();
   await loadEvents();
 }
 
-
-// ============================================================
-// LOAD EVENTS
-// ============================================================
-
+/* ══════════════════════════════════════════
+   LOAD & RENDER
+══════════════════════════════════════════ */
 async function loadEvents() {
   const tbody = document.getElementById('eventsTableBody');
-
   if (!tbody) return;
-
-  tbody.innerHTML = `
-    <tr>
-      <td colspan="8" class="table-loading">
-        Loading events…
-      </td>
-    </tr>
-  `;
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--slate)">Loading…</td></tr>';
 
   try {
-    const result = await Api.get('/admin/events');
-
-    if (!result.ok || !result.body?.success) {
-      throw new Error(
-        result.body?.message || 'Unable to load events'
-      );
-    }
-
-    allEvents = normalizeEvents(result.body.data);
-
-    renderEvents();
-
+    const res = await Api.get('/admin/events');
+    if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed to load');
+    allEvents = toArray(res.body.data);
+    renderTable();
   } catch (err) {
-    console.error('[Admin Events] Load:', err);
-
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8" class="table-empty">
-          Unable to load events.
-          <button
-            type="button"
-            class="btn btn-secondary"
-            id="retryEventsBtn"
-          >
-            Retry
-          </button>
-        </td>
-      </tr>
-    `;
-
-    document
-      .getElementById('retryEventsBtn')
-      ?.addEventListener('click', loadEvents);
-
-    showToast(
-      err.message || 'Unable to load events.',
-      true
-    );
+    console.error('[Events] Load:', err);
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--slate)">
+      Unable to load events. <button class="btn btn-secondary btn-sm" onclick="loadEvents()" style="margin-left:0.5rem">Retry</button>
+    </td></tr>`;
+    showToast(err.message || 'Unable to load events.', true);
   }
 }
 
-
-// ============================================================
-// RENDER
-// ============================================================
-
-function renderEvents() {
-  const tbody =
-    document.getElementById('eventsTableBody');
-
+function renderTable() {
+  const tbody  = document.getElementById('eventsTableBody');
   if (!tbody) return;
 
-  const search =
-    document
-      .getElementById('searchInput')
-      ?.value
-      .trim()
-      .toLowerCase() || '';
+  const search = document.getElementById('searchInput')?.value.trim().toLowerCase() || '';
+  const status = document.getElementById('statusFilter')?.value || '';
 
-  const status =
-    document
-      .getElementById('statusFilter')
-      ?.value || 'all';
-
-  let events = [...allEvents];
-
-  // Search
-  if (search) {
-    events = events.filter((event) => {
-      return [
-        event.title,
-        event.description,
-        event.venue,
-      ]
-        .filter(Boolean)
-        .some((value) =>
-          String(value)
-            .toLowerCase()
-            .includes(search)
-        );
-    });
-  }
-
-  // Status
-  events = events.filter((event) => {
-    return matchesStatus(event, status);
-  });
-
-  // Newest-created first
-  events.sort((a, b) => {
-    const aDate =
-      new Date(a.created_at || 0).getTime();
-
-    const bDate =
-      new Date(b.created_at || 0).getTime();
-
-    return bDate - aDate;
-  });
+  let events = allEvents.filter(ev => {
+    // search
+    if (search && !['title','description','venue'].some(k => String(ev[k]||'').toLowerCase().includes(search))) return false;
+    // status
+    if (status === 'published')  return ev.is_published && !ev.is_completed;
+    if (status === 'draft')      return !ev.is_published && !ev.is_completed;
+    if (status === 'completed')  return ev.is_completed;
+    return true;
+  }).sort((a, b) => new Date(b.created_at||0) - new Date(a.created_at||0));
 
   if (!events.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8" class="table-empty">
-          No events found.
-        </td>
-      </tr>
-    `;
-
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--slate)">No events found.</td></tr>';
     return;
   }
 
-  tbody.innerHTML = events
-    .map(renderEventRow)
-    .join('');
+  tbody.innerHTML = events.map(renderRow).join('');
 
-  bindRowActions();
-}
-
-
-// ============================================================
-// EVENT ROW
-// ============================================================
-
-function renderEventRow(event) {
-  const id = Number(event.id);
-
-  const title = escapeHtml(
-    event.title || 'Untitled event'
-  );
-
-  const venue = escapeHtml(
-    event.venue || '-'
-  );
-
-  const date = formatDate(
-    event.event_date
-  );
-
-  const time = formatTimeRange(
-    event.start_time,
-    event.end_time
-  );
-
-  const registered =
-    Number(event.registration_count || 0);
-
-  const capacity =
-    Number(event.capacity || 0);
-
-  const fillRate =
-    capacity > 0
-      ? Math.min(
-          100,
-          Math.round(
-            (registered / capacity) * 100
-          )
-        )
-      : 0;
-
-  let status;
-
-  if (event.is_completed) {
-    status = `
-      <span class="dash-status dash-status-muted">
-        Completed
-      </span>
-    `;
-  } else if (event.is_published) {
-    status = `
-      <span class="dash-status dash-status-success">
-        Published
-      </span>
-    `;
-  } else {
-    status = `
-      <span class="dash-status dash-status-muted">
-        Draft
-      </span>
-    `;
-  }
-
-  return `
-    <tr data-event-id="${id}">
-
-      <td>
-        <div class="event-table-title">
-          <strong>${title}</strong>
-        </div>
-      </td>
-
-      <td>
-        ${venue}
-      </td>
-
-      <td>
-        ${escapeHtml(date)}
-      </td>
-
-      <td>
-        ${escapeHtml(time)}
-      </td>
-
-      <td>
-        <div class="event-capacity">
-          <strong>
-            ${registered}
-          </strong>
-          <span>
-            / ${capacity}
-          </span>
-        </div>
-
-        <div class="dash-progress">
-          <div
-            class="dash-progress-bar"
-            style="width:${fillRate}%"
-          ></div>
-        </div>
-      </td>
-
-      <td>
-        ${status}
-      </td>
-
-      <td>
-        <div class="table-actions">
-
-          <button
-            type="button"
-            class="btn btn-secondary btn-sm"
-            data-action="stats"
-            data-id="${id}"
-          >
-            Stats
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-secondary btn-sm"
-            data-action="edit"
-            data-id="${id}"
-          >
-            Edit
-          </button>
-
-          <button
-            type="button"
-            class="btn btn-danger btn-sm"
-            data-action="delete"
-            data-id="${id}"
-          >
-            Delete
-          </button>
-
-        </div>
-      </td>
-
-    </tr>
-  `;
-}
-
-
-// ============================================================
-// SEARCH / FILTER
-// ============================================================
-
-function bindEvents() {
-  document
-    .getElementById('searchInput')
-    ?.addEventListener(
-      'input',
-      renderEvents
-    );
-
-  document
-    .getElementById('statusFilter')
-    ?.addEventListener(
-      'change',
-      renderEvents
-    );
-
-  // Edit modal
-  document
-    .getElementById('editModalClose')
-    ?.addEventListener(
-      'click',
-      closeEditModal
-    );
-
-  document
-    .getElementById('editModalClose2')
-    ?.addEventListener(
-      'click',
-      closeEditModal
-    );
-
-  document
-    .getElementById('saveEditBtn')
-    ?.addEventListener(
-      'click',
-      saveEditedEvent
-    );
-
-  // Stats modal
-  document
-    .getElementById('statsModalClose')
-    ?.addEventListener(
-      'click',
-      closeStatsModal
-    );
-
-  // Close modals by clicking backdrop
-  document
-    .getElementById('editModal')
-    ?.addEventListener(
-      'click',
-      (event) => {
-        if (
-          event.target === event.currentTarget
-        ) {
-          closeEditModal();
-        }
-      }
-    );
-
-  document
-    .getElementById('statsModal')
-    ?.addEventListener(
-      'click',
-      (event) => {
-        if (
-          event.target === event.currentTarget
-        ) {
-          closeStatsModal();
-        }
-      }
-    );
-
-  // Escape key
-  document.addEventListener(
-    'keydown',
-    (event) => {
-      if (event.key !== 'Escape') return;
-
-      closeEditModal();
-      closeStatsModal();
-    }
-  );
-}
-
-
-// ============================================================
-// TABLE ACTIONS
-// ============================================================
-
-function bindRowActions() {
-  document
-    .querySelectorAll('[data-action="edit"]')
-    .forEach((button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          const id =
-            Number(button.dataset.id);
-
-          openEditModal(id);
-        }
-      );
+  // Bind row actions via delegation
+  tbody.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = Number(btn.dataset.id);
+      if (btn.dataset.action === 'edit')   openEdit(id);
+      if (btn.dataset.action === 'stats')  openStats(id);
+      if (btn.dataset.action === 'delete') confirmDelete(id);
     });
-
-  document
-    .querySelectorAll('[data-action="stats"]')
-    .forEach((button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          const id =
-            Number(button.dataset.id);
-
-          openStatsModal(id);
-        }
-      );
-    });
-
-  document
-    .querySelectorAll('[data-action="delete"]')
-    .forEach((button) => {
-      button.addEventListener(
-        'click',
-        () => {
-          const id =
-            Number(button.dataset.id);
-
-          deleteEvent(id);
-        }
-      );
-    });
-}
-
-
-// ============================================================
-// EDIT EVENT
-// ============================================================
-
-function openEditModal(eventId) {
-  const event =
-    allEvents.find(
-      (item) =>
-        Number(item.id) === eventId
-    );
-
-  if (!event) {
-    showToast(
-      'Event not found.',
-      true
-    );
-
-    return;
-  }
-
-  editingEventId = eventId;
-
-  setInputValue(
-    'editTitle',
-    event.title
-  );
-
-  setInputValue(
-    'editDesc',
-    event.description || ''
-  );
-
-  setInputValue(
-    'editVenue',
-    event.venue || ''
-  );
-
-  setInputValue(
-    'editCapacity',
-    event.capacity ?? ''
-  );
-
-  setInputValue(
-    'editDate',
-    event.event_date || ''
-  );
-
-  setInputValue(
-    'editStart',
-    normalizeTimeInput(
-      event.start_time
-    )
-  );
-
-  setInputValue(
-    'editEnd',
-    normalizeTimeInput(
-      event.end_time
-    )
-  );
-
-  clearEditAlert();
-
-  const modal =
-    document.getElementById('editModal');
-
-  if (!modal) return;
-
-  modal.classList.add('open');
-
-  // Support projects where modal uses hidden.
-  modal.classList.remove('hidden');
-}
-
-function closeEditModal() {
-  const modal =
-    document.getElementById('editModal');
-
-  if (!modal) return;
-
-  modal.classList.remove('open');
-  modal.classList.add('hidden');
-
-  editingEventId = null;
-
-  clearEditAlert();
-}
-
-
-// ============================================================
-// SAVE EDIT
-// ============================================================
-
-async function saveEditedEvent() {
-  if (!editingEventId) return;
-
-  const title =
-    getInputValue('editTitle');
-
-  const description =
-    getInputValue('editDesc');
-
-  const venue =
-    getInputValue('editVenue');
-
-  const capacity =
-    getInputValue('editCapacity');
-
-  const eventDate =
-    getInputValue('editDate');
-
-  const startTime =
-    getInputValue('editStart');
-
-  const endTime =
-    getInputValue('editEnd');
-
-  const validation =
-    validateEventForm({
-      title,
-      venue,
-      capacity,
-      eventDate,
-      startTime,
-      endTime,
-    });
-
-  if (validation) {
-    showEditAlert(validation);
-    return;
-  }
-
-  const button =
-    document.getElementById(
-      'saveEditBtn'
-    );
-
-  setButtonLoading(
-    button,
-    true,
-    'Saving…'
-  );
-
-  try {
-    const result =
-      await Api.put(
-        `/admin/events/${editingEventId}`,
-        {
-          title,
-          description,
-          venue,
-          capacity: Number(capacity),
-          event_date: eventDate,
-          start_time: startTime,
-          end_time: endTime,
-        }
-      );
-
-    if (
-      !result.ok ||
-      !result.body?.success
-    ) {
-      throw new Error(
-        result.body?.message ||
-          'Unable to update event'
-      );
-    }
-
-    closeEditModal();
-
-    showToast(
-      'Event updated successfully.'
-    );
-
-    await loadEvents();
-
-  } catch (err) {
-    console.error(
-      '[Admin Events] Update:',
-      err
-    );
-
-    showEditAlert(
-      err.message ||
-        'Unable to update event.'
-    );
-
-  } finally {
-    setButtonLoading(
-      button,
-      false,
-      'Save changes'
-    );
-  }
-}
-
-
-// ============================================================
-// EVENT STATS
-// ============================================================
-
-async function openStatsModal(eventId) {
-  const event =
-    allEvents.find(
-      (item) =>
-        Number(item.id) === eventId
-    );
-
-  if (!event) {
-    showToast(
-      'Event not found.',
-      true
-    );
-
-    return;
-  }
-
-  statsEventId = eventId;
-
-  const modal =
-    document.getElementById(
-      'statsModal'
-    );
-
-  const title =
-    document.getElementById(
-      'statsModalTitle'
-    );
-
-  const content =
-    document.getElementById(
-      'statsContent'
-    );
-
-  if (!modal || !content) return;
-
-  if (title) {
-    title.textContent =
-      event.title || 'Event statistics';
-  }
-
-  content.innerHTML = `
-    <div class="dash-loading">
-      Loading statistics…
-    </div>
-  `;
-
-  modal.classList.add('open');
-  modal.classList.remove('hidden');
-
-  try {
-    const result =
-      await Api.get(
-        `/admin/events/${eventId}/stats`
-      );
-
-    if (
-      !result.ok ||
-      !result.body?.success
-    ) {
-      throw new Error(
-        result.body?.message ||
-          'Unable to load statistics'
-      );
-    }
-
-    const stats =
-      result.body.data || {};
-
-    renderStats(stats);
-
-  } catch (err) {
-    console.error(
-      '[Admin Events] Stats:',
-      err
-    );
-
-    content.innerHTML = `
-      <div class="dash-empty">
-        <p>
-          Unable to load event statistics.
-        </p>
-      </div>
-    `;
-  }
-}
-
-function renderStats(stats) {
-  const content =
-    document.getElementById(
-      'statsContent'
-    );
-
-  if (!content) return;
-
-  const capacity =
-    Number(stats.capacity || 0);
-
-  const registered =
-    Number(
-      stats.total_registered || 0
-    );
-
-  const checkedIn =
-    Number(
-      stats.total_checkedin || 0
-    );
-
-  const occupancy =
-    Number(
-      stats.occupancy_percent || 0
-    );
-
-  const status =
-    stats.status || 'safe';
-
-  const statusText =
-    status === 'full'
-      ? 'Full'
-      : status === 'near'
-        ? 'Near capacity'
-        : 'Safe';
-
-  const statusClass =
-    status === 'full'
-      ? 'dash-status-danger'
-      : status === 'near'
-        ? 'dash-status-warning'
-        : 'dash-status-success';
-
-  content.innerHTML = `
-    <div class="stats-grid">
-
-      <div class="stats-card">
-        <span>Capacity</span>
-        <strong>${capacity}</strong>
-      </div>
-
-      <div class="stats-card">
-        <span>Registered</span>
-        <strong>${registered}</strong>
-      </div>
-
-      <div class="stats-card">
-        <span>Checked in</span>
-        <strong>${checkedIn}</strong>
-      </div>
-
-      <div class="stats-card">
-        <span>Occupancy</span>
-        <strong>
-          ${formatNumber(occupancy)}%
-        </strong>
-      </div>
-
-    </div>
-
-    <div class="stats-status">
-      <span class="dash-status ${statusClass}">
-        ${statusText}
-      </span>
-    </div>
-  `;
-}
-
-function closeStatsModal() {
-  const modal =
-    document.getElementById(
-      'statsModal'
-    );
-
-  if (!modal) return;
-
-  modal.classList.remove('open');
-  modal.classList.add('hidden');
-
-  statsEventId = null;
-}
-
-
-// ============================================================
-// DELETE EVENT
-// ============================================================
-
-function deleteEvent(eventId) {
-  const event =
-    allEvents.find(
-      (item) =>
-        Number(item.id) === eventId
-    );
-
-  if (!event) {
-    showToast(
-      'Event not found.',
-      true
-    );
-
-    return;
-  }
-
-  showConfirm({
-    icon: '🗑️',
-    title: 'Delete event?',
-    msg:
-      `"${event.title}" will be permanently deleted.`,
-    confirmTxt: 'Delete',
-    cancelTxt: 'Cancel',
-    danger: true,
-
-    onConfirm: async () => {
-      await performDeleteEvent(
-        eventId
-      );
-    },
   });
 }
 
-async function performDeleteEvent(eventId) {
+function renderRow(ev) {
+  const id         = Number(ev.id);
+  const registered = Number(ev.registration_count || 0);
+  const capacity   = Number(ev.capacity || 0);
+  const fill       = capacity > 0 ? Math.min(100, Math.round(registered / capacity * 100)) : 0;
+  const date       = ev.event_date ? new Date(`${ev.event_date}T00:00:00`).toLocaleDateString(undefined, { day:'numeric', month:'short', year:'numeric' }) : '-';
+  const timeRange  = [fmtTime(ev.start_time), fmtTime(ev.end_time)].filter(Boolean).join(' – ') || '-';
+
+  let badge;
+  if      (ev.is_completed)  badge = '<span class="badge badge-slate">Completed</span>';
+  else if (ev.is_published)  badge = '<span class="badge badge-blue">Published</span>';
+  else                        badge = '<span class="badge badge-slate">Draft</span>';
+
+  return `
+    <tr>
+      <td><strong>${esc(ev.title || 'Untitled')}</strong></td>
+      <td style="font-size:0.82rem">${esc(date)}<br><span style="color:var(--slate)">${esc(timeRange)}</span></td>
+      <td>${esc(ev.venue || '-')}</td>
+      <td>
+        <span style="font-size:0.875rem">${registered} / ${capacity}</span>
+        <div class="capacity-bar" style="margin-top:0.3rem">
+          <div class="capacity-fill ${fill>=100?'full':fill>=80?'near-full':''}" style="width:${fill}%"></div>
+        </div>
+      </td>
+      <td>${badge}</td>
+      <td>
+        <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" data-action="stats"  data-id="${id}">Stats</button>
+          <button class="btn btn-secondary btn-sm" data-action="edit"   data-id="${id}">Edit</button>
+          <button class="btn btn-danger    btn-sm" data-action="delete" data-id="${id}">Delete</button>
+        </div>
+      </td>
+    </tr>`;
+}
+
+/* ══════════════════════════════════════════
+   EDIT MODAL
+══════════════════════════════════════════ */
+function openEdit(id) {
+  const ev = allEvents.find(e => Number(e.id) === id);
+  if (!ev) return;
+  editingId = id;
+
+  setVal('editTitle',    ev.title || '');
+  setVal('editDesc',     ev.description || '');
+  setVal('editVenue',    ev.venue || '');
+  setVal('editCapacity', ev.capacity ?? '');
+  setVal('editDate',     ev.event_date || '');
+  setVal('editStart',    normTime(ev.start_time));
+  setVal('editEnd',      normTime(ev.end_time));
+  hideAlert();
+  // Show Publish button only for drafts
+const publishBtn = document.getElementById('publishBtn');
+if (publishBtn) {
+  const isDraft = !ev.is_published && !ev.is_completed;
+  publishBtn.classList.toggle('hidden', !isDraft);
+}
+  showModal('editModal');
+}
+
+async function saveEdit() {
+  if (!editingId) return;
+
+  const body = {
+    title:       getVal('editTitle'),
+    description: getVal('editDesc'),
+    venue:       getVal('editVenue'),
+    capacity:    Number(getVal('editCapacity')),
+    event_date:  getVal('editDate'),
+    start_time:  getVal('editStart'),
+    end_time:    getVal('editEnd'),
+  };
+
+  const err = validateForm(body);
+  if (err) { showAlert(err); return; }
+
+  const btn = document.getElementById('saveEditBtn');
+  setBtnLoading(btn, 'Saving…');
+
   try {
-    const result =
-      await Api.delete(
-        `/admin/events/${eventId}`
-      );
-
-    if (
-      !result.ok ||
-      !result.body?.success
-    ) {
-      throw new Error(
-        result.body?.message ||
-          'Unable to delete event'
-      );
-    }
-
-    showToast(
-      'Event deleted successfully.'
-    );
-
+    const res = await Api.put(`/admin/events/${editingId}`, body);
+    if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Update failed');
+    closeModal('editModal');
+    showToast('Event updated.');
     await loadEvents();
-
   } catch (err) {
-    console.error(
-      '[Admin Events] Delete:',
-      err
-    );
-
-    showToast(
-      err.message ||
-        'Unable to delete event.',
-      true
-    );
+    console.error('[Events] Save:', err);
+    showAlert(err.message || 'Unable to update event.');
+  } finally {
+    setBtnLoading(btn, null);
   }
 }
 
-
-// ============================================================
-// VALIDATION
-// ============================================================
-
-function validateEventForm(data) {
-  if (!data.title) {
-    return 'Event title is required.';
-  }
-
-  if (!data.venue) {
-    return 'Venue is required.';
-  }
-
-  if (
-    !data.capacity ||
-    Number(data.capacity) <= 0
-  ) {
-    return 'Capacity must be greater than 0.';
-  }
-
-  if (!data.eventDate) {
-    return 'Event date is required.';
-  }
-
-  if (!data.startTime) {
-    return 'Start time is required.';
-  }
-
-  if (!data.endTime) {
-    return 'End time is required.';
-  }
-
-  if (data.startTime >= data.endTime) {
-    return 'Start time must be before end time.';
-  }
-
+function validateForm(d) {
+  if (!d.title)                         return 'Title is required.';
+  if (!d.venue)                         return 'Venue is required.';
+  if (!d.capacity || d.capacity <= 0)   return 'Capacity must be greater than 0.';
+  if (!d.event_date)                    return 'Date is required.';
+  if (!d.start_time)                    return 'Start time is required.';
+  if (!d.end_time)                      return 'End time is required.';
+  if (d.start_time >= d.end_time)       return 'Start time must be before end time.';
   return null;
 }
 
+/* ══════════════════════════════════════════
+   STATS MODAL
+══════════════════════════════════════════ */
+async function openStats(id) {
+  const ev = allEvents.find(e => Number(e.id) === id);
+  if (!ev) return;
 
-// ============================================================
-// STATUS FILTER
-// ============================================================
+  const content = document.getElementById('statsContent');
+  const title   = document.getElementById('statsModalTitle');
+  if (title) title.textContent = ev.title || 'Event Stats';
+  if (content) content.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
+  showModal('statsModal');
 
-function matchesStatus(event, status) {
-  if (!status || status === 'all') {
-    return true;
-  }
-
-  switch (status) {
-    case 'published':
-      return (
-        event.is_published === true &&
-        event.is_completed !== true
-      );
-
-    case 'draft':
-      return (
-        event.is_published !== true &&
-        event.is_completed !== true
-      );
-
-    case 'completed':
-      return event.is_completed === true;
-
-    case 'upcoming':
-      return (
-        event.is_completed !== true &&
-        isUpcoming(event)
-      );
-
-    default:
-      return true;
+  try {
+    const res = await Api.get(`/admin/events/${id}/stats`);
+    if (!res.ok || !res.body?.success) throw new Error(res.body?.message);
+    renderStats(res.body.data || {});
+  } catch (err) {
+    console.error('[Events] Stats:', err);
+    if (content) content.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--slate)">Unable to load stats.</div>';
   }
 }
 
-function isUpcoming(event) {
-  if (!event.event_date) {
-    return false;
-  }
+function renderStats(s) {
+  const content = document.getElementById('statsContent');
+  if (!content) return;
 
-  const date =
-    new Date(
-      `${event.event_date}T${
-        normalizeTimeInput(
-          event.start_time
-        ) || '00:00'
-      }`
-    );
+  const cap      = Number(s.capacity || 0);
+  const reg      = Number(s.total_registered || 0);
+  const checked  = Number(s.total_checkedin || 0);
+  const occ      = Number(s.occupancy_percent || 0);
+  const st       = s.status || 'safe';
+  const badgeCls = st === 'full' ? 'badge-red' : st === 'near' ? 'badge-amber' : 'badge-green';
+  const badgeTxt = st === 'full' ? 'Full' : st === 'near' ? 'Near capacity' : 'Safe';
 
-  return date.getTime() >= Date.now();
+  content.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+      ${[['Capacity',cap],['Registered',reg],['Checked in',checked],['Occupancy',fmtNum(occ)+'%']].map(([label,val])=>`
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius);padding:1rem;text-align:center">
+          <div style="font-size:0.75rem;color:var(--slate);margin-bottom:0.3rem">${label}</div>
+          <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-head)">${val}</div>
+        </div>`).join('')}
+    </div>
+    <div style="text-align:center"><span class="badge ${badgeCls}">${badgeTxt}</span></div>`;
 }
 
+/* ══════════════════════════════════════════
+   DELETE
+══════════════════════════════════════════ */
+function confirmDelete(id) {
+  const ev = allEvents.find(e => Number(e.id) === id);
+  if (!ev) return;
 
-// ============================================================
-// FORM HELPERS
-// ============================================================
-
-function getInputValue(id) {
-  return (
-    document.getElementById(id)
-      ?.value
-      .trim() || ''
-  );
+  // Simple native confirm — no showConfirm dependency
+  if (!confirm(`Delete "${ev.title}"? This cannot be undone.`)) return;
+  doDelete(id);
 }
 
-function setInputValue(id, value) {
-  const input =
-    document.getElementById(id);
-
-  if (input) {
-    input.value = value ?? '';
+async function doDelete(id) {
+  try {
+    const res = await Api.delete(`/admin/events/${id}`);
+    if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Delete failed');
+    showToast('Event deleted.');
+    await loadEvents();
+  } catch (err) {
+    console.error('[Events] Delete:', err);
+    showToast(err.message || 'Unable to delete event.', true);
   }
 }
 
-function normalizeTimeInput(time) {
-  if (!time) return '';
+/* ══════════════════════════════════════════
+   UI BINDINGS
+══════════════════════════════════════════ */
+function bindUI() {
+  document.getElementById('searchInput')?.addEventListener('input', renderTable);
+  document.getElementById('statusFilter')?.addEventListener('change', renderTable);
+  document.getElementById('publishBtn')?.addEventListener('click', publishEvent);
+  document.getElementById('saveEditBtn')?.addEventListener('click', saveEdit);
+  document.getElementById('editModalClose')?.addEventListener('click', () => closeModal('editModal'));
+  document.getElementById('editCancel')?.addEventListener('click',    () => closeModal('editModal'));
+  document.getElementById('statsModalClose')?.addEventListener('click', () => closeModal('statsModal'));
 
-  const value =
-    String(time);
+  // Backdrop click closes
+  ['editModal','statsModal'].forEach(id => {
+    document.getElementById(id)?.addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeModal(id);
+    });
+  });
 
-  const match =
-    value.match(
-      /^(\d{1,2}):(\d{2})/
-    );
-
-  if (!match) {
-    return value;
-  }
-
-  return (
-    String(
-      Number(match[1])
-    ).padStart(2, '0') +
-    ':' +
-    match[2]
-  );
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeModal('editModal'); closeModal('statsModal'); }
+  });
 }
 
-function clearEditAlert() {
-  const alert =
-    document.getElementById(
-      'editAlert'
-    );
-
-  if (!alert) return;
-
-  alert.textContent = '';
-  alert.classList.remove('show');
+/* ══════════════════════════════════════════
+   MODAL HELPERS
+══════════════════════════════════════════ */
+function showModal(id)  { document.getElementById(id)?.classList.replace('hidden','open') || document.getElementById(id)?.classList.remove('hidden'); }
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('hidden');
+  el.classList.remove('open');
+  if (id === 'editModal') { editingId = null; hideAlert(); }
 }
 
-function showEditAlert(message) {
-  const alert =
-    document.getElementById(
-      'editAlert'
-    );
-
-  if (!alert) return;
-
-  alert.textContent = message;
-  alert.classList.add('show');
+function showAlert(msg) {
+  const el = document.getElementById('editAlert');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+function hideAlert() {
+  const el = document.getElementById('editAlert');
+  if (el) { el.textContent = ''; el.classList.add('hidden'); }
 }
 
-
-// ============================================================
-// NORMALIZATION
-// ============================================================
-
-function normalizeEvents(data) {
-  if (Array.isArray(data)) {
-    return data;
+function setBtnLoading(btn, loadingText) {
+  if (!btn) return;
+  if (loadingText) {
+    btn.dataset.orig = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = loadingText;
+  } else {
+    btn.disabled = false;
+    btn.textContent = btn.dataset.orig || 'Save Changes';
   }
+}
 
-  if (Array.isArray(data?.events)) {
-    return data.events;
-  }
+/* ══════════════════════════════════════════
+   SMALL HELPERS
+══════════════════════════════════════════ */
+function getUser() {
+  try { return JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')); }
+  catch { return null; }
+}
 
-  if (Array.isArray(data?.items)) {
-    return data.items;
-  }
-
+function toArray(data) {
+  if (Array.isArray(data))          return data;
+  if (Array.isArray(data?.events))  return data.events;
+  if (Array.isArray(data?.items))   return data.items;
   return [];
 }
 
+function getVal(id)       { return document.getElementById(id)?.value.trim() || ''; }
+function setVal(id, val)  { const el = document.getElementById(id); if (el) el.value = val ?? ''; }
 
-// ============================================================
-// FORMATTING
-// ============================================================
-
-function formatDate(value) {
-  if (!value) return '-';
-
-  const date =
-    new Date(
-      `${value}T00:00:00`
-    );
-
-  if (Number.isNaN(date.getTime())) {
-    return String(value);
-  }
-
-  return date.toLocaleDateString(
-    undefined,
-    {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    }
-  );
+function esc(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function formatTime(value) {
-  if (!value) return '';
-
-  const match =
-    String(value).match(
-      /^(\d{1,2}):(\d{2})/
-    );
-
-  if (!match) {
-    return String(value);
-  }
-
-  let hour =
-    Number(match[1]);
-
-  const minute =
-    match[2];
-
-  const period =
-    hour >= 12 ? 'PM' : 'AM';
-
-  hour =
-    hour % 12 || 12;
-
-  return `${hour}:${minute} ${period}`;
+function fmtTime(t) {
+  if (!t) return '';
+  const m = String(t).match(/^(\d{1,2}):(\d{2})/);
+  if (!m) return String(t);
+  let h = Number(m[1]); const min = m[2], p = h >= 12 ? 'PM' : 'AM';
+  return `${h % 12 || 12}:${min} ${p}`;
 }
 
-function formatTimeRange(start, end) {
-  const first =
-    formatTime(start);
-
-  const last =
-    formatTime(end);
-
-  if (!first && !last) {
-    return '-';
-  }
-
-  if (!last) {
-    return first;
-  }
-
-  return `${first} – ${last}`;
+function fmtNum(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? (Number.isInteger(n) ? String(n) : n.toFixed(1)) : '0';
 }
 
-function formatNumber(value) {
-  const number =
-    Number(value);
-
-  if (!Number.isFinite(number)) {
-    return '0';
-  }
-
-  return Number.isInteger(number)
-    ? String(number)
-    : number.toFixed(1);
+function normTime(t) {
+  if (!t) return '';
+  const m = String(t).match(/^(\d{1,2}):(\d{2})/);
+  return m ? String(Number(m[1])).padStart(2,'0') + ':' + m[2] : String(t);
 }
 
-
-// ============================================================
-// UI HELPERS
-// ============================================================
-
-function setButtonLoading(
-  button,
-  loading,
-  loadingText
-) {
-  if (!button) return;
-
-  if (loading) {
-    button.dataset.originalText =
-      button.textContent;
-
-    button.disabled = true;
-    button.textContent =
-      loadingText;
-  } else {
-    button.disabled = false;
-
-    button.textContent =
-      button.dataset.originalText ||
-      'Save changes';
-  }
-}
-
-function showToast(
-  message,
-  isError = false
-) {
-  const toast =
-    document.getElementById('toast');
-
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('toast');
   if (!toast) return;
-
-  toast.textContent = message;
-
-  toast.classList.remove(
-    'show',
-    'error'
-  );
-
-  if (isError) {
-    toast.classList.add('error');
-  }
-
-  void toast.offsetWidth;
-
-  toast.classList.add('show');
-
-  clearTimeout(
-    showToast.timer
-  );
-
-  showToast.timer =
-    setTimeout(() => {
-      toast.classList.remove(
-        'show',
-        'error'
-      );
-    }, 3500);
+  toast.textContent = msg;
+  toast.className = `toast ${isError ? 'toast-error' : 'toast-success'}`;
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => { toast.classList.add('toast-hide'); }, 3200);
+  setTimeout(() => { toast.className = 'toast hidden'; }, 3700);
 }
-
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+async function publishEvent() {
+  if (!editingId) return;
+  const btn = document.getElementById('publishBtn');
+  setBtnLoading(btn, 'Publishing…');
+  try {
+    const res = await Api.put(`/admin/events/${editingId}`, { is_published: true });
+    if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed');
+    closeModal('editModal');
+    showToast('Event published!');
+    await loadEvents();
+  } catch (err) {
+    showAlert(err.message || 'Could not publish event.');
+  } finally {
+    setBtnLoading(btn, null);
+    document.getElementById('publishBtn').dataset.orig = 'Publish';
+  }
 }

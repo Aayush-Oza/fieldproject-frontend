@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Volunteer Dashboard - EventOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/main.css?v=1" />
+  <link rel="stylesheet" href="../css/dashboard.css?v=1" />
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="dashboard.html" class="nav-logo">Event<span>Ops</span></a>
+    <ul class="nav-links">
+      <li><a href="dashboard.html" class="active">Dashboard</a></li>
+      <li><a href="scanner.html">Scanner</a></li>
+      <li><a href="checkin-log.html">Check-in Log</a></li>
+    </ul>
+    <div class="nav-user">
+      <span class="nav-user-name" id="navName"></span>
+      <span class="nav-role-badge role-volunteer">Volunteer</span>
+      <button class="nav-logout" id="logoutBtn">Sign out</button>
+    </div>
+    <!-- hamburger + drawer injected by volunteer-hamburger.js -->
+  </div>
+</nav>
+
+<main class="dash-main">
+
+  <div class="dash-greeting">
+    <div>
+      <div class="dash-greeting-sub">Volunteer Portal</div>
+      <div class="dash-greeting-name">Welcome, <span id="greetingName">-</span></div>
+    </div>
+    <a href="scanner.html" class="btn btn-primary">📷 Open Scanner</a>
+  </div>
+
+  <!-- STATS -->
+  <div class="dash-stats" style="grid-template-columns:repeat(3,1fr);">
+    <div class="stat-card">
+      <div class="stat-value" id="statAssigned">-</div>
+      <div class="stat-label">Assigned Events</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statUpcoming">-</div>
+      <div class="stat-label">Upcoming</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statCompleted">-</div>
+      <div class="stat-label">Completed</div>
+    </div>
+  </div>
+
+  <!-- ASSIGNMENTS TABLE -->
+  <div class="card" style="padding:0;">
+    <div class="dash-card-header" style="padding:1.25rem 1.5rem 0;">
+      <span class="card-title">My Assigned Events</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Date</th>
+            <th>Venue</th>
+            <th>Duty</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="assignmentsBody">
+          <tr><td colspan="6"><div class="loading-state"><div class="spinner"></div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast hidden" id="toast"></div>
+
+<script src="../js/api.js?v=1"></script>
+<script src="../js/auth.js?v=1"></script>
+<script src="../js/volunteer/volunteer-hamburger.js?v=1"></script>
+<script src="../js/volunteer/dashboard.js?v=1"></script>
+</body>
+</html>
