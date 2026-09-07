@@ -23,7 +23,13 @@ function showToast(msg, type = 'success') {
 }
 
 // ── Helpers ──
-function fmtDate(d) { return new Date(d).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' }); }
+function fmtDate(d) {
+  if (!d) return '-';
+  // If already formatted string from backend, return as-is
+  if (typeof d === 'string' && d.includes('IST')) return d;
+  const dt = new Date(d);
+  return isNaN(dt) ? d : dt.toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 function fmtTime(t) {
   const [h, m] = t.split(':');
   const d = new Date(); d.setHours(+h, +m);
@@ -78,7 +84,7 @@ function render() {
             <button class="btn btn-secondary btn-sm qr-btn" data-event-id="${event?.id}" data-event-title="${event?.title}">QR Code</button>
             <button class="btn btn-danger btn-sm cancel-btn" data-event-id="${event?.id}" data-event-title="${event?.title}">Cancel</button>
           ` : ''}
-          ${completed && !cancelled ? `<a href="my-certificates.html" class="btn btn-success btn-sm">Certificate</a>` : ''}
+          ${completed && !cancelled ? `<button class="btn btn-success btn-sm cert-btn" data-event-id="${event?.id}">Certificate</button>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -102,6 +108,14 @@ function render() {
     });
   });
 }
+
+el.querySelectorAll('.cert-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const { ok, body } = await Api.get(`/participant/events/${btn.dataset.eventId}/certificate`);
+    if (ok) window.location.href = 'my-certificates.html';
+    else showToast(body?.message || 'Could not get certificate', 'error');
+  });
+});
 
 // ── QR Modal ──
 async function openQR(eventId, eventTitle) {
