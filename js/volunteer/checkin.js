@@ -150,12 +150,7 @@ function getUser() {
 
 function fmtDateTime(iso) {
   if (!iso) return '-';
-  try {
-    return new Date(iso).toLocaleString(undefined, {
-      day: 'numeric', month: 'short',
-      hour: '2-digit', minute: '2-digit', second: '2-digit'
-    });
-  } catch { return iso; }
+  return iso; 
 }
 
 function esc(v) {
