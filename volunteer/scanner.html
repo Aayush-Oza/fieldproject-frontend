@@ -1,110 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QR Scanner - EventOps</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="../css/main.css?v=5" />
   <link rel="stylesheet" href="../css/dashboard.css?v=5" />
   <link rel="stylesheet" href="../css/scanner.css?v=5" />
 </head>
+
 <body>
 
-<nav>
-  <div class="nav-inner">
-    <a href="dashboard.html" class="nav-logo">Event<span>Ops</span></a>
-    <ul class="nav-links">
-      <li><a href="dashboard.html">Dashboard</a></li>
-      <li><a href="scanner.html" class="active">Scanner</a></li>
-      <li><a href="checkin-log.html">Check-in Log</a></li>
-    </ul>
-    <div class="nav-user">
-      <span class="nav-user-name" id="navName"></span>
-      <span class="nav-role-badge role-volunteer">Volunteer</span>
-      <button class="nav-logout" id="logoutBtn">Sign out</button>
+  <nav>
+    <div class="nav-inner">
+      <a href="dashboard.html" class="nav-logo">Event<span>Ops</span></a>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="scanner.html" class="active">Scanner</a></li>
+        <li><a href="checkin-log.html">Check-in Log</a></li>
+      </ul>
+      <div class="nav-user">
+        <span class="nav-user-name" id="navName"></span>
+        <span class="nav-role-badge role-volunteer">Volunteer</span>
+        <button class="nav-logout" id="logoutBtn">Sign out</button>
+      </div>
+      <!-- hamburger + drawer injected by volunteer-hamburger.js -->
     </div>
-    <!-- hamburger + drawer injected by volunteer-hamburger.js -->
-  </div>
-</nav>
+  </nav>
 
-<main class="dash-main" style="max-width:640px;">
+  <main class="dash-main" style="max-width:640px;">
 
-  <div class="dash-greeting">
-    <div>
-      <div class="dash-greeting-sub">Volunteer · QR Check-in</div>
-      <div class="dash-greeting-name">QR Scanner</div>
-    </div>
-  </div>
-
-  <!-- EVENT SELECTOR -->
-  <div class="card">
-    <div class="form-group">
-      <label class="form-label">Select Event</label>
-      <select class="form-select" id="eventSelect">
-        <option value="">- choose your assigned event -</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- SCANNER BOX -->
-  <div class="card" id="scannerCard" style="display:none;">
-    <div class="card-title" style="margin-bottom:1rem;">Scan Participant QR Code</div>
-
-    <div id="scannerWrap" style="position:relative;width:100%;border-radius:var(--radius);overflow:hidden;background:#000;aspect-ratio:1;">
-      <video id="scannerVideo" style="width:100%;height:100%;object-fit:cover;" playsinline></video>
-      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
-        <div style="width:60%;aspect-ratio:1;border:3px solid rgba(255,255,255,0.7);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.4);"></div>
+    <div class="dash-greeting">
+      <div>
+        <div class="dash-greeting-sub">Volunteer · QR Check-in</div>
+        <div class="dash-greeting-name">QR Scanner</div>
       </div>
     </div>
 
-    <div style="display:flex;gap:0.75rem;margin-top:1rem;">
-      <button class="btn btn-secondary" style="flex:1" id="startBtn">▶ Start Camera</button>
-      <button class="btn btn-danger"    style="flex:1" id="stopBtn" disabled>■ Stop</button>
-    </div>
-
-    <!-- MANUAL FALLBACK -->
-    <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,0.07);">
+    <!-- EVENT SELECTOR -->
+    <div class="card">
       <div class="form-group">
-        <label class="form-label">Or enter token manually</label>
-        <div style="display:flex;gap:0.5rem;">
-          <input type="text" class="form-input" id="manualToken" placeholder="Paste QR token here…" style="flex:1;" />
-          <button class="btn btn-primary" id="manualSubmitBtn">Check In</button>
+        <label class="form-label">Select Event</label>
+        <select class="form-select" id="eventSelect">
+          <option value="">- choose your assigned event -</option>
+        </select>
+      </div>
+    </div>
+    <div id="checkinWindowBanner" class="hidden"></div>
+    <!-- SCANNER BOX -->
+    <div class="card" id="scannerCard" style="display:none;">
+      <div class="card-title" style="margin-bottom:1rem;">Scan Participant QR Code</div>
+
+      <div id="scannerWrap"
+        style="position:relative;width:100%;border-radius:var(--radius);overflow:hidden;background:#000;aspect-ratio:1;">
+        <video id="scannerVideo" style="width:100%;height:100%;object-fit:cover;" playsinline></video>
+        <div
+          style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+          <div
+            style="width:60%;aspect-ratio:1;border:3px solid rgba(255,255,255,0.7);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.4);">
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+        <button class="btn btn-secondary" style="flex:1" id="startBtn">▶ Start Camera</button>
+        <button class="btn btn-danger" style="flex:1" id="stopBtn" disabled>■ Stop</button>
+      </div>
+
+      <!-- MANUAL FALLBACK -->
+      <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid rgba(255,255,255,0.07);">
+        <div class="form-group">
+          <label class="form-label">Or enter token manually</label>
+          <div style="display:flex;gap:0.5rem;">
+            <input type="text" class="form-input" id="manualToken" placeholder="Paste QR token here…" style="flex:1;" />
+            <button class="btn btn-primary" id="manualSubmitBtn">Check In</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- RESULT -->
-  <div id="checkinResult" class="hidden"></div>
+    <!-- RESULT -->
+    <div id="checkinResult" class="hidden"></div>
 
-  <!-- RECENT LOG -->
-  <div class="card" id="recentCard" style="display:none;padding:0;">
-    <div class="dash-card-header" style="padding:1.25rem 1.5rem 0;">
-      <span class="card-title">Recent Check-ins</span>
-      <span id="checkinCount" style="font-size:0.75rem;color:var(--slate);"></span>
+    <!-- RECENT LOG -->
+    <div class="card" id="recentCard" style="display:none;padding:0;">
+      <div class="dash-card-header" style="padding:1.25rem 1.5rem 0;">
+        <span class="card-title">Recent Check-ins</span>
+        <span id="checkinCount" style="font-size:0.75rem;color:var(--slate);"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Participant</th>
+            </tr>
+          </thead>
+          <tbody id="recentBody">
+            <tr>
+              <td colspan="2" style="text-align:center;padding:1.5rem;color:var(--slate)">No check-ins yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>Time</th><th>Registration ID</th></tr>
-        </thead>
-        <tbody id="recentBody">
-          <tr><td colspan="2" style="text-align:center;padding:1.5rem;color:var(--slate)">No check-ins yet.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
 
-</main>
+  </main>
 
-<div class="toast hidden" id="toast"></div>
+  <div class="toast hidden" id="toast"></div>
 
-<script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js?v=5"></script>
-<script src="../js/api.js?v=5"></script>
-<script src="../js/auth.js?v=5"></script>
-<script src="../js/volunteer/volunteer-hamburger.js?v=5"></script>
-<script src="../js/volunteer/scanner.js?v=5"></script>
+  <script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js?v=5"></script>
+  <script src="../js/api.js?v=5"></script>
+  <script src="../js/auth.js?v=5"></script>
+  <script src="../js/volunteer/volunteer-hamburger.js?v=5"></script>
+  <script src="../js/volunteer/scanner.js?v=6"></script>
 </body>
+
 </html>

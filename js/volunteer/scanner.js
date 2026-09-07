@@ -62,13 +62,13 @@ async function loadAssignments() {
     const events = await Promise.all(
       assignments.map(a =>
         Api.get(`/volunteer/assignments/${a.event_id}/event`)
-          .then(r => r.body?.success ? { id: a.event_id, title: r.body.data.title } : { id: a.event_id, title: `Event #${a.event_id}` })
+          .then(r => r.body?.success ? { id: a.event_id, title: r.body.data.title, start_time: r.body.data.start_time, end_time: r.body.data.end_time } : { id: a.event_id, title: `Event #${a.event_id}` })
           .catch(() => ({ id: a.event_id, title: `Event #${a.event_id}` }))
       )
     );
 
     sel.innerHTML = '<option value="">- choose your assigned event -</option>' +
-      events.map(e => `<option value="${e.id}">${esc(e.title)}</option>`).join('');
+      events.map(e => `<option value="${e.id}" data-start="${e.start_time||''}" data-end="${e.end_time||''}">${esc(e.title)}</option>`).join('');
 
   } catch {
     sel.innerHTML = '<option value="">Failed to load events</option>';
@@ -80,21 +80,62 @@ async function loadAssignments() {
 ══════════════════════════════════════════ */
 function onEventChange() {
   const sel = document.getElementById('eventSelect');
+  const opt = sel.options[sel.selectedIndex];
   selectedEventId = sel.value ? Number(sel.value) : null;
 
   const scannerCard = document.getElementById('scannerCard');
-  const recentCard = document.getElementById('recentCard');
+  const recentCard  = document.getElementById('recentCard');
+  const banner      = document.getElementById('checkinWindowBanner');
 
-  if (selectedEventId) {
-    if (scannerCard) scannerCard.style.display = '';
-    if (recentCard) recentCard.style.display = '';
-    loadRecentLog();
-  } else {
+  if (!selectedEventId) {
     stopCamera();
     if (scannerCard) scannerCard.style.display = 'none';
-    if (recentCard) recentCard.style.display = 'none';
+    if (recentCard)  recentCard.style.display  = 'none';
+    if (banner)      banner.classList.add('hidden');
+    clearResult();
+    return;
   }
 
+  if (scannerCard) scannerCard.style.display = '';
+  if (recentCard)  recentCard.style.display  = '';
+
+  const rawStart = opt.dataset.start;
+  const rawEnd   = opt.dataset.end;
+
+  const toIST = (timeStr, offsetMin = 0) => {
+    if (!timeStr) return null;
+    const [h, m] = timeStr.split(':').map(Number);
+    const d = new Date();
+    d.setUTCHours(h, m, 0, 0);
+    d.setMinutes(d.getMinutes() + offsetMin);
+    return d;
+  };
+
+  const windowOpen  = toIST(rawStart, -60);
+  const windowClose = toIST(rawEnd, 0);
+  const now         = new Date();
+
+  let locked = false, lockMsg = '';
+  if (windowOpen && windowClose) {
+    if (now < windowOpen)  { locked = true; lockMsg = `🔒 Check-in opens at ${windowOpen.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })} IST`; }
+    if (now > windowClose) { locked = true; lockMsg = '🔒 Event has ended — check-in closed'; }
+  }
+
+  if (banner) {
+    banner.classList.remove('hidden');
+    banner.innerHTML = locked
+      ? `<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:0.75rem 1rem;color:#991b1b;font-size:0.875rem;margin-bottom:1rem">${lockMsg}</div>`
+      : `<div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:0.75rem 1rem;color:#166534;font-size:0.875rem;margin-bottom:1rem">✅ Check-in window: ${windowOpen.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })} – ${windowClose.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })} IST</div>`;
+  }
+
+  const manualToken = document.getElementById('manualToken');
+  const manualBtn   = document.getElementById('manualSubmitBtn');
+  const startBtn    = document.getElementById('startBtn');
+  if (manualToken) manualToken.disabled = locked;
+  if (manualBtn)   manualBtn.disabled   = locked;
+  if (startBtn)    startBtn.disabled    = locked;
+
+  if (!locked) loadRecentLog();
   clearResult();
 }
 
@@ -219,7 +260,7 @@ async function loadRecentLog() {
     tbody.innerHTML = recentCheckins.slice(0, 20).map(c => `
       <tr>
         <td style="font-size:0.82rem">${fmtDateTime(c.checked_in_at)}</td>
-        <td style="font-size:0.82rem;color:var(--slate)">#${c.registration_id}</td>
+        <td style="font-size:0.82rem;color:var(--slate)">${esc(c.participant_name || '#' + c.registration_id)}</td>
       </tr>`).join('');
   } catch (err) {
     console.error('[Scanner] Log:', err);
@@ -267,6 +308,7 @@ function getUser() {
 
 function fmtDateTime(iso) {
   if (!iso) return '-';
+  if (typeof iso === 'string' && iso.includes('IST')) return iso;
   try { return new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
   catch { return iso; }
 }
