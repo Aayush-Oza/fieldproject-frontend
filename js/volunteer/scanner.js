@@ -135,7 +135,7 @@ function onEventChange() {
   if (manualBtn)   manualBtn.disabled   = locked;
   if (startBtn)    startBtn.disabled    = locked;
 
-  if (!locked) loadRecentLog();
+  loadRecentLog();
   clearResult();
 }
 
