@@ -107,15 +107,14 @@ function render() {
       });
     });
   });
-}
-
-el.querySelectorAll('.cert-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const { ok, body } = await Api.get(`/participant/events/${btn.dataset.eventId}/certificate`);
-    if (ok) window.location.href = 'my-certificates.html';
-    else showToast(body?.message || 'Could not get certificate', 'error');
+  el.querySelectorAll('.cert-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const { ok, body } = await Api.get(`/participant/events/${btn.dataset.eventId}/certificate`);
+      if (ok) window.location.href = 'my-certificates.html';
+      else showToast(body?.message || 'Could not get certificate', 'error');
+    });
   });
-});
+}
 
 // ── QR Modal ──
 async function openQR(eventId, eventTitle) {
