@@ -209,7 +209,7 @@ function renderAssignments(assignments, eventId) {
         ${avatar(name)}
         <strong>${esc(name)}</strong>
       </div></td>
-      <td style="font-size:0.82rem;color:var(--slate)">${esc(a.email || '-')}</td>
+      <td style="font-size:0.82rem;color:var(--slate)">${esc(a.volunteer_email || a.email || '-')}</td>
       <td>${a.duty ? `<span class="badge badge-slate">${esc(a.duty)}</span>` : '<span style="color:var(--slate);font-size:0.8rem">—</span>'}</td>
       <td style="font-size:0.82rem">${esc(fmtDate(a.assigned_at || a.created_at))}</td>
       <td>

@@ -130,7 +130,7 @@ function renderTable(checkins) {
   setTbody(checkins.map((c, i) => `
     <tr>
       <td style="color:var(--slate);font-size:0.82rem">${i + 1}</td>
-      <td style="font-size:0.82rem">#${c.registration_id}</td>
+      <td style="font-size:0.82rem">${esc(c.participant_name || c.participant_email || '#' + c.registration_id)}</td>
       <td style="font-size:0.82rem">${fmtDateTime(c.checked_in_at)}</td>
     </tr>`).join(''));
 }
