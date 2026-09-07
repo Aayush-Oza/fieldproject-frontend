@@ -61,14 +61,14 @@ async function loadStats() {
     showToast('Some stats could not be loaded.', true);
   }
 
-  // Certificate count — optional endpoint, fails silently if not yet added
+  // Certificate count - optional endpoint, fails silently if not yet added
   try {
     const certsRes = await Api.get('/admin/certificates/count');
     if (certsRes.ok && certsRes.body?.success) {
       setText('statCerts', certsRes.body.data?.count ?? '-');
     }
   } catch (_) {
-    // endpoint not yet deployed — leave as '-'
+    // endpoint not yet deployed - leave as '-'
   }
 }
 

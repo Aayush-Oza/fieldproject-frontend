@@ -106,10 +106,10 @@ function renderRow(ev) {
       <td>${badge}</td>
       <td>
         <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
-          <button class="btn btn-secondary btn-sm" data-action="stats"  data-id="${id}">Stats</button>
-          <button class="btn btn-secondary btn-sm" data-action="edit"   data-id="${id}">Edit</button>
-          <button class="btn btn-danger    btn-sm" data-action="delete" data-id="${id}">Delete</button>
-        </div>
+  <button class="btn btn-secondary btn-sm" data-action="stats"  data-id="${id}">Stats</button>
+  <button class="btn btn-secondary btn-sm" data-action="edit"   data-id="${id}">Edit</button>
+  ${!ev.is_completed && !ev.is_published ? `<button class="btn btn-danger btn-sm" data-action="delete" data-id="${id}">Delete</button>` : ''}
+</div>
       </td>
     </tr>`;
 }
@@ -236,9 +236,16 @@ function confirmDelete(id) {
   const ev = allEvents.find(e => Number(e.id) === id);
   if (!ev) return;
 
-  // Simple native confirm — no showConfirm dependency
-  if (!confirm(`Delete "${ev.title}"? This cannot be undone.`)) return;
-  doDelete(id);
+  // Simple native confirm - no showConfirm dependency
+  showConfirm({
+    icon: '🗑️',
+    title: 'Delete event?',
+    msg: `This will permanently delete <strong>${ev.title}</strong>. This cannot be undone.`,
+    confirmTxt: 'Yes, delete',
+    cancelTxt: 'Cancel',
+    danger: true,
+    onConfirm: () => doDelete(id)
+  });
 }
 
 async function doDelete(id) {

@@ -77,7 +77,7 @@ async function loadAssignments(eventId) {
 }
 
 /* ══════════════════════════════════════════
-   RENDER — VOLUNTEERS TAB
+   RENDER - VOLUNTEERS TAB
 ══════════════════════════════════════════ */
 function renderVolunteers() {
   const tbody = document.getElementById('volTableBody');
@@ -119,7 +119,7 @@ function renderVolunteers() {
 }
 
 /* ══════════════════════════════════════════
-   RENDER — USERS TAB
+   RENDER - USERS TAB
 ══════════════════════════════════════════ */
 function renderUsers() {
   const tbody = document.getElementById('userTableBody');
@@ -178,7 +178,7 @@ function renderUsers() {
 }
 
 /* ══════════════════════════════════════════
-   RENDER — ASSIGNMENTS TAB
+   RENDER - ASSIGNMENTS TAB
 ══════════════════════════════════════════ */
 function populateEventDropdown() {
   const sel = document.getElementById('assignEventFilter');
@@ -210,7 +210,7 @@ function renderAssignments(assignments, eventId) {
         <strong>${esc(name)}</strong>
       </div></td>
       <td style="font-size:0.82rem;color:var(--slate)">${esc(a.volunteer_email || a.email || '-')}</td>
-      <td>${a.duty ? `<span class="badge badge-slate">${esc(a.duty)}</span>` : '<span style="color:var(--slate);font-size:0.8rem">—</span>'}</td>
+      <td>${a.duty ? `<span class="badge badge-slate">${esc(a.duty)}</span>` : '<span style="color:var(--slate);font-size:0.8rem">-</span>'}</td>
       <td style="font-size:0.82rem">${esc(fmtDate(a.assigned_at || a.created_at))}</td>
       <td>
         <button class="btn btn-danger btn-sm" data-action="remove" data-vol-id="${a.volunteer_id || a.user_id || a.id}" data-event-id="${eventId}">Remove</button>
@@ -229,31 +229,49 @@ function renderAssignments(assignments, eventId) {
 async function promoteUser(userId) {
   const u = allUsers.find(x => x.id === userId);
   if (!u) return;
-  if (!confirm(`Make "${u.name || u.full_name || u.email}" a volunteer?`)) return;
-
-  try {
-    const res = await Api.put(`/admin/users/${userId}/make-volunteer`);
-    if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed');
-    showToast('User promoted to volunteer.');
-    await loadUsers();
-  } catch (err) {
-    showToast(err.message || 'Could not promote user.', true);
-  }
+  showConfirm({
+    icon: '⬆️',
+    title: 'Make volunteer?',
+    msg: `Promote <strong>${u.name || u.email}</strong> to volunteer role?`,
+    confirmTxt: 'Yes, promote',
+    cancelTxt: 'Cancel',
+    danger: false,
+    onConfirm: async () => {
+      try {
+        const res = await Api.put(`/admin/users/${userId}/make-volunteer`);
+        if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed');
+        showToast('User promoted to volunteer.');
+        await loadUsers();
+      } catch (err) {
+        showToast(err.message || 'Could not promote user.', true);
+      }
+    }
+  });
+  return;
 }
 
 async function demoteUser(userId) {
   const u = allUsers.find(x => x.id === userId);
   if (!u) return;
-  if (!confirm(`Demote "${u.name || u.full_name || u.email}" back to participant?`)) return;
-
-  try {
-    const res = await Api.put(`/admin/users/${userId}/make-participant`);
-    if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed');
-    showToast('User demoted to participant.');
-    await loadUsers();
-  } catch (err) {
-    showToast(err.message || 'Could not demote user.', true);
-  }
+  showConfirm({
+    icon: '⬇️',
+    title: 'Demote user?',
+    msg: `Demote <strong>${u.name || u.email}</strong> back to participant?`,
+    confirmTxt: 'Yes, demote',
+    cancelTxt: 'Cancel',
+    danger: true,
+    onConfirm: async () => {
+      try {
+        const res = await Api.put(`/admin/users/${userId}/make-participant`);
+        if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed');
+        showToast('User demoted to participant.');
+        await loadUsers();
+      } catch (err) {
+        showToast(err.message || 'Could not demote user.', true);
+      }
+    }
+  });
+  return;
 }
 
 /* ══════════════════════════════════════════
@@ -262,7 +280,7 @@ async function demoteUser(userId) {
 function openAssignModal() {
   if (!selectedEventId) { showToast('Select an event first.', true); return; }
 
-  // Populate volunteer dropdown — exclude already assigned if possible
+  // Populate volunteer dropdown - exclude already assigned if possible
   const sel = document.getElementById('assignVolSelect');
   const vols = allUsers.filter(u => u.role === 'volunteer');
   if (!vols.length) {
@@ -304,15 +322,25 @@ async function doAssign() {
 }
 
 async function removeAssignment(eventId, volId) {
-  if (!confirm('Remove this volunteer from the event?')) return;
-  try {
-    const res = await Api.delete(`/admin/events/${eventId}/volunteers/${volId}`);
-    if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed');
-    showToast('Volunteer removed.');
-    await loadAssignments(eventId);
-  } catch (err) {
-    showToast(err.message || 'Could not remove volunteer.', true);
-  }
+  showConfirm({
+    icon: '🗑️',
+    title: 'Remove volunteer?',
+    msg: 'Remove this volunteer from the event?',
+    confirmTxt: 'Yes, remove',
+    cancelTxt: 'Cancel',
+    danger: true,
+    onConfirm: async () => {
+      try {
+        const res = await Api.delete(`/admin/events/${eventId}/volunteers/${volId}`);
+        if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed');
+        showToast('Volunteer removed.');
+        await loadAssignments(eventId);
+      } catch (err) {
+        showToast(err.message || 'Could not remove volunteer.', true);
+      }
+    }
+  });
+  return;
 }
 
 /* ══════════════════════════════════════════

@@ -36,7 +36,7 @@ async function init() {
   // REST fallback after 3 s if socket hasn't delivered data
   setTimeout(() => {
     if (!socketOk) {
-      console.warn('[Occupancy] Socket slow — falling back to REST');
+      console.warn('[Occupancy] Socket slow - falling back to REST');
       loadRest();
     }
   }, 3000);
@@ -48,7 +48,7 @@ async function init() {
 function connectSocket() {
   setStatus('connecting');
   if (typeof io === 'undefined') {
-    console.warn('[Occupancy] socket.io not loaded — falling back to REST');
+    console.warn('[Occupancy] socket.io not loaded - falling back to REST');
     setStatus('error');
     loadRest();
     return;

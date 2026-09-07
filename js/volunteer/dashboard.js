@@ -103,7 +103,7 @@ function renderTable(rows) {
         <td><strong>${esc(ev.title)}</strong></td>
         <td style="font-size:0.82rem">${date}<br><span style="color:var(--slate)">${timeRange}</span></td>
         <td>${esc(ev.venue)}</td>
-        <td>${esc(row.duty || '—')}</td>
+        <td>${esc(row.duty || '-')}</td>
         <td>${statusBadge}</td>
         <td>
           <div style="display:flex;gap:0.4rem;flex-wrap:wrap">

@@ -77,7 +77,7 @@ async function loadModelStatus() {
       wrap.innerHTML = `
         <div class="model-status not-ready">
           <span class="model-status-dot"></span>
-          Model not trained — run <code>python -m ai.train</code>
+          Model not trained - run <code>python -m ai.train</code>
         </div>`;
     }
   } catch {
@@ -144,7 +144,7 @@ function onEventSelect() {
 }
 
 /* ══════════════════════════════════════════
-   RUN FORECAST — SAVED EVENT
+   RUN FORECAST - SAVED EVENT
 ══════════════════════════════════════════ */
 async function runSavedForecast() {
   const eventId = document.getElementById('eventSelect')?.value;
@@ -167,7 +167,7 @@ async function runSavedForecast() {
 }
 
 /* ══════════════════════════════════════════
-   RUN FORECAST — PREVIEW
+   RUN FORECAST - PREVIEW
 ══════════════════════════════════════════ */
 async function runPreviewForecast() {
   const errEl = document.getElementById('previewFormError');

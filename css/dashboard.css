@@ -729,7 +729,7 @@
    BREAKPOINTS
    ════════════════════════════════════════ */
 
-/* ── 1024px — show hamburger ── */
+/* ── 1024px - show hamburger ── */
 @media (max-width: 1024px) {
   .nav-links {
     display: none !important;

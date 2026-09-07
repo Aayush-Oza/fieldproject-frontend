@@ -118,7 +118,7 @@ function onEventChange() {
   let locked = false, lockMsg = '';
   if (windowOpen && windowClose) {
     if (now < windowOpen)  { locked = true; lockMsg = `🔒 Check-in opens at ${windowOpen.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })} IST`; }
-    if (now > windowClose) { locked = true; lockMsg = '🔒 Event has ended — check-in closed'; }
+    if (now > windowClose) { locked = true; lockMsg = '🔒 Event has ended - check-in closed'; }
   }
 
   if (banner) {
