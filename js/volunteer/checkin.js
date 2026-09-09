@@ -15,11 +15,11 @@ let eventCapacity = 0;
 ══════════════════════════════════════════ */
 async function init() {
   const user = getUser();
-  if (!user) { window.location.href = '../login.html'; return; }
+  if (!user) { window.location.href = '../login'; return; }
   if (user.role !== 'volunteer') {
     window.location.href = user.role === 'admin'
-      ? '../admin/dashboard.html'
-      : '../participant/dashboard.html';
+      ? '../admin/dashboard'
+      : '../participant/dashboard';
     return;
   }
 

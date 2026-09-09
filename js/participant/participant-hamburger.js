@@ -12,10 +12,10 @@
         <span class="nav-role-badge role-participant" style="font-size:0.7rem;padding:2px 8px;">Participant</span>
       </div>
     </div>
-    <a href="dashboard.html"        class="nav-drawer-link" data-page="dashboard">Dashboard</a>
-    <a href="events.html"           class="nav-drawer-link" data-page="events">Events</a>
-    <a href="my-registrations.html" class="nav-drawer-link" data-page="my-registrations">My Registrations</a>
-    <a href="my-certificates.html"  class="nav-drawer-link" data-page="my-certificates">Certificates</a>
+    <a href="dashboard"        class="nav-drawer-link" data-page="dashboard">Dashboard</a>
+    <a href="events"           class="nav-drawer-link" data-page="events">Events</a>
+    <a href="my-registrations" class="nav-drawer-link" data-page="my-registrations">My Registrations</a>
+    <a href="my-certificates"  class="nav-drawer-link" data-page="my-certificates">Certificates</a>
     <button class="nav-drawer-logout" id="drawerLogout">Sign out</button>
   `;
   document.body.appendChild(drawer);
@@ -28,7 +28,7 @@
   burger.innerHTML = '<span></span><span></span><span></span>';
   navInner.appendChild(burger);
 
-  const page = location.pathname.split('/').pop().replace('.html', '');
+  const page = location.pathname.split('/').pop().replace('', '');
   drawer.querySelectorAll('.nav-drawer-link').forEach(a => {
     if (a.dataset.page === page) a.classList.add('active');
   });
@@ -63,7 +63,7 @@
   function doLogout() {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
-    window.location.href = '../login.html';
+    window.location.href = '../login';
   }
 
   document.getElementById('drawerLogout').addEventListener('click', doLogout);

@@ -5,11 +5,11 @@ document.addEventListener('DOMContentLoaded', init);
 
 function init() {
   const user = getUser();
-  if (!user) { window.location.href = '../login.html'; return; }
+  if (!user) { window.location.href = '../login'; return; }
   if (user.role !== 'admin') {
     window.location.href = user.role === 'volunteer'
-      ? '../volunteer/dashboard.html'
-      : '../participant/dashboard.html';
+      ? '../volunteer/dashboard'
+      : '../participant/dashboard';
     return;
   }
 
@@ -44,7 +44,7 @@ async function createEvent() {
     const res = await Api.post('/admin/events', body);
     if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed to create event');
     showToast('Event created!');
-    setTimeout(() => { window.location.href = 'events.html'; }, 1000);
+    setTimeout(() => { window.location.href = 'events'; }, 1000);
   } catch (err) {
     showAlert(err.message || 'Unable to create event.');
   } finally {

@@ -1,12 +1,12 @@
 // frontend/js/participant/registrations.js
 
-if (!Auth.isLoggedIn()) window.location.href = '../login.html';
+if (!Auth.isLoggedIn()) window.location.href = '../login';
 
 const NAV_LINKS = [
-  { href: 'dashboard.html', label: 'Dashboard' },
-  { href: 'events.html', label: 'Events' },
-  { href: 'my-registrations.html', label: 'My Registrations' },
-  { href: 'my-certificates.html', label: 'Certificates' },
+  { href: 'dashboard', label: 'Dashboard' },
+  { href: 'events', label: 'Events' },
+  { href: 'my-registrations', label: 'My Registrations' },
+  { href: 'my-certificates', label: 'Certificates' },
 ];
 
 Auth.initNav({ links: NAV_LINKS, active: 'My Registrations' });
@@ -58,7 +58,7 @@ function render() {
         <div class="empty-state-icon">📋</div>
         <p class="empty-state-title">No registrations found</p>
         <p class="empty-state-desc">${activeFilter === 'all' ? 'Browse events and register to get started.' : 'Nothing in this category yet.'}</p>
-        ${activeFilter === 'all' ? '<a href="events.html" class="btn btn-primary btn-sm mt-2">Browse events</a>' : ''}
+        ${activeFilter === 'all' ? '<a href="events" class="btn btn-primary btn-sm mt-2">Browse events</a>' : ''}
       </div>`;
     return;
   }
@@ -110,7 +110,7 @@ function render() {
   el.querySelectorAll('.cert-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const { ok, body } = await Api.get(`/participant/events/${btn.dataset.eventId}/certificate`);
-      if (ok) window.location.href = 'my-certificates.html';
+      if (ok) window.location.href = 'my-certificates';
       else showToast(body?.message || 'Could not get certificate', 'error');
     });
   });

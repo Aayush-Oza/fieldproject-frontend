@@ -1,6 +1,6 @@
 // frontend/js/participant/certificates.js
 
-if (!Auth.isLoggedIn()) window.location.href = '../login.html';
+if (!Auth.isLoggedIn()) window.location.href = '../login';
 
 const user = Auth.getUser();
 document.getElementById('navName').textContent = user?.name || '';
@@ -19,7 +19,7 @@ function render(certs) {
         <div class="empty-state-icon">🎓</div>
         <p class="empty-state-title">No certificates yet</p>
         <p class="empty-state-desc">Attend events and get checked in to earn certificates.</p>
-        <a href="events.html" class="btn btn-primary btn-sm mt-2">Browse events</a>
+        <a href="events" class="btn btn-primary btn-sm mt-2">Browse events</a>
       </div>`;
     return;
   }

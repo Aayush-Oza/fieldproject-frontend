@@ -14,11 +14,11 @@ let assignments = [];
 ══════════════════════════════════════════ */
 async function init() {
   const user = getUser();
-  if (!user) { window.location.href = '../login.html'; return; }
+  if (!user) { window.location.href = '../login'; return; }
   if (user.role !== 'volunteer') {
     window.location.href = user.role === 'admin'
-      ? '../admin/dashboard.html'
-      : '../participant/dashboard.html';
+      ? '../admin/dashboard'
+      : '../participant/dashboard';
     return;
   }
 
@@ -107,8 +107,8 @@ function renderTable(rows) {
         <td>${statusBadge}</td>
         <td>
           <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
-            <a href="scanner.html?event_id=${ev.id}" class="btn btn-primary btn-sm">📷 Scan</a>
-            <a href="checkin-log.html?event_id=${ev.id}" class="btn btn-secondary btn-sm">Log</a>
+            <a href="scanner?event_id=${ev.id}" class="btn btn-primary btn-sm">📷 Scan</a>
+            <a href="checkin-log?event_id=${ev.id}" class="btn btn-secondary btn-sm">Log</a>
           </div>
         </td>
       </tr>`;

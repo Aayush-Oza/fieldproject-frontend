@@ -35,7 +35,7 @@ const Auth = {
   logout() {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
-    window.location.href = '../login.html';
+    window.location.href = '../login';
   },
 
   getUser() {
@@ -52,17 +52,17 @@ const Auth = {
     const user = this.getUser();
     if (!user) return;
     const dest = {
-      admin:       'admin/dashboard.html',
-      volunteer:   'volunteer/dashboard.html',
-      participant: 'participant/dashboard.html',
+      admin:       'admin/dashboard',
+      volunteer:   'volunteer/dashboard',
+      participant: 'participant/dashboard',
     };
-    window.location.href = dest[user.role] || 'participant/dashboard.html';
+    window.location.href = dest[user.role] || 'participant/dashboard';
   },
 
   initNav() {
     const user = this.getUser();
     if (!user) {
-      window.location.href = '../login.html';
+      window.location.href = '../login';
       return null;
     }
     const name = user.name || user.full_name || user.email || '';

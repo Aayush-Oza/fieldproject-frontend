@@ -6,11 +6,11 @@ document.addEventListener('DOMContentLoaded', initDashboard);
 /* ── INIT ── */
 async function initDashboard() {
   const user = getUser();
-  if (!user) { window.location.href = '../login.html'; return; }
+  if (!user) { window.location.href = '../login'; return; }
   if (user.role !== 'admin') {
     window.location.href = user.role === 'volunteer'
-      ? '../volunteer/dashboard.html'
-      : '../participant/dashboard.html';
+      ? '../volunteer/dashboard'
+      : '../participant/dashboard';
     return;
   }
 
@@ -89,7 +89,7 @@ async function loadUpcomingEvents() {
       .slice(0, 5);
 
     if (!upcoming.length) {
-      el.innerHTML = emptyState('📅', 'No upcoming events.', '<a href="create-event.html">Create your first event</a>');
+      el.innerHTML = emptyState('📅', 'No upcoming events.', '<a href="create-event">Create your first event</a>');
       return;
     }
 

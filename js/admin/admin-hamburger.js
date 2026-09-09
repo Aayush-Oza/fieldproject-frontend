@@ -12,12 +12,12 @@
         <span class="nav-role-badge role-admin" style="font-size:0.7rem;padding:2px 8px;">Admin</span>
       </div>
     </div>
-    <a href="dashboard.html"    class="nav-drawer-link" data-page="dashboard">Dashboard</a>
-    <a href="events.html"       class="nav-drawer-link" data-page="events">Events</a>
-    <a href="volunteers.html"   class="nav-drawer-link" data-page="volunteers">Volunteers</a>
-    <a href="occupancy.html"    class="nav-drawer-link" data-page="occupancy">Occupancy</a>
-    <a href="forecast.html"     class="nav-drawer-link" data-page="forecast">Forecast</a>
-    <a href="certificates.html" class="nav-drawer-link" data-page="certificates">Certificates</a>
+    <a href="dashboard"    class="nav-drawer-link" data-page="dashboard">Dashboard</a>
+    <a href="events"       class="nav-drawer-link" data-page="events">Events</a>
+    <a href="volunteers"   class="nav-drawer-link" data-page="volunteers">Volunteers</a>
+    <a href="occupancy"    class="nav-drawer-link" data-page="occupancy">Occupancy</a>
+    <a href="forecast"     class="nav-drawer-link" data-page="forecast">Forecast</a>
+    <a href="certificates" class="nav-drawer-link" data-page="certificates">Certificates</a>
     <button class="nav-drawer-logout" id="drawerLogout">Sign out</button>
   `;
   document.body.appendChild(drawer);
@@ -30,7 +30,7 @@
   burger.innerHTML = '<span></span><span></span><span></span>';
   navInner.appendChild(burger);
 
-  const page = location.pathname.split('/').pop().replace('.html', '');
+  const page = location.pathname.split('/').pop().replace('', '');
   drawer.querySelectorAll('.nav-drawer-link').forEach(a => {
     if (a.dataset.page === page) a.classList.add('active');
   });
@@ -65,7 +65,7 @@
   function doLogout() {
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('user');
-    window.location.href = '../login.html';
+    window.location.href = '../login';
   }
 
   document.getElementById('drawerLogout').addEventListener('click', doLogout);

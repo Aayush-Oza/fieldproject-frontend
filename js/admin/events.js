@@ -11,11 +11,11 @@ document.addEventListener('DOMContentLoaded', init);
 ══════════════════════════════════════════ */
 async function init() {
   const user = getUser();
-  if (!user) { window.location.href = '../login.html'; return; }
+  if (!user) { window.location.href = '../login'; return; }
   if (user.role !== 'admin') {
     window.location.href = user.role === 'volunteer'
-      ? '../volunteer/dashboard.html'
-      : '../participant/dashboard.html';
+      ? '../volunteer/dashboard'
+      : '../participant/dashboard';
     return;
   }
   bindUI();
