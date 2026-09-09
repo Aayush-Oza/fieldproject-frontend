@@ -11,6 +11,7 @@ let selectedEventId = null;
 let stream = null;
 let scanLoop = null;
 let recentCheckins = [];
+let isProcessing = false; // prevent double scans
 
 /* ══════════════════════════════════════════
    INIT
@@ -58,17 +59,31 @@ async function loadAssignments() {
       return;
     }
 
-    // Fetch event titles
+    // Fetch event details
     const events = await Promise.all(
       assignments.map(a =>
         Api.get(`/volunteer/assignments/${a.event_id}/event`)
-          .then(r => r.body?.success ? { id: a.event_id, title: r.body.data.title, start_time: r.body.data.start_time, end_time: r.body.data.end_time } : { id: a.event_id, title: `Event #${a.event_id}` })
-          .catch(() => ({ id: a.event_id, title: `Event #${a.event_id}` }))
+          .then(r => r.body?.success ? {
+            id: a.event_id,
+            title: r.body.data.title,
+            start_time: r.body.data.start_time,
+            end_time: r.body.data.end_time,
+            is_completed: r.body.data.is_completed  // ← ADDED
+          } : { id: a.event_id, title: `Event #${a.event_id}`, is_completed: false })
+          .catch(() => ({ id: a.event_id, title: `Event #${a.event_id}`, is_completed: false }))
       )
     );
 
+    // ← FILTER OUT COMPLETED EVENTS
+    const activeEvents = events.filter(e => !e.is_completed);
+
+    if (!activeEvents.length) {
+      sel.innerHTML = '<option value="">No active assigned events</option>';
+      return;
+    }
+
     sel.innerHTML = '<option value="">- choose your assigned event -</option>' +
-      events.map(e => `<option value="${e.id}" data-start="${e.start_time||''}" data-end="${e.end_time||''}">${esc(e.title)}</option>`).join('');
+      activeEvents.map(e => `<option value="${e.id}" data-start="${e.start_time||''}" data-end="${e.end_time||''}">${esc(e.title)}</option>`).join('');
 
   } catch {
     sel.innerHTML = '<option value="">Failed to load events</option>';
@@ -154,6 +169,7 @@ async function startCamera() {
     document.getElementById('startBtn').disabled = true;
     document.getElementById('stopBtn').disabled = false;
 
+    isProcessing = false;
     scanLoop = requestAnimationFrame(scanFrame);
   } catch (err) {
     showToast('Camera access denied or unavailable.', true);
@@ -172,6 +188,8 @@ function stopCamera() {
   const stopBtn = document.getElementById('stopBtn');
   if (startBtn) startBtn.disabled = false;
   if (stopBtn) stopBtn.disabled = true;
+
+  isProcessing = false;
 }
 
 function scanFrame() {
@@ -192,8 +210,9 @@ function scanFrame() {
     ? jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' })
     : null;
 
-  if (code?.data) {
-    stopCamera();
+  // ← CAMERA KEEPS RUNNING, no stopCamera() here
+  if (code?.data && !isProcessing) {
+    isProcessing = true; // prevent scanning same QR multiple times
     processToken(code.data);
     return;
   }
@@ -233,6 +252,12 @@ async function processToken(token) {
   } catch (err) {
     showResult('error', 'Network error. Try again.');
     showToast('Network error.', true);
+  } finally {
+    // ← RESUME CAMERA after 2 seconds regardless of success/error
+    setTimeout(() => {
+      isProcessing = false;
+      if (stream) scanLoop = requestAnimationFrame(scanFrame);
+    }, 2000);
   }
 }
 
