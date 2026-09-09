@@ -1,5 +1,4 @@
 // frontend/js/participant/dashboard.js
-const isCompleted = e.is_completed;
 if (!Auth.isLoggedIn()) window.location.href = '../login.html';
 
 const NAV_LINKS = [
