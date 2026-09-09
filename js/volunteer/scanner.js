@@ -122,7 +122,7 @@ function onEventChange() {
     const [h, m] = timeStr.split(':').map(Number);
     const d = new Date();
     d.setUTCHours(h, m, 0, 0);
-    d.setMinutes(d.getMinutes() + offsetMin);
+    d.setMinutes(d.getMinutes() + 330 + offsetMin);
     return d;
   };
 
