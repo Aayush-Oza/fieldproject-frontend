@@ -113,6 +113,7 @@ function renderEvents(events, myRegs) {
   el.innerHTML = events.map(e => {
     const isRegistered = registeredIds.has(e.id);
     const regCount = e.registration_count ?? 0;
+    const isCompleted = e.is_completed;
     const pct = Math.min(100, Math.round((regCount / e.capacity) * 100));
     const fillClass = pct >= 100 ? 'full' : pct >= 80 ? 'near-full' : '';
     const full = pct >= 100;

@@ -1,5 +1,5 @@
 // frontend/js/participant/events.js
-const isCompleted = e.is_completed;
+
 if (!Auth.isLoggedIn()) window.location.href = '../login.html';
 
 const NAV_LINKS = [
@@ -64,6 +64,7 @@ function render() {
     const pct = Math.min(100, Math.round((regCount / e.capacity) * 100));
     const fillClass = pct >= 100 ? 'full' : pct >= 80 ? 'near-full' : '';
     const full = pct >= 100;
+    const isCompleted = e.is_completed;
     return `
       <div class="event-card">
         <div class="event-card-top">
