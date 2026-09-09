@@ -121,8 +121,8 @@ function onEventChange() {
     if (!timeStr) return null;
     const [h, m] = timeStr.split(':').map(Number);
     const d = new Date();
-    d.setUTCHours(h, m, 0, 0);
-    d.setMinutes(d.getMinutes() + 330 + offsetMin);
+    d.setHours(h, m, 0, 0);  // ← setHours not setUTCHours
+    d.setMinutes(d.getMinutes() + offsetMin);
     return d;
   };
 
