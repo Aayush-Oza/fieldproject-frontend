@@ -120,9 +120,11 @@ function onEventChange() {
   const toIST = (timeStr, offsetMin = 0) => {
     if (!timeStr) return null;
     const [h, m] = timeStr.split(':').map(Number);
+    const totalMins = h * 60 + m + offsetMin;
+    const finalH = Math.floor(((totalMins % 1440) + 1440) % 1440 / 60);
+    const finalM = ((totalMins % 60) + 60) % 60;
     const d = new Date();
-    d.setHours(h, m, 0, 0);  // ← setHours not setUTCHours
-    d.setMinutes(d.getMinutes() + offsetMin);
+    d.setHours(finalH, finalM, 0, 0);
     return d;
   };
 
