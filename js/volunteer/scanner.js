@@ -134,7 +134,7 @@ function onEventChange() {
 
   let locked = false, lockMsg = '';
   if (windowOpen && windowClose) {
-    if (now < windowOpen)  { locked = true; lockMsg = `🔒 Check-in opens at ${windowOpen.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })} IST`; }
+    if (now < windowOpen)  { locked = true; lockMsg = `🔒 Check-in opens at ${windowOpen.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit' })} IST`; }
     if (now > windowClose) { locked = true; lockMsg = '🔒 Event has ended - check-in closed'; }
   }
 
@@ -142,7 +142,7 @@ function onEventChange() {
     banner.classList.remove('hidden');
     banner.innerHTML = locked
       ? `<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:0.75rem 1rem;color:#991b1b;font-size:0.875rem;margin-bottom:1rem">${lockMsg}</div>`
-      : `<div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:0.75rem 1rem;color:#166534;font-size:0.875rem;margin-bottom:1rem">✅ Check-in window: ${windowOpen.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })} – ${windowClose.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Kolkata' })} IST</div>`;
+      : `<div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:0.75rem 1rem;color:#166534;font-size:0.875rem;margin-bottom:1rem">✅ Check-in window: ${windowOpen.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit' })} – ${windowClose.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit' })} IST</div>`;
   }
 
   const manualToken = document.getElementById('manualToken');
