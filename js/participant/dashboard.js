@@ -134,9 +134,9 @@ function renderEvents(events, myRegs) {
   ${isCompleted
         ? `<button class="btn btn-secondary btn-sm" disabled>Completed</button>`
         : isRegistered
-          ? `<button class="btn btn-secondary btn-sm qr-btn" ...>Get QR</button>
-         <button class="btn btn-danger btn-sm cancel-btn" ...>Cancel</button>`
-          : `<button class="btn btn-primary btn-sm register-btn" ... ${full ? 'disabled' : ''}>${full ? 'Full' : 'Register'}</button>`
+          ? `<button class="btn btn-secondary btn-sm qr-btn" data-event-id="${e.id}" data-event-title="${e.title}">Get QR</button>
+         <button class="btn btn-danger btn-sm cancel-btn" data-event-id="${e.id}" data-event-title="${e.title}">Cancel</button>`
+          : `<button class="btn btn-primary btn-sm register-btn" data-event-id="${e.id}" ${full ? 'disabled' : ''}>${full ? 'Full' : 'Register'}</button>`
       }
 </div>
       </div>`;

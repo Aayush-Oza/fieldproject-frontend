@@ -84,9 +84,9 @@ function render() {
   ${isCompleted
         ? `<button class="btn btn-secondary btn-sm" disabled>Completed</button>`
         : isRegistered
-          ? `<button class="btn btn-secondary btn-sm qr-btn" ...>Get QR</button>
-         <button class="btn btn-danger btn-sm cancel-btn" ...>Cancel</button>`
-          : `<button class="btn btn-primary btn-sm register-btn" ... ${full ? 'disabled' : ''}>${full ? 'Full' : 'Register'}</button>`
+          ? `<button class="btn btn-secondary btn-sm qr-btn" data-event-id="${e.id}" data-event-title="${e.title}">Get QR</button>
+         <button class="btn btn-danger btn-sm cancel-btn" data-event-id="${e.id}" data-event-title="${e.title}">Cancel</button>`
+          : `<button class="btn btn-primary btn-sm register-btn" data-event-id="${e.id}" ${full ? 'disabled' : ''}>${full ? 'Full' : 'Register'}</button>`
       }
 </div>
       </div>`;
@@ -130,7 +130,7 @@ async function openQR(eventId, eventTitle) {
   img.src = ''; modal.classList.remove('hidden');
   const token = sessionStorage.getItem('token');
   //const url   = `${window.API_BASE_URL || 'http://localhost:5000/api'}/participant/events/${eventId}/qr`;
-  const url = `${window.API_BASE_URL || 'http://localhost:5000/api'}/participant/events/${eventId}/qr`;
+  const url = `${window.API_BASE_URL || 'https://fieldproject-backend-mmsv.onrender.com/api'}/participant/events/${eventId}/qr`;
   try {
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) throw new Error();
