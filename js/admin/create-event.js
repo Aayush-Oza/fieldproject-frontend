@@ -102,7 +102,6 @@ function validate(d) {
   if (!d.event_date) return 'Event date is required.';
   if (!d.start_time) return 'Start time is required.';
   if (!d.end_time) return 'End time is required.';
-  if (d.start_time >= d.end_time) return 'Start time must be before end time.';
   return null;
 }
 
