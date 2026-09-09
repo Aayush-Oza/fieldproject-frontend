@@ -215,8 +215,7 @@ function scanFrame() {
   // ← CAMERA KEEPS RUNNING, no stopCamera() here
   if (code?.data && !isProcessing) {
     isProcessing = true; // prevent scanning same QR multiple times
-    cancelAnimationFrame(scanLoop);
-    scanLoop = null;
+    
     processToken(code.data);
     return;
   }
