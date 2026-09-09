@@ -3,7 +3,7 @@
 
 //const API_BASE = window.API_BASE_URL || 'http://localhost:5000/api';
 //const API_BASE = 'https://fieldproject-backend-mmsv.onrender.com/api';
-const API_BASE = 'http://3.110.188.5/api';
+const API_BASE = 'http://15.252.185.90/api';
 
 const Api = {
   async _request(path, opts = {}) {
