@@ -1,6 +1,5 @@
 // frontend/js/participant/event-modal.js
 // Shared modal logic for events page and dashboard
-// Requires: api.js — EventModal.open(eventId, eventsArray, registeredIds, goToQR, onRegisterSuccess)
 
 const EventModal = (() => {
 
@@ -9,14 +8,18 @@ const EventModal = (() => {
   let _registeredIds = new Set();
   let _onRegisterSuccess = null;
 
-  function fmtDate(d) { return new Date(d).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  function fmtDate(d) {
+    return new Date(d).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
   function fmtTime(t) {
     const [h, m] = t.split(':');
     const d = new Date(); d.setHours(+h, +m);
     return d.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit' });
   }
   function esc(v) {
-    return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return String(v ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
   function showToast(msg, type = 'success') {
     const existing = document.querySelector('.toast');
@@ -39,102 +42,92 @@ const EventModal = (() => {
 
     // ── Banner ──
     const bannerImg = document.getElementById('modalBannerImg');
-    const bannerGrad = document.getElementById('modalBannerGradient');
+    const bannerWrap = document.getElementById('modalBannerWrap');
+
     if (ev.banner_url) {
       bannerImg.src = ev.banner_url;
       bannerImg.style.display = 'block';
-      bannerGrad.style.position = 'absolute';
-      bannerGrad.style.bottom = '0';
-      bannerGrad.style.height = 'auto';
-      bannerGrad.style.background = 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)';
+      bannerWrap.classList.add('has-image');
     } else {
       bannerImg.style.display = 'none';
-      bannerGrad.style.position = '';
-      bannerGrad.style.height = '100%';
-      bannerGrad.style.background = 'linear-gradient(135deg, #4F46E5 0%, #6C63FF 100%)';
+      bannerImg.src = '';
+      bannerWrap.classList.remove('has-image');
     }
 
-    // Title in banner
     document.getElementById('modalBannerTitle').textContent = ev.title;
 
-    // Badges row in banner
+    // Badges
     const badges = [];
-    if (ev.event_type) badges.push(`<span class="modal-badge modal-badge-white">${esc(ev.event_type)}</span>`);
-    if (ev.mode) badges.push(`<span class="modal-badge modal-badge-white">${esc(ev.mode)}</span>`);
-    if (ev.is_paid) badges.push(`<span class="modal-badge modal-badge-amber">₹${ev.entry_fee ?? 'Paid'}</span>`);
-    else badges.push(`<span class="modal-badge modal-badge-green">Free</span>`);
-    if (ev.has_certificate) badges.push(`<span class="modal-badge modal-badge-purple">🎓 Certificate</span>`);
+    if (ev.event_type) badges.push(`<span class="em-badge em-badge-white">${esc(ev.event_type)}</span>`);
+    if (ev.mode)       badges.push(`<span class="em-badge em-badge-white">${esc(ev.mode)}</span>`);
+    if (ev.is_paid)    badges.push(`<span class="em-badge em-badge-amber">₹${ev.entry_fee ?? 'Paid'}</span>`);
+    else               badges.push(`<span class="em-badge em-badge-green">Free</span>`);
+    if (ev.has_certificate) badges.push(`<span class="em-badge em-badge-purple">🎓 Certificate</span>`);
     document.getElementById('modalBannerBadges').innerHTML = badges.join('');
 
-    // ── Details section ──
-    const detailRows = [];
-
-    // Date & time
-    detailRows.push(`
-      <div class="modal-detail-row">
-        <span class="modal-detail-icon">🗓</span>
+    // ── Detail rows ──
+    const rows = [];
+    rows.push(`
+      <div class="em-row">
+        <span class="em-row-icon">🗓</span>
         <div>
-          <div class="modal-detail-label">Date & Time</div>
-          <div class="modal-detail-value">${fmtDate(ev.event_date)} · ${fmtTime(ev.start_time)} – ${fmtTime(ev.end_time)}</div>
+          <div class="em-row-label">Date &amp; Time</div>
+          <div class="em-row-value">${fmtDate(ev.event_date)} · ${fmtTime(ev.start_time)} – ${fmtTime(ev.end_time)}</div>
         </div>
       </div>`);
 
-    // Venue
-    detailRows.push(`
-      <div class="modal-detail-row">
-        <span class="modal-detail-icon">📍</span>
+    rows.push(`
+      <div class="em-row">
+        <span class="em-row-icon">📍</span>
         <div>
-          <div class="modal-detail-label">Venue</div>
-          <div class="modal-detail-value">${esc(ev.venue)}</div>
+          <div class="em-row-label">Venue</div>
+          <div class="em-row-value">${esc(ev.venue)}</div>
         </div>
       </div>`);
 
-    // Capacity
     const regCount = ev.registration_count ?? 0;
     const pct = Math.min(100, Math.round((regCount / ev.capacity) * 100));
-    detailRows.push(`
-      <div class="modal-detail-row">
-        <span class="modal-detail-icon">👥</span>
+    const barColor = pct >= 100 ? '#DC2626' : pct >= 80 ? '#D97706' : '#4F46E5';
+    rows.push(`
+      <div class="em-row">
+        <span class="em-row-icon">👥</span>
         <div style="flex:1;">
-          <div class="modal-detail-label">Capacity</div>
-          <div class="modal-detail-value" style="margin-bottom:0.35rem;">${regCount} / ${ev.capacity} registered</div>
+          <div class="em-row-label">Capacity</div>
+          <div class="em-row-value" style="margin-bottom:0.4rem;">${regCount} / ${ev.capacity} registered</div>
           <div style="height:5px;background:#E2E8F0;border-radius:100px;overflow:hidden;">
-            <div style="height:100%;width:${pct}%;background:${pct>=100?'#DC2626':pct>=80?'#D97706':'#4F46E5'};border-radius:100px;"></div>
+            <div style="height:100%;width:${pct}%;background:${barColor};border-radius:100px;transition:width 0.4s;"></div>
           </div>
         </div>
       </div>`);
 
-    // Speaker
-    if (ev.speaker_name) detailRows.push(`
-      <div class="modal-detail-row">
-        <span class="modal-detail-icon">🎤</span>
+    if (ev.speaker_name) rows.push(`
+      <div class="em-row">
+        <span class="em-row-icon">🎤</span>
         <div>
-          <div class="modal-detail-label">Speaker</div>
-          <div class="modal-detail-value">${esc(ev.speaker_name)}</div>
+          <div class="em-row-label">Speaker</div>
+          <div class="em-row-value">${esc(ev.speaker_name)}</div>
         </div>
       </div>`);
 
-    // Organizer
-    if (ev.organizer_dept) detailRows.push(`
-      <div class="modal-detail-row">
-        <span class="modal-detail-icon">🏛</span>
+    if (ev.organizer_dept) rows.push(`
+      <div class="em-row">
+        <span class="em-row-icon">🏛</span>
         <div>
-          <div class="modal-detail-label">Organizer</div>
-          <div class="modal-detail-value">${esc(ev.organizer_dept)}</div>
+          <div class="em-row-label">Organizer</div>
+          <div class="em-row-value">${esc(ev.organizer_dept)}</div>
         </div>
       </div>`);
 
-    // Registration deadline
-    if (ev.registration_deadline) detailRows.push(`
-      <div class="modal-detail-row">
-        <span class="modal-detail-icon">⏰</span>
+    if (ev.registration_deadline) rows.push(`
+      <div class="em-row">
+        <span class="em-row-icon">⏰</span>
         <div>
-          <div class="modal-detail-label">Registration Deadline</div>
-          <div class="modal-detail-value">${fmtDate(ev.registration_deadline)}</div>
+          <div class="em-row-label">Registration Deadline</div>
+          <div class="em-row-value">${fmtDate(ev.registration_deadline)}</div>
         </div>
       </div>`);
 
-    document.getElementById('modalMeta').innerHTML = detailRows.join('');
+    document.getElementById('modalMeta').innerHTML = rows.join('');
 
     // ── Description ──
     const descEl = document.getElementById('modalDescription');
@@ -149,7 +142,7 @@ const EventModal = (() => {
     const extraEl = document.getElementById('modalExtraInfo');
     if (ev.tags) {
       extraEl.innerHTML = `
-        <div style="margin-bottom:0.35rem;font-size:0.75rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:0.05em;">Tags</div>
+        <div class="em-tags-label">Tags</div>
         <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
           ${ev.tags.split(',').map(t => `<span class="badge badge-slate">${esc(t.trim())}</span>`).join('')}
         </div>`;
@@ -159,7 +152,7 @@ const EventModal = (() => {
       extraEl.style.display = 'none';
     }
 
-    // ── Register button state ──
+    // ── Register button ──
     const regBtn = document.getElementById('modalRegisterBtn');
     const regClosedMsg = document.getElementById('modalRegClosedMsg');
     const isRegistered = _registeredIds.has(eventId);
@@ -180,13 +173,12 @@ const EventModal = (() => {
     }
 
     // Show modal
-    document.getElementById('eventModal').classList.remove('hidden');
+    const overlay = document.getElementById('eventModal');
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
 
-    if (goToQR) {
-      _showQRState(eventId);
-    } else {
-      _showDetailsState();
-    }
+    if (goToQR) _showQRState(eventId);
+    else _showDetailsState();
   }
 
   function _showDetailsState() {
@@ -206,30 +198,29 @@ const EventModal = (() => {
       if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed');
       const url = res.body.data.qr_url;
       wrap.innerHTML = `
-        <div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:1rem;display:inline-block;">
+        <div class="em-qr-box">
           <img src="${url}" alt="QR Code" style="width:180px;height:180px;display:block;" />
         </div>`;
       const dl = document.getElementById('modalQRDownload');
       dl.href = url;
       dl.download = `qr_event_${eventId}.png`;
     } catch (err) {
-      wrap.innerHTML = `<p style="color:#64748B;font-size:0.85rem;">Could not load QR. ${esc(err.message)}</p>`;
+      wrap.innerHTML = `<p style="color:var(--slate);font-size:0.85rem;">Could not load QR. ${esc(err.message)}</p>`;
     }
   }
 
   function close() {
     document.getElementById('eventModal').classList.add('hidden');
+    document.body.style.overflow = '';
     modalEventId = null;
   }
 
-  // ── Wire up modal buttons once DOM ready ──
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modalRegisterBtn')?.addEventListener('click', async () => {
       if (!modalEventId) return;
       const btn = document.getElementById('modalRegisterBtn');
       btn.disabled = true;
       btn.textContent = 'Registering…';
-
       const { ok, body } = await Api.post(`/participant/events/${modalEventId}/register`);
       if (ok) {
         showToast('Registered successfully!');
@@ -249,5 +240,4 @@ const EventModal = (() => {
   });
 
   return { open, close };
-
 })();

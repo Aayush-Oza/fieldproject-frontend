@@ -1,149 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Dashboard - EventOps</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="../css/main.css?v=5" />
-  <link rel="stylesheet" href="../css/dashboard.css?v=5" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/main.css?v=6" />
+  <link rel="stylesheet" href="../css/dashboard.css?v=6" />
+  <link rel="stylesheet" href="../css/event-modal.css?v=1" />
 </head>
-
 <body>
 
-  <!-- NAV -->
-  <nav>
-    <div class="nav-inner">
-      <a href="dashboard" class="nav-logo">Event<span>Ops</span></a>
-      <ul class="nav-links">
-        <li><a href="dashboard" class="active">Dashboard</a></li>
-        <li><a href="events">Events</a></li>
-        <li><a href="my-registrations">My Registrations</a></li>
-        <li><a href="my-certificates">Certificates</a></li>
-      </ul>
-      <div class="nav-user">
-        <span class="nav-user-name" id="navName">-</span>
-        <span class="nav-role-badge role-participant">Participant</span>
-        <button class="nav-logout" id="logoutBtn">Sign out</button>
-      </div>
-    </div>
-  </nav>
-
-  <!-- MAIN -->
-  <main class="dash-main">
-
-    <!-- GREETING -->
-    <section class="dash-greeting">
-      <div class="dash-greeting-inner">
-        <p class="dash-greeting-sub">Good to see you</p>
-        <h1 class="dash-greeting-name" id="greetingName">Loading…</h1>
-      </div>
-      <a href="events" class="btn btn-primary">Browse events</a>
-    </section>
-
-    <!-- STATS ROW -->
-    <section class="dash-stats">
-      <div class="stat-card">
-        <span class="stat-value" id="statRegistered">-</span>
-        <span class="stat-label">Registered</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-value" id="statAttended">-</span>
-        <span class="stat-label">Attended</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-value" id="statCerts">-</span>
-        <span class="stat-label">Certificates</span>
-      </div>
-    </section>
-
-    <!-- CONTENT GRID -->
-    <div class="dash-grid">
-      <section class="card dash-card">
-        <div class="dash-card-header">
-          <h2 class="card-title">Upcoming events</h2>
-          <a href="my-registrations" class="dash-card-link">View all</a>
-        </div>
-        <div id="upcomingList" class="dash-event-list">
-          <div class="loading-state">
-            <div class="spinner"></div><span>Loading…</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="card dash-card">
-        <div class="dash-card-header">
-          <h2 class="card-title">My certificates</h2>
-          <a href="my-certificates" class="dash-card-link">View all</a>
-        </div>
-        <div id="certList" class="dash-cert-list">
-          <div class="loading-state">
-            <div class="spinner"></div><span>Loading…</span>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- AVAILABLE EVENTS -->
-    <section class="dash-section">
-      <div class="dash-section-header">
-        <h2 class="dash-section-title">Open for registration</h2>
-        <a href="events" class="dash-card-link">All events →</a>
-      </div>
-      <div id="eventGrid" class="event-grid">
-        <div class="loading-state">
-          <div class="spinner"></div><span>Loading events…</span>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- EVENT MODAL -->
-  <div class="modal-overlay hidden" id="eventModal">
-    <div class="modal" style="max-width:560px;padding:0;overflow:hidden;">
-      <div id="modalBannerGradient"
-        style="position:relative;min-height:140px;display:flex;flex-direction:column;justify-content:flex-end;padding:1.25rem 1.5rem 1rem;">
-        <img id="modalBannerImg" src="" alt=""
-          style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;" />
-        <button class="modal-close" id="eventModalClose"
-          style="position:absolute;top:0.75rem;right:0.75rem;z-index:2;">✕</button>
-        <div style="position:relative;z-index:1;">
-          <div id="modalBannerBadges" style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.5rem;"></div>
-          <h3 id="modalBannerTitle" style="color:#fff;font-size:1.2rem;font-weight:700;margin:0;"></h3>
-        </div>
-      </div>
-      <div style="padding:1.25rem 1.5rem;">
-        <div id="modalMeta" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;"></div>
-        <p id="modalDescription" style="font-size:0.875rem;color:var(--slate);margin-bottom:1rem;"></p>
-        <div id="modalExtraInfo" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1rem;"></div>
-
-        <div id="modalStateDetails">
-          <p id="modalRegClosedMsg" class="hidden" style="font-size:0.85rem;color:var(--slate);margin-bottom:0.75rem;">
-          </p>
-          <button id="modalRegisterBtn" class="btn btn-primary btn-full hidden">Register</button>
-        </div>
-
-        <div id="modalStateQR" class="hidden" style="text-align:center;padding:1rem 0;">
-          <p style="font-size:0.85rem;color:var(--slate);margin-bottom:1rem;">Show this QR at the gate</p>
-          <div id="modalQRWrap" style="display:flex;justify-content:center;margin-bottom:1rem;"></div>
-          <a id="modalQRDownload" class="btn btn-secondary btn-sm" href="#" download>Download QR</a>
-        </div>
-      </div>
+<nav>
+  <div class="nav-inner">
+    <a href="dashboard" class="nav-logo">Event<span>Ops</span></a>
+    <ul class="nav-links">
+      <li><a href="dashboard" class="active">Dashboard</a></li>
+      <li><a href="events">Events</a></li>
+      <li><a href="my-registrations">My Registrations</a></li>
+      <li><a href="my-certificates">Certificates</a></li>
+    </ul>
+    <div class="nav-user">
+      <span class="nav-user-name" id="navName">-</span>
+      <span class="nav-role-badge role-participant">Participant</span>
+      <button class="nav-logout" id="logoutBtn">Sign out</button>
     </div>
   </div>
+</nav>
 
-  <script src="../js/api.js?v=9"></script>
-  <script src="../js/ui.js?v=6"></script>
-  <script src="../js/auth.js?v=6"></script>
-  <script src="../js/participant/participant-hamburger.js?v=6"></script>
-  <script src="../js/participant/event-modal.js?v=1"></script>
-  <script src="../js/participant/dashboard.js?v=10"></script>
+<main class="dash-main">
+
+  <section class="dash-greeting">
+    <div class="dash-greeting-inner">
+      <p class="dash-greeting-sub">Good to see you</p>
+      <h1 class="dash-greeting-name" id="greetingName">Loading…</h1>
+    </div>
+    <a href="events" class="btn btn-primary">Browse events</a>
+  </section>
+
+  <section class="dash-stats">
+    <div class="stat-card">
+      <span class="stat-value" id="statRegistered">-</span>
+      <span class="stat-label">Registered</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="statAttended">-</span>
+      <span class="stat-label">Attended</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="statCerts">-</span>
+      <span class="stat-label">Certificates</span>
+    </div>
+  </section>
+
+  <div class="dash-grid">
+    <section class="card dash-card">
+      <div class="dash-card-header">
+        <h2 class="card-title">Upcoming events</h2>
+        <a href="my-registrations" class="dash-card-link">View all</a>
+      </div>
+      <div id="upcomingList" class="dash-event-list">
+        <div class="loading-state"><div class="spinner"></div><span>Loading…</span></div>
+      </div>
+    </section>
+
+    <section class="card dash-card">
+      <div class="dash-card-header">
+        <h2 class="card-title">My certificates</h2>
+        <a href="my-certificates" class="dash-card-link">View all</a>
+      </div>
+      <div id="certList" class="dash-cert-list">
+        <div class="loading-state"><div class="spinner"></div><span>Loading…</span></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="dash-section">
+    <div class="dash-section-header">
+      <h2 class="dash-section-title">Open for registration</h2>
+      <a href="events" class="dash-card-link">All events →</a>
+    </div>
+    <div id="eventGrid" class="event-grid">
+      <div class="loading-state"><div class="spinner"></div><span>Loading events…</span></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════
+     EVENT MODAL — outside <main>, body-level
+     ═══════════════════════════════════════ -->
+<div class="em-overlay hidden" id="eventModal">
+  <div class="em-box">
+
+    <!-- BANNER -->
+    <div class="em-banner" id="modalBannerWrap">
+      <img class="em-banner-img" id="modalBannerImg" src="" alt="" />
+      <button class="em-close" id="eventModalClose">✕</button>
+      <div class="em-banner-content">
+        <div class="em-badges" id="modalBannerBadges"></div>
+        <h3 class="em-title" id="modalBannerTitle"></h3>
+      </div>
+    </div>
+
+    <!-- SCROLLABLE BODY -->
+    <div class="em-body">
+
+      <!-- Details state -->
+      <div id="modalStateDetails">
+        <div id="modalMeta" class="em-meta"></div>
+        <p id="modalDescription" class="em-desc"></p>
+        <div id="modalExtraInfo" class="em-extra"></div>
+        <p id="modalRegClosedMsg" class="em-closed-msg hidden"></p>
+        <button id="modalRegisterBtn" class="btn btn-primary btn-full hidden">Register</button>
+      </div>
+
+      <!-- QR state -->
+      <div id="modalStateQR" class="hidden em-qr-state">
+        <p class="em-qr-hint">Show this QR at the gate</p>
+        <div id="modalQRWrap" class="em-qr-wrap"></div>
+        <a id="modalQRDownload" class="btn btn-secondary btn-full" href="#" download>⬇ Download QR</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js?v=9"></script>
+<script src="../js/ui.js?v=6"></script>
+<script src="../js/auth.js?v=6"></script>
+<script src="../js/participant/participant-hamburger.js?v=6"></script>
+<script src="../js/participant/event-modal.js?v=3"></script>
+<script src="../js/participant/dashboard.js?v=10"></script>
 </body>
-
 </html>
