@@ -9,6 +9,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/main.css?v=5" />
   <link rel="stylesheet" href="../css/dashboard.css?v=5" />
+  <style>
+    /* All 2-col grids collapse to 1-col on mobile */
+    @media (max-width: 600px) {
+      .two-col-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -60,7 +68,7 @@
         <input type="text" class="form-input" id="venue" placeholder="e.g. Main Auditorium, Block A" />
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="two-col-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
         <div class="form-group">
           <label class="form-label">Capacity *</label>
           <input type="number" class="form-input" id="capacity" min="1" placeholder="e.g. 200" />
@@ -80,11 +88,11 @@
       </div>
 
       <!-- ── EVENT IDENTITY ── -->
-      <div style="margin:1.5rem 0 1rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.06);padding-top:1.25rem;">
+      <div class="section-divider" style="margin:1.5rem 0 1rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);padding-top:1.25rem;">
         Event Identity
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="two-col-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
         <div class="form-group">
           <label class="form-label">Event Type</label>
           <select class="form-input" id="event_type">
@@ -123,7 +131,7 @@
       </div>
 
       <!-- ── MEDIA ── -->
-      <div style="margin:1.5rem 0 1rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.06);padding-top:1.25rem;">
+      <div style="margin:1.5rem 0 1rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);padding-top:1.25rem;">
         Media
       </div>
 
@@ -132,7 +140,7 @@
         <input type="file" id="banner_file" accept="image/*" style="display:none;" onchange="uploadBanner(this)" />
         <input type="hidden" id="banner_url" />
         <div id="bannerPreview"
-          style="width:100%;height:160px;border-radius:var(--radius);border:2px dashed rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(255,255,255,0.03);"
+          style="width:100%;height:160px;border-radius:var(--radius);border:2px dashed var(--border-mid);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:var(--surface-2);"
           onclick="document.getElementById('banner_file').click()">
           <img id="bannerPreviewImg" style="width:100%;height:100%;object-fit:cover;display:none;" />
           <div id="bannerPlaceholder" style="text-align:center;color:var(--slate);">
@@ -145,16 +153,16 @@
       </div>
 
       <!-- ── REGISTRATION CONTROL ── -->
-      <div style="margin:1.5rem 0 1rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.06);padding-top:1.25rem;">
+      <div style="margin:1.5rem 0 1rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);padding-top:1.25rem;">
         Registration Control
       </div>
 
       <div class="form-group">
-        <label class="form-label">Registration Deadline <span style="font-weight:400;opacity:0.6;">(optional — if blank, open until event starts)</span></label>
+        <label class="form-label">Registration Deadline <span style="font-weight:400;opacity:0.6;">(optional)</span></label>
         <input type="datetime-local" class="form-input" id="registration_deadline" />
       </div>
 
-      <div style="display:flex;gap:1.5rem;align-items:center;margin-bottom:1rem;">
+      <div style="display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;margin-bottom:1rem;">
         <div style="display:flex;align-items:center;gap:0.5rem;">
           <input type="checkbox" id="has_certificate" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
           <label for="has_certificate" class="form-label" style="margin:0;cursor:pointer;">Has Certificate</label>
@@ -171,7 +179,7 @@
       </div>
 
       <!-- ── PRIVATE LINKS ── -->
-      <div style="margin:1.5rem 0 1rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.06);padding-top:1.25rem;">
+      <div style="margin:1.5rem 0 1rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);padding-top:1.25rem;">
         Private Links <span style="font-size:0.7rem;font-weight:400;text-transform:none;">(shown only after registration)</span>
       </div>
 
@@ -185,7 +193,7 @@
         <input type="text" class="form-input" id="meet_link" placeholder="https://meet.google.com/..." />
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="two-col-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
         <div class="form-group">
           <label class="form-label">Contact Name</label>
           <input type="text" class="form-input" id="contact_name" placeholder="e.g. Riya Sharma" />
@@ -202,7 +210,7 @@
       </div>
 
       <!-- ── PUBLISH ── -->
-      <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:1.25rem;margin-top:0.5rem;">
+      <div style="border-top:1px solid var(--border);padding-top:1.25rem;margin-top:0.5rem;">
         <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;margin-bottom:1.25rem;">
           <input type="checkbox" id="is_published" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
           <label for="is_published" class="form-label" style="margin:0;cursor:pointer;">Publish immediately</label>
@@ -210,17 +218,17 @@
       </div>
 
       <!-- ── AI FORECAST ── -->
-      <div style="background:rgba(59,111,232,0.06);border:1px solid rgba(59,111,232,0.15);border-radius:var(--radius);padding:1rem;margin-bottom:1.25rem;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
-          <span style="font-size:0.82rem;font-weight:600;color:var(--blue-light);">🤖 AI Attendance Forecast</span>
+      <div style="background:var(--blue-soft);border:1px solid rgba(79,70,229,0.2);border-radius:var(--radius);padding:1rem;margin-bottom:1.25rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;gap:0.5rem;flex-wrap:wrap;">
+          <span style="font-size:0.82rem;font-weight:600;color:var(--blue);">🤖 AI Attendance Forecast</span>
           <button class="btn btn-sm btn-secondary" id="previewForecastBtn" type="button">Preview</button>
         </div>
-        <div id="forecastPreview" class="text-slate text-sm">Fill in event details, then click Preview to see the AI estimate.</div>
+        <div id="forecastPreview" style="font-size:0.82rem;color:var(--slate);">Fill in event details, then click Preview to see the AI estimate.</div>
       </div>
 
-      <div style="display:flex;gap:0.75rem;">
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
         <a href="events" class="btn btn-secondary">Cancel</a>
-        <button class="btn btn-primary" style="flex:1" id="createBtn">Create Event</button>
+        <button class="btn btn-primary" style="flex:1;min-width:120px;" id="createBtn">Create Event</button>
       </div>
 
     </div>
@@ -231,7 +239,7 @@
   <script src="../js/api.js?v=9"></script>
   <script src="../js/auth.js?v=6"></script>
   <script src="../js/admin/admin-hamburger.js?v=7"></script>
-  <script src="../js/admin/create-event.js?v=11"></script>
+  <script src="../js/admin/create-event.js?v=10"></script>
   <script>
     function toggleEntryFee(checked) {
       document.getElementById('entryFeeGroup').style.display = checked ? '' : 'none';

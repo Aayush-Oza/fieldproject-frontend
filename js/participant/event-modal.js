@@ -45,51 +45,125 @@ const EventModal = (() => {
       bannerImg.style.display = 'block';
       bannerGrad.style.position = 'absolute';
       bannerGrad.style.bottom = '0';
-      bannerGrad.style.background = 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)';
+      bannerGrad.style.height = 'auto';
+      bannerGrad.style.background = 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)';
     } else {
       bannerImg.style.display = 'none';
       bannerGrad.style.position = '';
-      bannerGrad.style.background = 'linear-gradient(135deg,rgba(59,111,232,0.9),rgba(99,51,200,0.85))';
+      bannerGrad.style.height = '100%';
+      bannerGrad.style.background = 'linear-gradient(135deg, #4F46E5 0%, #6C63FF 100%)';
     }
 
+    // Title in banner
     document.getElementById('modalBannerTitle').textContent = ev.title;
 
-    // badges in banner
+    // Badges row in banner
     const badges = [];
-    if (ev.event_type) badges.push(`<span style="background:rgba(255,255,255,0.2);color:#fff;font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:99px;font-weight:600;">${esc(ev.event_type)}</span>`);
-    if (ev.mode) badges.push(`<span style="background:rgba(255,255,255,0.2);color:#fff;font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:99px;font-weight:600;">${esc(ev.mode)}</span>`);
-    if (ev.is_paid) badges.push(`<span style="background:rgba(251,191,36,0.3);color:#fbbf24;font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:99px;font-weight:600;">₹${ev.entry_fee ?? 'Paid'}</span>`);
-    else badges.push(`<span style="background:rgba(34,197,94,0.3);color:#4ade80;font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:99px;font-weight:600;">Free</span>`);
-    if (ev.has_certificate) badges.push(`<span style="background:rgba(99,51,200,0.3);color:#c4b5fd;font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:99px;font-weight:600;">🎓 Certificate</span>`);
+    if (ev.event_type) badges.push(`<span class="modal-badge modal-badge-white">${esc(ev.event_type)}</span>`);
+    if (ev.mode) badges.push(`<span class="modal-badge modal-badge-white">${esc(ev.mode)}</span>`);
+    if (ev.is_paid) badges.push(`<span class="modal-badge modal-badge-amber">₹${ev.entry_fee ?? 'Paid'}</span>`);
+    else badges.push(`<span class="modal-badge modal-badge-green">Free</span>`);
+    if (ev.has_certificate) badges.push(`<span class="modal-badge modal-badge-purple">🎓 Certificate</span>`);
     document.getElementById('modalBannerBadges').innerHTML = badges.join('');
 
-    // ── Meta rows ──
-    const metaRows = [];
-    metaRows.push(`<div style="font-size:0.85rem;display:flex;gap:0.5rem;align-items:center;"><span>🗓</span><span>${fmtDate(ev.event_date)} · ${fmtTime(ev.start_time)} – ${fmtTime(ev.end_time)}</span></div>`);
-    metaRows.push(`<div style="font-size:0.85rem;display:flex;gap:0.5rem;align-items:center;"><span>📍</span><span>${esc(ev.venue)}</span></div>`);
-    if (ev.speaker_name) metaRows.push(`<div style="font-size:0.85rem;display:flex;gap:0.5rem;align-items:center;"><span>🎤</span><span>${esc(ev.speaker_name)}</span></div>`);
-    if (ev.organizer_dept) metaRows.push(`<div style="font-size:0.85rem;display:flex;gap:0.5rem;align-items:center;"><span>🏛</span><span>${esc(ev.organizer_dept)}</span></div>`);
-    if (ev.registration_deadline) metaRows.push(`<div style="font-size:0.85rem;display:flex;gap:0.5rem;align-items:center;color:var(--slate);"><span>⏰</span><span>Register by ${fmtDate(ev.registration_deadline)}</span></div>`);
-    document.getElementById('modalMeta').innerHTML = metaRows.join('');
+    // ── Details section ──
+    const detailRows = [];
+
+    // Date & time
+    detailRows.push(`
+      <div class="modal-detail-row">
+        <span class="modal-detail-icon">🗓</span>
+        <div>
+          <div class="modal-detail-label">Date & Time</div>
+          <div class="modal-detail-value">${fmtDate(ev.event_date)} · ${fmtTime(ev.start_time)} – ${fmtTime(ev.end_time)}</div>
+        </div>
+      </div>`);
+
+    // Venue
+    detailRows.push(`
+      <div class="modal-detail-row">
+        <span class="modal-detail-icon">📍</span>
+        <div>
+          <div class="modal-detail-label">Venue</div>
+          <div class="modal-detail-value">${esc(ev.venue)}</div>
+        </div>
+      </div>`);
+
+    // Capacity
+    const regCount = ev.registration_count ?? 0;
+    const pct = Math.min(100, Math.round((regCount / ev.capacity) * 100));
+    detailRows.push(`
+      <div class="modal-detail-row">
+        <span class="modal-detail-icon">👥</span>
+        <div style="flex:1;">
+          <div class="modal-detail-label">Capacity</div>
+          <div class="modal-detail-value" style="margin-bottom:0.35rem;">${regCount} / ${ev.capacity} registered</div>
+          <div style="height:5px;background:#E2E8F0;border-radius:100px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${pct>=100?'#DC2626':pct>=80?'#D97706':'#4F46E5'};border-radius:100px;"></div>
+          </div>
+        </div>
+      </div>`);
+
+    // Speaker
+    if (ev.speaker_name) detailRows.push(`
+      <div class="modal-detail-row">
+        <span class="modal-detail-icon">🎤</span>
+        <div>
+          <div class="modal-detail-label">Speaker</div>
+          <div class="modal-detail-value">${esc(ev.speaker_name)}</div>
+        </div>
+      </div>`);
+
+    // Organizer
+    if (ev.organizer_dept) detailRows.push(`
+      <div class="modal-detail-row">
+        <span class="modal-detail-icon">🏛</span>
+        <div>
+          <div class="modal-detail-label">Organizer</div>
+          <div class="modal-detail-value">${esc(ev.organizer_dept)}</div>
+        </div>
+      </div>`);
+
+    // Registration deadline
+    if (ev.registration_deadline) detailRows.push(`
+      <div class="modal-detail-row">
+        <span class="modal-detail-icon">⏰</span>
+        <div>
+          <div class="modal-detail-label">Registration Deadline</div>
+          <div class="modal-detail-value">${fmtDate(ev.registration_deadline)}</div>
+        </div>
+      </div>`);
+
+    document.getElementById('modalMeta').innerHTML = detailRows.join('');
 
     // ── Description ──
     const descEl = document.getElementById('modalDescription');
-    descEl.textContent = ev.description || '';
-    descEl.style.display = ev.description ? '' : 'none';
+    if (ev.description) {
+      descEl.textContent = ev.description;
+      descEl.style.display = '';
+    } else {
+      descEl.style.display = 'none';
+    }
 
     // ── Tags ──
     const extraEl = document.getElementById('modalExtraInfo');
     if (ev.tags) {
-      extraEl.innerHTML = ev.tags.split(',').map(t => `<span style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:99px;padding:0.2rem 0.65rem;font-size:0.75rem;color:var(--slate);">${esc(t.trim())}</span>`).join('');
+      extraEl.innerHTML = `
+        <div style="margin-bottom:0.35rem;font-size:0.75rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:0.05em;">Tags</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+          ${ev.tags.split(',').map(t => `<span class="badge badge-slate">${esc(t.trim())}</span>`).join('')}
+        </div>`;
+      extraEl.style.display = '';
     } else {
       extraEl.innerHTML = '';
+      extraEl.style.display = 'none';
     }
 
     // ── Register button state ──
     const regBtn = document.getElementById('modalRegisterBtn');
     const regClosedMsg = document.getElementById('modalRegClosedMsg');
     const isRegistered = _registeredIds.has(eventId);
-    const full = (ev.registration_count ?? 0) >= ev.capacity;
+    const full = regCount >= ev.capacity;
 
     if (isRegistered) {
       regBtn.classList.add('hidden');
@@ -97,15 +171,15 @@ const EventModal = (() => {
     } else if (!ev.registration_open || full) {
       regBtn.classList.add('hidden');
       regClosedMsg.classList.remove('hidden');
-      regClosedMsg.textContent = full ? 'This event is full.' : 'Registration is closed.';
+      regClosedMsg.textContent = full ? '⚠️ This event is full.' : '🔒 Registration is closed.';
     } else {
       regBtn.classList.remove('hidden');
       regBtn.disabled = false;
-      regBtn.textContent = 'Register';
+      regBtn.textContent = ev.is_paid ? `Register · ₹${ev.entry_fee}` : 'Register for Free';
       regClosedMsg.classList.add('hidden');
     }
 
-    // show modal
+    // Show modal
     document.getElementById('eventModal').classList.remove('hidden');
 
     if (goToQR) {
@@ -131,12 +205,15 @@ const EventModal = (() => {
       const res = await Api.get(`/participant/events/${eventId}/qr`);
       if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed');
       const url = res.body.data.qr_url;
-      wrap.innerHTML = `<img src="${url}" alt="QR Code" style="width:200px;height:200px;border-radius:var(--radius);" />`;
+      wrap.innerHTML = `
+        <div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:1rem;display:inline-block;">
+          <img src="${url}" alt="QR Code" style="width:180px;height:180px;display:block;" />
+        </div>`;
       const dl = document.getElementById('modalQRDownload');
       dl.href = url;
       dl.download = `qr_event_${eventId}.png`;
     } catch (err) {
-      wrap.innerHTML = `<p style="color:var(--slate);font-size:0.85rem;">Could not load QR. ${esc(err.message)}</p>`;
+      wrap.innerHTML = `<p style="color:#64748B;font-size:0.85rem;">Could not load QR. ${esc(err.message)}</p>`;
     }
   }
 
