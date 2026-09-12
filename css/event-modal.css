@@ -244,3 +244,18 @@
   .em-title  { font-size: 1.05rem; }
   .em-body   { padding: 1rem 1.25rem 1.25rem; }
 }
+
+/* ── Info badges (in body, not banner) ── */
+.em-info-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.65rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.em-info-green  { background: var(--green-soft);  color: var(--green); }
+.em-info-amber  { background: var(--amber-soft);  color: var(--amber); }
+.em-info-purple { background: #EDE9FE; color: #7c3aed; }
+.em-info-slate  { background: #F1F5F9; color: var(--slate); }

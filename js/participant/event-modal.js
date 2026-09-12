@@ -1,5 +1,4 @@
 // frontend/js/participant/event-modal.js
-// Shared modal logic for events page and dashboard
 
 const EventModal = (() => {
 
@@ -40,33 +39,35 @@ const EventModal = (() => {
     const ev = _eventsArray.find(e => e.id === eventId);
     if (!ev) return;
 
-    // ── Banner ──
+    // ── Banner image ──
     const bannerImg = document.getElementById('modalBannerImg');
     const bannerWrap = document.getElementById('modalBannerWrap');
 
+    // Always reset first
+    bannerImg.style.display = 'none';
+    bannerImg.src = '';
+    bannerWrap.classList.remove('has-image');
+
     if (ev.banner_url) {
+      bannerImg.onload = () => {
+        bannerImg.style.display = 'block';
+        bannerWrap.classList.add('has-image');
+      };
+      bannerImg.onerror = () => {
+        bannerImg.style.display = 'none';
+        bannerWrap.classList.remove('has-image');
+      };
       bannerImg.src = ev.banner_url;
-      bannerImg.style.display = 'block';
-      bannerWrap.classList.add('has-image');
-    } else {
-      bannerImg.style.display = 'none';
-      bannerImg.src = '';
-      bannerWrap.classList.remove('has-image');
     }
 
+    // Title only in banner — NO badges here
     document.getElementById('modalBannerTitle').textContent = ev.title;
-
-    // Badges
-    const badges = [];
-    if (ev.event_type) badges.push(`<span class="em-badge em-badge-white">${esc(ev.event_type)}</span>`);
-    if (ev.mode)       badges.push(`<span class="em-badge em-badge-white">${esc(ev.mode)}</span>`);
-    if (ev.is_paid)    badges.push(`<span class="em-badge em-badge-amber">₹${ev.entry_fee ?? 'Paid'}</span>`);
-    else               badges.push(`<span class="em-badge em-badge-green">Free</span>`);
-    if (ev.has_certificate) badges.push(`<span class="em-badge em-badge-purple">🎓 Certificate</span>`);
-    document.getElementById('modalBannerBadges').innerHTML = badges.join('');
+    document.getElementById('modalBannerBadges').innerHTML = ''; // always empty
 
     // ── Detail rows ──
     const rows = [];
+
+    // Date & Time
     rows.push(`
       <div class="em-row">
         <span class="em-row-icon">🗓</span>
@@ -76,6 +77,7 @@ const EventModal = (() => {
         </div>
       </div>`);
 
+    // Venue
     rows.push(`
       <div class="em-row">
         <span class="em-row-icon">📍</span>
@@ -85,6 +87,23 @@ const EventModal = (() => {
         </div>
       </div>`);
 
+    // Fee / Type
+    const feeLabel = ev.is_paid ? `₹${ev.entry_fee ?? 'Paid'}` : 'Free';
+    const feeBadge = ev.is_paid
+      ? `<span class="em-info-badge em-info-amber">${feeLabel}</span>`
+      : `<span class="em-info-badge em-info-green">${feeLabel}</span>`;
+    rows.push(`
+      <div class="em-row">
+        <span class="em-row-icon">🎟</span>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+          ${feeBadge}
+          ${ev.event_type ? `<span class="em-info-badge em-info-slate">${esc(ev.event_type)}</span>` : ''}
+          ${ev.mode ? `<span class="em-info-badge em-info-slate">${esc(ev.mode)}</span>` : ''}
+          ${ev.has_certificate ? `<span class="em-info-badge em-info-purple">🎓 Certificate</span>` : ''}
+        </div>
+      </div>`);
+
+    // Capacity
     const regCount = ev.registration_count ?? 0;
     const pct = Math.min(100, Math.round((regCount / ev.capacity) * 100));
     const barColor = pct >= 100 ? '#DC2626' : pct >= 80 ? '#D97706' : '#4F46E5';
@@ -100,6 +119,7 @@ const EventModal = (() => {
         </div>
       </div>`);
 
+    // Speaker
     if (ev.speaker_name) rows.push(`
       <div class="em-row">
         <span class="em-row-icon">🎤</span>
@@ -109,6 +129,7 @@ const EventModal = (() => {
         </div>
       </div>`);
 
+    // Organizer
     if (ev.organizer_dept) rows.push(`
       <div class="em-row">
         <span class="em-row-icon">🏛</span>
@@ -118,6 +139,7 @@ const EventModal = (() => {
         </div>
       </div>`);
 
+    // Registration deadline
     if (ev.registration_deadline) rows.push(`
       <div class="em-row">
         <span class="em-row-icon">⏰</span>
@@ -173,8 +195,7 @@ const EventModal = (() => {
     }
 
     // Show modal
-    const overlay = document.getElementById('eventModal');
-    overlay.classList.remove('hidden');
+    document.getElementById('eventModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 
     if (goToQR) _showQRState(eventId);
