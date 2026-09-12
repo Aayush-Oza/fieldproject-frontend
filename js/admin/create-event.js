@@ -183,7 +183,7 @@ async function uploadBanner(input) {
 
   const token = sessionStorage.getItem('token');
   try {
-    const res = await fetch(`${window.API_BASE_URL || ''}/admin/upload/banner`, {
+    const res = await fetch(`${window.API_BASE_URL || ''}/api/admin/upload/banner`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData,
