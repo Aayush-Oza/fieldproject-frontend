@@ -129,7 +129,13 @@
 
         <div class="form-group">
           <label class="form-label">Banner URL</label>
-          <input type="text" class="form-input" id="banner_url" placeholder="https://your-s3-bucket.com/banner.jpg" />
+          <input type="file" class="form-input" id="banner_file" accept="image/*" onchange="uploadBanner(this)" />
+          <input type="hidden" id="banner_url" />
+          <div id="bannerPreview" style="display:none;margin-top:0.5rem;">
+            <img id="bannerPreviewImg"
+              style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--radius);" />
+            <p style="font-size:0.75rem;color:var(--slate);margin-top:0.25rem;" id="bannerStatus"></p>
+          </div>
         </div>
 
         <!-- REGISTRATION CONTROL -->
@@ -223,7 +229,7 @@
   <script src="../js/api.js?v=9"></script>
   <script src="../js/auth.js?v=6"></script>
   <script src="../js/admin/admin-hamburger.js?v=7"></script>
-  <script src="../js/admin/create-event.js?v=8"></script>
+  <script src="../js/admin/create-event.js?v=9"></script>
   <script>
     function toggleEntryFee(checked) {
       document.getElementById('entryFeeGroup').style.display = checked ? '' : 'none';

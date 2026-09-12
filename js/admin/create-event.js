@@ -165,6 +165,39 @@ function esc(v) {
   return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+async function uploadBanner(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const status = document.getElementById('bannerStatus');
+  const preview = document.getElementById('bannerPreview');
+  const previewImg = document.getElementById('bannerPreviewImg');
+
+  status.textContent = 'Uploading…';
+  preview.style.display = '';
+  previewImg.src = URL.createObjectURL(file);
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const token = sessionStorage.getItem('token');
+  try {
+    const res = await fetch(`${window.API_BASE_URL || ''}/admin/upload/banner`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData,
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || 'Upload failed');
+
+    document.getElementById('banner_url').value = json.data.url;
+    status.textContent = '✅ Uploaded successfully';
+  } catch (err) {
+    status.textContent = `❌ ${err.message}`;
+    document.getElementById('banner_url').value = '';
+  }
+}
+
 function showToast(msg, isError = false) {
   const toast = document.getElementById('toast');
   if (!toast) return;
