@@ -23,6 +23,7 @@ function init() {
 async function createEvent() {
   hideAlert();
 
+  const isPaid = document.getElementById('is_paid')?.checked || false;
   const body = {
     title: getVal('title'),
     description: getVal('description'),
@@ -32,6 +33,25 @@ async function createEvent() {
     start_time: getVal('start_time'),
     end_time: getVal('end_time'),
     is_published: document.getElementById('is_published')?.checked || false,
+    // Identity
+    event_type: getVal('event_type') || null,
+    mode: getVal('mode') || null,
+    organizer_dept: getVal('organizer_dept') || null,
+    speaker_name: getVal('speaker_name') || null,
+    tags: getVal('tags') || null,
+    // Media
+    banner_url: getVal('banner_url') || null,
+    // Registration control
+    registration_deadline: getVal('registration_deadline') || null,
+    has_certificate: document.getElementById('has_certificate')?.checked || false,
+    is_paid: isPaid,
+    entry_fee: isPaid ? (Number(getVal('entry_fee')) || null) : null,
+    // Private links
+    whatsapp_link: getVal('whatsapp_link') || null,
+    meet_link: getVal('meet_link') || null,
+    contact_name: getVal('contact_name') || null,
+    contact_phone: getVal('contact_phone') || null,
+    venue_map_link: getVal('venue_map_link') || null,
   };
 
   const err = validate(body);
@@ -102,6 +122,7 @@ function validate(d) {
   if (!d.event_date) return 'Event date is required.';
   if (!d.start_time) return 'Start time is required.';
   if (!d.end_time) return 'End time is required.';
+  if (d.is_paid && !d.entry_fee) return 'Entry fee is required for paid events.';
   return null;
 }
 

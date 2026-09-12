@@ -1,108 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Create Event - EventOps Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="../css/main.css?v=5" />
   <link rel="stylesheet" href="../css/dashboard.css?v=5" />
 </head>
+
 <body>
 
-<nav>
-  <div class="nav-inner">
-    <a href="dashboard" class="nav-logo">Event<span>Ops</span></a>
-    <ul class="nav-links">
-      <li><a href="dashboard">Dashboard</a></li>
-      <li><a href="events">Events</a></li>
-      <li><a href="volunteers">Volunteers</a></li>
-      <li><a href="occupancy">Occupancy</a></li>
-      <li><a href="forecast">Forecast</a></li>
-      <li><a href="certificates">Certificates</a></li>
-    </ul>
-    <div class="nav-user">
-      <span class="nav-user-name" id="navName"></span>
-      <span class="nav-role-badge role-admin">Admin</span>
-      <button class="nav-logout" id="logoutBtn">Sign out</button>
+  <nav>
+    <div class="nav-inner">
+      <a href="dashboard" class="nav-logo">Event<span>Ops</span></a>
+      <ul class="nav-links">
+        <li><a href="dashboard">Dashboard</a></li>
+        <li><a href="events">Events</a></li>
+        <li><a href="volunteers">Volunteers</a></li>
+        <li><a href="occupancy">Occupancy</a></li>
+        <li><a href="forecast">Forecast</a></li>
+        <li><a href="certificates">Certificates</a></li>
+      </ul>
+      <div class="nav-user">
+        <span class="nav-user-name" id="navName"></span>
+        <span class="nav-role-badge role-admin">Admin</span>
+        <button class="nav-logout" id="logoutBtn">Sign out</button>
+      </div>
+      <!-- hamburger + drawer injected by admin-hamburger.js -->
     </div>
-    <!-- hamburger + drawer injected by admin-hamburger.js -->
-  </div>
-</nav>
+  </nav>
 
-<main class="dash-main" style="max-width:760px;">
+  <main class="dash-main" style="max-width:760px;">
 
-  <div class="dash-greeting">
-    <div>
-      <div class="dash-greeting-name">Create New Event</div>
-    </div>
-  </div>
-
-  <div id="formAlert"></div>
-
-  <div class="card">
-    <div class="form-group">
-      <label class="form-label">Event Title *</label>
-      <input type="text" class="form-input" id="title" placeholder="e.g. Annual Tech Symposium 2025" />
+    <div class="dash-greeting">
+      <div>
+        <div class="dash-greeting-name">Create New Event</div>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">Description</label>
-      <textarea class="form-textarea" id="description" rows="4" placeholder="Describe the event…"></textarea>
-    </div>
+    <div id="formAlert"></div>
 
-    <div class="form-group">
-      <label class="form-label">Venue *</label>
-      <input type="text" class="form-input" id="venue" placeholder="e.g. Main Auditorium, Block A" />
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;min-width:0;overflow:hidden;">
+    <div class="card">
       <div class="form-group">
-        <label class="form-label">Capacity *</label>
-        <input type="number" class="form-input" id="capacity" min="1" placeholder="e.g. 200" />
+        <label class="form-label">Event Title *</label>
+        <input type="text" class="form-input" id="title" placeholder="e.g. Annual Tech Symposium 2025" />
       </div>
+
       <div class="form-group">
-        <label class="form-label">Event Date *</label>
-        <input type="date" class="form-input" id="event_date" />
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="description" rows="4" placeholder="Describe the event…"></textarea>
       </div>
+
       <div class="form-group">
-        <label class="form-label">Start Time *</label>
-        <input type="time" class="form-input" id="start_time" />
+        <label class="form-label">Venue *</label>
+        <input type="text" class="form-input" id="venue" placeholder="e.g. Main Auditorium, Block A" />
       </div>
-      <div class="form-group">
-        <label class="form-label">End Time *</label>
-        <input type="time" class="form-input" id="end_time" />
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;min-width:0;overflow:hidden;">
+        <div class="form-group">
+          <label class="form-label">Capacity *</label>
+          <input type="number" class="form-input" id="capacity" min="1" placeholder="e.g. 200" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Event Date *</label>
+          <input type="date" class="form-input" id="event_date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Start Time *</label>
+          <input type="time" class="form-input" id="start_time" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Time *</label>
+          <input type="time" class="form-input" id="end_time" />
+        </div>
+        <!-- EVENT IDENTITY -->
+        <div
+          style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
+          Event Identity</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">Event Type</label>
+            <select class="form-input" id="event_type">
+              <option value="">-- select --</option>
+              <option value="workshop">Workshop</option>
+              <option value="seminar">Seminar</option>
+              <option value="hackathon">Hackathon</option>
+              <option value="cultural">Cultural</option>
+              <option value="sports">Sports</option>
+              <option value="technical">Technical</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mode</label>
+            <select class="form-input" id="mode">
+              <option value="">-- select --</option>
+              <option value="offline">Offline</option>
+              <option value="online">Online</option>
+              <option value="hybrid">Hybrid</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Organizer Department</label>
+          <input type="text" class="form-input" id="organizer_dept" placeholder="e.g. Computer Science Dept" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Speaker Name</label>
+          <input type="text" class="form-input" id="speaker_name" placeholder="e.g. Dr. John Smith" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tags</label>
+          <input type="text" class="form-input" id="tags" placeholder="e.g. AI, ML, Python (comma-separated)" />
+        </div>
+
+        <!-- MEDIA -->
+        <div
+          style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
+          Media</div>
+
+        <div class="form-group">
+          <label class="form-label">Banner URL</label>
+          <input type="text" class="form-input" id="banner_url" placeholder="https://your-s3-bucket.com/banner.jpg" />
+        </div>
+
+        <!-- REGISTRATION CONTROL -->
+        <div
+          style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
+          Registration Control</div>
+
+        <div class="form-group">
+          <label class="form-label">Registration Deadline</label>
+          <input type="datetime-local" class="form-input" id="registration_deadline" />
+        </div>
+
+        <div style="display:flex;gap:1.5rem;align-items:center;margin-bottom:1rem;">
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <input type="checkbox" id="has_certificate"
+              style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
+            <label for="has_certificate" class="form-label" style="margin:0;cursor:pointer;">Has Certificate</label>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <input type="checkbox" id="is_paid" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;"
+              onchange="toggleEntryFee(this.checked)" />
+            <label for="is_paid" class="form-label" style="margin:0;cursor:pointer;">Paid Event</label>
+          </div>
+        </div>
+
+        <div class="form-group" id="entryFeeGroup" style="display:none;">
+          <label class="form-label">Entry Fee (₹)</label>
+          <input type="number" class="form-input" id="entry_fee" min="0" step="0.01" placeholder="e.g. 199" />
+        </div>
+
+        <!-- PRIVATE LINKS -->
+        <div
+          style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
+          Private Links <span style="font-size:0.7rem;font-weight:400;color:var(--slate)">(shown only after
+            registration)</span></div>
+
+        <div class="form-group">
+          <label class="form-label">WhatsApp Group Link</label>
+          <input type="text" class="form-input" id="whatsapp_link" placeholder="https://chat.whatsapp.com/..." />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Meet / Zoom Link</label>
+          <input type="text" class="form-input" id="meet_link" placeholder="https://meet.google.com/..." />
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">Contact Name</label>
+            <input type="text" class="form-input" id="contact_name" placeholder="e.g. Riya Sharma" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Phone</label>
+            <input type="text" class="form-input" id="contact_phone" placeholder="e.g. 9876543210" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Venue Map Link</label>
+          <input type="text" class="form-input" id="venue_map_link" placeholder="https://maps.google.com/..." />
+        </div>
+      </div>
+
+      <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;">
+        <input type="checkbox" id="is_published"
+          style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
+        <label for="is_published" class="form-label" style="margin:0;cursor:pointer;">Publish immediately</label>
+      </div>
+
+      <!-- AI FORECAST PREVIEW -->
+      <div
+        style="background:rgba(59,111,232,0.06);border:1px solid rgba(59,111,232,0.15);border-radius:var(--radius);padding:1rem;margin-bottom:1.25rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+          <span style="font-size:0.82rem;font-weight:600;color:var(--blue-light);">🤖 AI Attendance Forecast</span>
+          <button class="btn btn-sm btn-secondary" id="previewForecastBtn" type="button">Preview</button>
+        </div>
+        <div id="forecastPreview" class="text-slate text-sm">Fill in event details, then click Preview to see the AI
+          estimate.</div>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;">
+        <a href="events" class="btn btn-secondary">Cancel</a>
+        <button class="btn btn-primary" style="flex:1" id="createBtn">Create Event</button>
       </div>
     </div>
 
-    <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;">
-      <input type="checkbox" id="is_published" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
-      <label for="is_published" class="form-label" style="margin:0;cursor:pointer;">Publish immediately</label>
-    </div>
+  </main>
 
-    <!-- AI FORECAST PREVIEW -->
-    <div style="background:rgba(59,111,232,0.06);border:1px solid rgba(59,111,232,0.15);border-radius:var(--radius);padding:1rem;margin-bottom:1.25rem;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
-        <span style="font-size:0.82rem;font-weight:600;color:var(--blue-light);">🤖 AI Attendance Forecast</span>
-        <button class="btn btn-sm btn-secondary" id="previewForecastBtn" type="button">Preview</button>
-      </div>
-      <div id="forecastPreview" class="text-slate text-sm">Fill in event details, then click Preview to see the AI estimate.</div>
-    </div>
+  <div class="toast hidden" id="toast"></div>
 
-    <div style="display:flex;gap:0.75rem;">
-      <a href="events" class="btn btn-secondary">Cancel</a>
-      <button class="btn btn-primary" style="flex:1" id="createBtn">Create Event</button>
-    </div>
-  </div>
-
-</main>
-
-<div class="toast hidden" id="toast"></div>
-
-<script src="../js/api.js?v=9"></script>
-<script src="../js/auth.js?v=6"></script>
-<script src="../js/admin/admin-hamburger.js?v=7"></script>
-<script src="../js/admin/create-event.js?v=7"></script>
+  <script src="../js/api.js?v=9"></script>
+  <script src="../js/auth.js?v=6"></script>
+  <script src="../js/admin/admin-hamburger.js?v=7"></script>
+  <script src="../js/admin/create-event.js?v=8"></script>
+  <script>
+    function toggleEntryFee(checked) {
+      document.getElementById('entryFeeGroup').style.display = checked ? '' : 'none';
+    }
+  </script>
 </body>
+
 </html>

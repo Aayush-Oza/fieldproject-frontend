@@ -25,8 +25,6 @@ function showToast(msg, type = 'success') {
 // ── Helpers ──
 function fmtDate(d) {
   if (!d) return '-';
-  // If already formatted string from backend, return as-is
-  if (typeof d === 'string' && d.includes('IST')) return d;
   const dt = new Date(d);
   return isNaN(dt) ? d : dt.toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' });
 }
@@ -82,7 +80,6 @@ function render() {
           </span>
           ${!cancelled && !completed ? `
             <button class="btn btn-secondary btn-sm qr-btn" data-event-id="${event?.id}" data-event-title="${event?.title}">QR Code</button>
-            <button class="btn btn-danger btn-sm cancel-btn" data-event-id="${event?.id}" data-event-title="${event?.title}">Cancel</button>
           ` : ''}
           ${completed && !cancelled ? `<button class="btn btn-success btn-sm cert-btn" data-event-id="${event?.id}">Certificate</button>` : ''}
         </div>
@@ -93,20 +90,6 @@ function render() {
     btn.addEventListener('click', () => openQR(btn.dataset.eventId, btn.dataset.eventTitle));
   });
 
-  el.querySelectorAll('.cancel-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      showConfirm({
-        icon: '🗓️', title: 'Cancel registration?',
-        msg: `You'll lose your spot for <strong>${btn.dataset.eventTitle}</strong>.`,
-        confirmTxt: 'Yes, cancel', cancelTxt: 'Keep it', danger: true,
-        onConfirm: async () => {
-          const { ok, body } = await Api.put(`/participant/events/${btn.dataset.eventId}/cancel`);
-          if (ok) { showToast('Registration cancelled'); await load(); }
-          else { showToast(body.message || 'Failed', 'error'); }
-        }
-      });
-    });
-  });
   el.querySelectorAll('.cert-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const { ok, body } = await Api.get(`/participant/events/${btn.dataset.eventId}/certificate`);
@@ -122,17 +105,16 @@ async function openQR(eventId, eventTitle) {
   const img = document.getElementById('qrImg');
   const dl = document.getElementById('qrDownload');
   document.getElementById('qrEventName').textContent = eventTitle;
-  img.src = ''; modal.classList.remove('hidden');
-  const token = sessionStorage.getItem('token');
-  //const url   = `${window.API_BASE_URL || 'http://localhost:5000/api'}/participant/events/${eventId}/qr`;
-  const url = `${window.API_BASE_URL || 'https://fieldproject-backend.onrender.com/api'}/participant/events/${eventId}/qr`;
+  img.src = '';
+  modal.classList.remove('hidden');
   try {
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) throw new Error();
-    const blob = await res.blob();
-    const obj = URL.createObjectURL(blob);
-    img.src = obj; dl.href = obj; dl.download = `qr_event_${eventId}.png`;
-  } catch {
+    const res = await Api.get(`/participant/events/${eventId}/qr`);
+    if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed');
+    const url = res.body.data.qr_url;
+    img.src = url;
+    dl.href = url;
+    dl.download = `qr_event_${eventId}.png`;
+  } catch (err) {
     showToast('Could not load QR', 'error');
     modal.classList.add('hidden');
   }

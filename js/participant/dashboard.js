@@ -33,6 +33,13 @@ function fmtTime(t) {
   const d = new Date(); d.setHours(+h, +m);
   return d.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit' });
 }
+function esc(v) {
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// store for EventModal access
+let _dashEvents = [];
+let _dashRegIds = new Set();
 
 // ── Render upcoming ──
 function renderUpcoming(regs) {
@@ -59,15 +66,15 @@ function renderUpcoming(regs) {
         <span class="dash-event-date-mon">${fmtMon(r.event.event_date)}</span>
       </div>
       <div class="dash-event-info">
-        <div class="dash-event-title">${r.event.title}</div>
-        <div class="dash-event-meta">${r.event.venue} · ${fmtTime(r.event.start_time)}</div>
+        <div class="dash-event-title">${esc(r.event.title)}</div>
+        <div class="dash-event-meta">${esc(r.event.venue)} · ${fmtTime(r.event.start_time)}</div>
       </div>
-      <button class="dash-event-qr" data-event-id="${r.event.id}" data-event-title="${r.event.title}">QR</button>
+      <button class="dash-event-qr" data-id="${r.event.id}">QR</button>
     </div>
   `).join('');
 
   el.querySelectorAll('.dash-event-qr').forEach(btn => {
-    btn.addEventListener('click', () => openQR(btn.dataset.eventId, btn.dataset.eventTitle));
+    btn.addEventListener('click', () => EventModal.open(Number(btn.dataset.id), _dashEvents, _dashRegIds, true, loadAll));
   });
 }
 
@@ -87,7 +94,7 @@ function renderCerts(certs) {
     <div class="dash-cert-item">
       <span class="dash-cert-icon">🎓</span>
       <div class="dash-cert-info">
-        <div class="dash-cert-title">${c.event_title || 'Event'}</div>
+        <div class="dash-cert-title">${esc(c.event_title || 'Event')}</div>
         <div class="dash-cert-date">Issued ${fmtDate(c.issued_at)}</div>
       </div>
     </div>
@@ -116,14 +123,23 @@ function renderEvents(events, myRegs) {
     const pct = Math.min(100, Math.round((regCount / e.capacity) * 100));
     const fillClass = pct >= 100 ? 'full' : pct >= 80 ? 'near-full' : '';
     const full = pct >= 100;
+
+    const typeBadge = e.event_type ? `<span class="badge badge-slate" style="font-size:0.7rem;">${esc(e.event_type)}</span>` : '';
+    const modeBadge = e.mode ? `<span class="badge badge-slate" style="font-size:0.7rem;">${esc(e.mode)}</span>` : '';
+    const paidBadge = e.is_paid ? `<span class="badge badge-amber" style="font-size:0.7rem;">₹${e.entry_fee ?? 'Paid'}</span>` : '<span class="badge badge-green" style="font-size:0.7rem;">Free</span>';
+    const certBadge = e.has_certificate ? `<span class="badge badge-blue" style="font-size:0.7rem;">🎓 Certificate</span>` : '';
+
     return `
       <div class="event-card">
         <div class="event-card-top">
-          <h3 class="event-card-title">${e.title}</h3>
+          <h3 class="event-card-title">${esc(e.title)}</h3>
           ${isRegistered ? '<span class="badge badge-green">Registered</span>' : ''}
         </div>
+        <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+          ${typeBadge}${modeBadge}${paidBadge}${certBadge}
+        </div>
         <div class="event-card-meta">
-          <div class="event-card-meta-row"><span class="event-card-meta-icon">📍</span>${e.venue}</div>
+          <div class="event-card-meta-row"><span class="event-card-meta-icon">📍</span>${esc(e.venue)}</div>
           <div class="event-card-meta-row"><span class="event-card-meta-icon">🗓</span>${fmtDate(e.event_date)} · ${fmtTime(e.start_time)}</div>
         </div>
         <div class="event-card-capacity">
@@ -131,71 +147,23 @@ function renderEvents(events, myRegs) {
           <span>${regCount}/${e.capacity}</span>
         </div>
         <div class="event-card-actions">
-  ${isCompleted
-        ? `<button class="btn btn-secondary btn-sm" disabled>Completed</button>`
-        : isRegistered
-          ? `<button class="btn btn-secondary btn-sm qr-btn" data-event-id="${e.id}" data-event-title="${e.title}">Get QR</button>
-         <button class="btn btn-danger btn-sm cancel-btn" data-event-id="${e.id}" data-event-title="${e.title}">Cancel</button>`
-          : `<button class="btn btn-primary btn-sm register-btn" data-event-id="${e.id}" ${full ? 'disabled' : ''}>${full ? 'Full' : 'Register'}</button>`
-      }
-</div>
+          ${isCompleted
+            ? `<button class="btn btn-secondary btn-sm" disabled>Completed</button>`
+            : isRegistered
+              ? `<button class="btn btn-secondary btn-sm view-btn" data-id="${e.id}">View Details / QR</button>`
+              : `<button class="btn btn-primary btn-sm open-btn" data-id="${e.id}" ${full ? 'disabled' : ''}>${full ? 'Full' : 'Register'}</button>`
+          }
+        </div>
       </div>`;
   }).join('');
 
-  el.querySelectorAll('.register-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      btn.disabled = true; btn.textContent = 'Registering…';
-      const { ok, body } = await Api.post(`/participant/events/${btn.dataset.eventId}/register`);
-      if (ok) { showToast('Registered!'); loadAll(); }
-      else { showToast(body.message || 'Failed', 'error'); btn.disabled = false; btn.textContent = 'Register'; }
-    });
+  el.querySelectorAll('.open-btn').forEach(btn => {
+    btn.addEventListener('click', () => EventModal.open(Number(btn.dataset.id), _dashEvents, _dashRegIds, false, loadAll));
   });
-
-  el.querySelectorAll('.cancel-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      showConfirm({
-        icon: '🗓️', title: 'Cancel registration?',
-        msg: `You'll lose your spot for <strong>${btn.dataset.eventTitle}</strong>.`,
-        confirmTxt: 'Yes, cancel', cancelTxt: 'Keep it', danger: true,
-        onConfirm: async () => {
-          const { ok, body } = await Api.put(`/participant/events/${btn.dataset.eventId}/cancel`);
-          if (ok) { showToast('Registration cancelled'); loadAll(); }
-          else { showToast(body.message || 'Failed', 'error'); }
-        }
-      });
-    });
-  });
-
-  el.querySelectorAll('.qr-btn').forEach(btn => {
-    btn.addEventListener('click', () => openQR(btn.dataset.eventId, btn.dataset.eventTitle));
+  el.querySelectorAll('.view-btn').forEach(btn => {
+    btn.addEventListener('click', () => EventModal.open(Number(btn.dataset.id), _dashEvents, _dashRegIds, true, loadAll));
   });
 }
-
-// ── QR Modal ──
-async function openQR(eventId, eventTitle) {
-  const modal = document.getElementById('qrModal');
-  const img = document.getElementById('qrImg');
-  const dl = document.getElementById('qrDownload');
-  document.getElementById('qrEventName').textContent = eventTitle;
-  img.src = '';
-  modal.classList.remove('hidden');
-  const token = sessionStorage.getItem('token');
-  //const url   = `${window.API_BASE_URL || 'http://localhost:5000/api'}/participant/events/${eventId}/qr`;
-  const url = `${window.API_BASE_URL || 'https://fieldproject-backend.onrender.com/api'}/participant/events/${eventId}/qr`;
-  try {
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) throw new Error();
-    const blob = await res.blob();
-    const obj = URL.createObjectURL(blob);
-    img.src = obj; dl.href = obj; dl.download = `qr_event_${eventId}.png`;
-  } catch {
-    showToast('Could not load QR', 'error');
-    modal.classList.add('hidden');
-  }
-}
-
-document.getElementById('qrModalClose').addEventListener('click', () => document.getElementById('qrModal').classList.add('hidden'));
-document.getElementById('qrModal').addEventListener('click', function (e) { if (e.target === this) this.classList.add('hidden'); });
 
 // ── Load ──
 async function loadAll() {
@@ -207,6 +175,10 @@ async function loadAll() {
   const regs = regsRes.ok ? regsRes.body.data : [];
   const certs = certsRes.ok ? certsRes.body.data : [];
   const events = eventsRes.ok ? eventsRes.body.data : [];
+
+  // store for modal
+  _dashEvents = events;
+  _dashRegIds = new Set(regs.filter(r => r.status === 'registered').map(r => r.event_id));
 
   const attended = regs.filter(r => r.status === 'registered' && r.event?.is_completed).length;
   document.getElementById('statRegistered').textContent = regs.filter(r => r.status === 'registered').length;

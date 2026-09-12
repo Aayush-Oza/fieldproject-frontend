@@ -1,146 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Events - EventOps Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="../css/main.css?v=5" />
   <link rel="stylesheet" href="../css/dashboard.css?v=5" />
 </head>
+
 <body>
 
-<nav>
-  <div class="nav-inner">
-    <a href="dashboard" class="nav-logo">Event<span>Ops</span></a>
-    <ul class="nav-links">
-      <li><a href="dashboard">Dashboard</a></li>
-      <li><a href="events" class="active">Events</a></li>
-      <li><a href="volunteers">Volunteers</a></li>
-      <li><a href="occupancy">Occupancy</a></li>
-      <li><a href="forecast">Forecast</a></li>
-      <li><a href="certificates">Certificates</a></li>
-    </ul>
-    <div class="nav-user">
-      <span class="nav-user-name" id="navName"></span>
-      <span class="nav-role-badge role-admin">Admin</span>
-      <button class="nav-logout" id="logoutBtn">Sign out</button>
-    </div>
-  </div>
-</nav>
-
-<main class="dash-main">
-
-  <div class="dash-greeting">
-    <div>
-      <div class="dash-greeting-sub">Manage</div>
-      <div class="dash-greeting-name">Events</div>
-    </div>
-    <a href="create-event" class="btn btn-primary">+ New Event</a>
-  </div>
-
-  <!-- FILTER BAR -->
-  <div class="card" style="padding:1rem 1.5rem;">
-    <div class="filter-bar">
-      <input type="text" class="form-input filter-search" id="searchInput" placeholder="Search events…" />
-      <select class="form-select filter-select" id="statusFilter">
-        <option value="">All Status</option>
-        <option value="published">Published</option>
-        <option value="draft">Draft</option>
-        <option value="completed">Completed</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- EVENTS TABLE -->
-  <div class="card" style="padding:0;">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Date & Time</th>
-            <th>Venue</th>
-            <th>Registered</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="eventsTableBody">
-          <tr><td colspan="6"><div class="loading-state"><div class="spinner"></div></div></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</main>
-
-<!-- EDIT MODAL -->
-<div class="modal-overlay hidden" id="editModal">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">Edit Event</span>
-      <button class="modal-close" id="editModalClose">✕</button>
-    </div>
-    <div class="alert alert-error hidden" id="editAlert"></div>
-    <div class="form-group">
-      <label class="form-label">Title</label>
-      <input type="text" class="form-input" id="editTitle" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Description</label>
-      <textarea class="form-textarea" id="editDesc"></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Venue</label>
-      <input type="text" class="form-input" id="editVenue" />
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-      <div class="form-group">
-        <label class="form-label">Capacity</label>
-        <input type="number" class="form-input" id="editCapacity" min="1" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Date</label>
-        <input type="date" class="form-input" id="editDate" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Start Time</label>
-        <input type="time" class="form-input" id="editStart" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">End Time</label>
-        <input type="time" class="form-input" id="editEnd" />
+  <nav>
+    <div class="nav-inner">
+      <a href="dashboard" class="nav-logo">Event<span>Ops</span></a>
+      <ul class="nav-links">
+        <li><a href="dashboard">Dashboard</a></li>
+        <li><a href="events" class="active">Events</a></li>
+        <li><a href="volunteers">Volunteers</a></li>
+        <li><a href="occupancy">Occupancy</a></li>
+        <li><a href="forecast">Forecast</a></li>
+        <li><a href="certificates">Certificates</a></li>
+      </ul>
+      <div class="nav-user">
+        <span class="nav-user-name" id="navName"></span>
+        <span class="nav-role-badge role-admin">Admin</span>
+        <button class="nav-logout" id="logoutBtn">Sign out</button>
       </div>
     </div>
-    <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
-  <button class="btn btn-secondary" id="editCancel">Cancel</button>
-  <button class="btn btn-success hidden" id="publishBtn">Publish</button>
-  <button class="btn btn-primary" style="flex:1" id="saveEditBtn">Save Changes</button>
-</div>
-  </div>
-</div>
+  </nav>
 
-<!-- STATS MODAL -->
-<div class="modal-overlay hidden" id="statsModal">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title" id="statsModalTitle">Event Stats</span>
-      <button class="modal-close" id="statsModalClose">✕</button>
+  <main class="dash-main">
+
+    <div class="dash-greeting">
+      <div>
+        <div class="dash-greeting-sub">Manage</div>
+        <div class="dash-greeting-name">Events</div>
+      </div>
+      <a href="create-event" class="btn btn-primary">+ New Event</a>
     </div>
-    <div id="statsContent">
-      <div class="loading-state"><div class="spinner"></div></div>
+
+    <!-- FILTER BAR -->
+    <div class="card" style="padding:1rem 1.5rem;">
+      <div class="filter-bar">
+        <input type="text" class="form-input filter-search" id="searchInput" placeholder="Search events…" />
+        <select class="form-select filter-select" id="statusFilter">
+          <option value="">All Status</option>
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- EVENTS TABLE -->
+    <div class="card" style="padding:0;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Date & Time</th>
+              <th>Venue</th>
+              <th>Registered</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="eventsTableBody">
+            <tr>
+              <td colspan="6">
+                <div class="loading-state">
+                  <div class="spinner"></div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- EDIT MODAL -->
+  <div class="modal-overlay hidden" id="editModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">Edit Event</span>
+        <button class="modal-close" id="editModalClose">✕</button>
+      </div>
+      <div class="alert alert-error hidden" id="editAlert"></div>
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input type="text" class="form-input" id="editTitle" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="editDesc"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Venue</label>
+        <input type="text" class="form-input" id="editVenue" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label class="form-label">Capacity</label>
+          <input type="number" class="form-input" id="editCapacity" min="1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-input" id="editDate" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Start Time</label>
+          <input type="time" class="form-input" id="editStart" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Time</label>
+          <input type="time" class="form-input" id="editEnd" />
+        </div>
+      </div>
+      <!-- LOCK REASON BANNER -->
+      <div id="editLockReason" class="hidden"
+        style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:var(--radius);padding:0.65rem 1rem;font-size:0.82rem;color:#fbbf24;margin-bottom:1rem;">
+      </div>
+
+      <!-- EVENT IDENTITY -->
+      <div
+        style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
+        Event Identity</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label class="form-label">Event Type</label>
+          <select class="form-input" id="editEventType">
+            <option value="">-- select --</option>
+            <option value="workshop">Workshop</option>
+            <option value="seminar">Seminar</option>
+            <option value="hackathon">Hackathon</option>
+            <option value="cultural">Cultural</option>
+            <option value="sports">Sports</option>
+            <option value="technical">Technical</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mode</label>
+          <select class="form-input" id="editMode">
+            <option value="">-- select --</option>
+            <option value="offline">Offline</option>
+            <option value="online">Online</option>
+            <option value="hybrid">Hybrid</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Organizer Department</label>
+        <input type="text" class="form-input" id="editOrgDept" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Speaker Name</label>
+        <input type="text" class="form-input" id="editSpeaker" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Tags (comma-separated)</label>
+        <input type="text" class="form-input" id="editTags" />
+      </div>
+
+      <!-- MEDIA -->
+      <div
+        style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
+        Media</div>
+
+      <div class="form-group">
+        <label class="form-label">Banner URL</label>
+        <input type="text" class="form-input" id="editBannerUrl" />
+      </div>
+
+      <!-- REGISTRATION CONTROL -->
+      <div
+        style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
+        Registration Control</div>
+
+      <div class="form-group">
+        <label class="form-label">Registration Deadline</label>
+        <input type="datetime-local" class="form-input" id="editRegDeadline" />
+      </div>
+
+      <div style="display:flex;gap:1.5rem;align-items:center;margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <input type="checkbox" id="editHasCertificate"
+            style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
+          <label for="editHasCertificate" class="form-label" style="margin:0;cursor:pointer;">Has Certificate</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <input type="checkbox" id="editIsPaid" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;"
+            onchange="document.getElementById('editEntryFeeGroup').style.display=this.checked?'':'none'" />
+          <label for="editIsPaid" class="form-label" style="margin:0;cursor:pointer;">Paid Event</label>
+        </div>
+      </div>
+
+      <div class="form-group" id="editEntryFeeGroup" style="display:none;">
+        <label class="form-label">Entry Fee (₹)</label>
+        <input type="number" class="form-input" id="editEntryFee" min="0" step="0.01" />
+      </div>
+
+      <!-- PRIVATE LINKS -->
+      <div
+        style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
+        Private Links <span style="font-size:0.7rem;font-weight:400;color:var(--slate)">(shown only after
+          registration)</span></div>
+
+      <div class="form-group">
+        <label class="form-label">WhatsApp Group Link</label>
+        <input type="text" class="form-input" id="editWhatsapp" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Meet / Zoom Link</label>
+        <input type="text" class="form-input" id="editMeetLink" />
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label class="form-label">Contact Name</label>
+          <input type="text" class="form-input" id="editContactName" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contact Phone</label>
+          <input type="text" class="form-input" id="editContactPhone" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Venue Map Link</label>
+        <input type="text" class="form-input" id="editVenueMap" />
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+        <button class="btn btn-secondary" id="editCancel">Cancel</button>
+        <button class="btn btn-success hidden" id="publishBtn">Publish</button>
+        <button class="btn btn-primary" style="flex:1" id="saveEditBtn">Save Changes</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="toast hidden" id="toast"></div>
+  <!-- STATS MODAL -->
+  <div class="modal-overlay hidden" id="statsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title" id="statsModalTitle">Event Stats</span>
+        <button class="modal-close" id="statsModalClose">✕</button>
+      </div>
+      <div id="statsContent">
+        <div class="loading-state">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<script src="../js/api.js?v=9"></script>
-<script src="../js/auth.js?v=6"></script>
-<script src="../js/ui.js?v=6"></script>
-<script src="../js/admin/admin-hamburger.js?v=7"></script>
-<script src="../js/admin/events.js?v=7"></script>
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="../js/api.js?v=9"></script>
+  <script src="../js/auth.js?v=6"></script>
+  <script src="../js/ui.js?v=6"></script>
+  <script src="../js/admin/admin-hamburger.js?v=7"></script>
+  <script src="../js/admin/events.js?v=8"></script>
 </body>
+
 </html>

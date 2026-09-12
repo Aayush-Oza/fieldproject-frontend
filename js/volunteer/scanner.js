@@ -83,7 +83,7 @@ async function loadAssignments() {
     }
 
     sel.innerHTML = '<option value="">- choose your assigned event -</option>' +
-      activeEvents.map(e => `<option value="${e.id}" data-start="${e.start_time||''}" data-end="${e.end_time||''}">${esc(e.title)}</option>`).join('');
+      activeEvents.map(e => `<option value="${e.id}" data-start="${e.start_time || ''}" data-end="${e.end_time || ''}">${esc(e.title)}</option>`).join('');
 
   } catch {
     sel.innerHTML = '<option value="">Failed to load events</option>';
@@ -99,42 +99,39 @@ function onEventChange() {
   selectedEventId = sel.value ? Number(sel.value) : null;
 
   const scannerCard = document.getElementById('scannerCard');
-  const recentCard  = document.getElementById('recentCard');
-  const banner      = document.getElementById('checkinWindowBanner');
+  const recentCard = document.getElementById('recentCard');
+  const banner = document.getElementById('checkinWindowBanner');
 
   if (!selectedEventId) {
     stopCamera();
     if (scannerCard) scannerCard.style.display = 'none';
-    if (recentCard)  recentCard.style.display  = 'none';
-    if (banner)      banner.classList.add('hidden');
+    if (recentCard) recentCard.style.display = 'none';
+    if (banner) banner.classList.add('hidden');
     clearResult();
     return;
   }
 
   if (scannerCard) scannerCard.style.display = '';
-  if (recentCard)  recentCard.style.display  = '';
+  if (recentCard) recentCard.style.display = '';
 
   const rawStart = opt.dataset.start;
-  const rawEnd   = opt.dataset.end;
+  const rawEnd = opt.dataset.end;
 
-  const toIST = (timeStr, offsetMin = 0) => {
+  const toTime = (timeStr) => {
     if (!timeStr) return null;
     const [h, m] = timeStr.split(':').map(Number);
-    const totalMins = h * 60 + m + offsetMin;
-    const finalH = Math.floor(((totalMins % 1440) + 1440) % 1440 / 60);
-    const finalM = ((totalMins % 60) + 60) % 60;
     const d = new Date();
-    d.setHours(finalH, finalM, 0, 0);
+    d.setHours(h, m, 0, 0);
     return d;
   };
 
-  const windowOpen  = toIST(rawStart, -60);
-  const windowClose = toIST(rawEnd, 0);
-  const now         = new Date();
+  const windowOpen = toTime(rawStart);
+  const windowClose = toTime(rawEnd);
+  const now = new Date();
 
   let locked = false, lockMsg = '';
   if (windowOpen && windowClose) {
-    if (now < windowOpen)  { locked = true; lockMsg = `🔒 Check-in opens at ${windowOpen.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit' })} IST`; }
+    if (now < windowOpen) { locked = true; lockMsg = `🔒 Check-in opens at ${windowOpen.toLocaleTimeString('en', { hour: 'numeric', minute: '2-digit' })} IST`; }
     if (now > windowClose) { locked = true; lockMsg = '🔒 Event has ended - check-in closed'; }
   }
 
@@ -146,11 +143,11 @@ function onEventChange() {
   }
 
   const manualToken = document.getElementById('manualToken');
-  const manualBtn   = document.getElementById('manualSubmitBtn');
-  const startBtn    = document.getElementById('startBtn');
+  const manualBtn = document.getElementById('manualSubmitBtn');
+  const startBtn = document.getElementById('startBtn');
   if (manualToken) manualToken.disabled = locked;
-  if (manualBtn)   manualBtn.disabled   = locked;
-  if (startBtn)    startBtn.disabled    = locked;
+  if (manualBtn) manualBtn.disabled = locked;
+  if (startBtn) startBtn.disabled = locked;
 
   loadRecentLog();
   clearResult();
@@ -215,7 +212,7 @@ function scanFrame() {
   // ← CAMERA KEEPS RUNNING, no stopCamera() here
   if (code?.data && !isProcessing) {
     isProcessing = true; // prevent scanning same QR multiple times
-    
+
     processToken(code.data);
     return;
   }
@@ -336,8 +333,7 @@ function getUser() {
 
 function fmtDateTime(iso) {
   if (!iso) return '-';
-  if (typeof iso === 'string' && iso.includes('IST')) return iso;
-  try { return new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
+  try { return new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
   catch { return iso; }
 }
 

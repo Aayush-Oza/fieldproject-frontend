@@ -29,7 +29,7 @@ async function initDashboard() {
 /* ── AUTH HELPER ── */
 function getUser() {
   try {
-    const raw = localStorage.getItem('user') || sessionStorage.getItem('user');
+    const raw = sessionStorage.getItem('user');
     return raw ? JSON.parse(raw) : null;
   } catch { return null; }
 }

@@ -117,11 +117,12 @@ function renderRow(ev) {
 /* ══════════════════════════════════════════
    EDIT MODAL
 ══════════════════════════════════════════ */
-function openEdit(id) {
+async function openEdit(id) {
   const ev = allEvents.find(e => Number(e.id) === id);
   if (!ev) return;
   editingId = id;
 
+  // populate all fields
   setVal('editTitle', ev.title || '');
   setVal('editDesc', ev.description || '');
   setVal('editVenue', ev.venue || '');
@@ -129,19 +130,98 @@ function openEdit(id) {
   setVal('editDate', ev.event_date || '');
   setVal('editStart', normTime(ev.start_time));
   setVal('editEnd', normTime(ev.end_time));
+  // identity
+  setVal('editEventType', ev.event_type || '');
+  setVal('editMode', ev.mode || '');
+  setVal('editOrgDept', ev.organizer_dept || '');
+  setVal('editSpeaker', ev.speaker_name || '');
+  setVal('editTags', ev.tags || '');
+  // media
+  setVal('editBannerUrl', ev.banner_url || '');
+  // registration control
+  setVal('editRegDeadline', ev.registration_deadline ? ev.registration_deadline.slice(0, 16) : '');
+  const hasCert = document.getElementById('editHasCertificate');
+  if (hasCert) hasCert.checked = ev.has_certificate || false;
+  const isPaid = document.getElementById('editIsPaid');
+  if (isPaid) isPaid.checked = ev.is_paid || false;
+  setVal('editEntryFee', ev.entry_fee ?? '');
+  const feeGroup = document.getElementById('editEntryFeeGroup');
+  if (feeGroup) feeGroup.style.display = ev.is_paid ? '' : 'none';
+  // private links
+  setVal('editWhatsapp', ev.whatsapp_link || '');
+  setVal('editMeetLink', ev.meet_link || '');
+  setVal('editContactName', ev.contact_name || '');
+  setVal('editContactPhone', ev.contact_phone || '');
+  setVal('editVenueMap', ev.venue_map_link || '');
+
   hideAlert();
+
+  // call edit-info to know which fields to lock
+  try {
+    const res = await Api.get(`/admin/events/${id}/edit-info`);
+    if (res.ok && res.body?.success) {
+      const { allowed_fields, reason } = res.body.data;
+      lockFields(allowed_fields, reason);
+    }
+  } catch (_) { }
+
   // Show Publish button only for drafts
   const publishBtn = document.getElementById('publishBtn');
   if (publishBtn) {
     const isDraft = !ev.is_published && !ev.is_completed;
     publishBtn.classList.toggle('hidden', !isDraft);
   }
+
   showModal('editModal');
+}
+
+function lockFields(allowedFields, reason) {
+  const fieldMap = {
+    editTitle: 'title',
+    editDesc: 'description',
+    editVenue: 'venue',
+    editCapacity: 'capacity',
+    editDate: 'event_date',
+    editStart: 'start_time',
+    editEnd: 'end_time',
+    editEventType: 'event_type',
+    editMode: 'mode',
+    editOrgDept: 'organizer_dept',
+    editSpeaker: 'speaker_name',
+    editTags: 'tags',
+    editBannerUrl: 'banner_url',
+    editRegDeadline: 'registration_deadline',
+    editHasCertificate: 'has_certificate',
+    editIsPaid: 'is_paid',
+    editEntryFee: 'entry_fee',
+    editWhatsapp: 'whatsapp_link',
+    editMeetLink: 'meet_link',
+    editContactName: 'contact_name',
+    editContactPhone: 'contact_phone',
+    editVenueMap: 'venue_map_link',
+  };
+
+  Object.entries(fieldMap).forEach(([elId, backendField]) => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.disabled = allowedFields ? !allowedFields.includes(backendField) : false;
+  });
+
+  const reasonEl = document.getElementById('editLockReason');
+  if (reasonEl) {
+    if (reason && reason !== 'Unpublished — all fields editable') {
+      reasonEl.textContent = `⚠️ ${reason}`;
+      reasonEl.classList.remove('hidden');
+    } else {
+      reasonEl.classList.add('hidden');
+    }
+  }
 }
 
 async function saveEdit() {
   if (!editingId) return;
 
+  const isPaid = document.getElementById('editIsPaid')?.checked || false;
   const body = {
     title: getVal('editTitle'),
     description: getVal('editDesc'),
@@ -150,6 +230,25 @@ async function saveEdit() {
     event_date: getVal('editDate'),
     start_time: getVal('editStart'),
     end_time: getVal('editEnd'),
+    // identity
+    event_type: getVal('editEventType') || null,
+    mode: getVal('editMode') || null,
+    organizer_dept: getVal('editOrgDept') || null,
+    speaker_name: getVal('editSpeaker') || null,
+    tags: getVal('editTags') || null,
+    // media
+    banner_url: getVal('editBannerUrl') || null,
+    // registration control
+    registration_deadline: getVal('editRegDeadline') || null,
+    has_certificate: document.getElementById('editHasCertificate')?.checked || false,
+    is_paid: isPaid,
+    entry_fee: isPaid ? (Number(getVal('editEntryFee')) || null) : null,
+    // private links
+    whatsapp_link: getVal('editWhatsapp') || null,
+    meet_link: getVal('editMeetLink') || null,
+    contact_name: getVal('editContactName') || null,
+    contact_phone: getVal('editContactPhone') || null,
+    venue_map_link: getVal('editVenueMap') || null,
   };
 
   const err = validateForm(body);
@@ -323,7 +422,7 @@ function setBtnLoading(btn, loadingText) {
    SMALL HELPERS
 ══════════════════════════════════════════ */
 function getUser() {
-  try { return JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')); }
+  try { return JSON.parse(sessionStorage.getItem('user')); }
   catch { return null; }
 }
 
@@ -369,12 +468,13 @@ function showToast(msg, isError = false) {
   showToast._t = setTimeout(() => { toast.classList.add('toast-hide'); }, 3200);
   setTimeout(() => { toast.className = 'toast hidden'; }, 3700);
 }
+
 async function publishEvent() {
   if (!editingId) return;
   const btn = document.getElementById('publishBtn');
   setBtnLoading(btn, 'Publishing…');
   try {
-    const res = await Api.put(`/admin/events/${editingId}`, { is_published: true });
+    const res = await Api.put(`/admin/events/${editingId}/publish`);
     if (!res.ok || !res.body?.success) throw new Error(res.body?.message || 'Failed');
     closeModal('editModal');
     showToast('Event published!');
@@ -383,6 +483,5 @@ async function publishEvent() {
     showAlert(err.message || 'Could not publish event.');
   } finally {
     setBtnLoading(btn, null);
-    document.getElementById('publishBtn').dataset.orig = 'Publish';
   }
 }
