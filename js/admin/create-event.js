@@ -170,12 +170,13 @@ async function uploadBanner(input) {
   if (!file) return;
 
   const status = document.getElementById('bannerStatus');
-  const preview = document.getElementById('bannerPreview');
   const previewImg = document.getElementById('bannerPreviewImg');
+  const placeholder = document.getElementById('bannerPlaceholder');
 
-  status.textContent = 'Uploading…';
-  preview.style.display = '';
+  status.textContent = '⏳ Uploading…';
   previewImg.src = URL.createObjectURL(file);
+  previewImg.style.display = 'block';
+  placeholder.style.display = 'none';
 
   const formData = new FormData();
   formData.append('file', file);
@@ -191,10 +192,12 @@ async function uploadBanner(input) {
     if (!res.ok || !json.success) throw new Error(json.message || 'Upload failed');
 
     document.getElementById('banner_url').value = json.data.url;
-    status.textContent = '✅ Uploaded successfully';
+    status.textContent = '✅ Banner uploaded successfully';
   } catch (err) {
     status.textContent = `❌ ${err.message}`;
     document.getElementById('banner_url').value = '';
+    previewImg.style.display = 'none';
+    placeholder.style.display = '';
   }
 }
 

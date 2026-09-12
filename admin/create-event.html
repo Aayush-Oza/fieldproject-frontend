@@ -6,8 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Create Event - EventOps Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/main.css?v=5" />
   <link rel="stylesheet" href="../css/dashboard.css?v=5" />
 </head>
@@ -30,7 +29,6 @@
         <span class="nav-role-badge role-admin">Admin</span>
         <button class="nav-logout" id="logoutBtn">Sign out</button>
       </div>
-      <!-- hamburger + drawer injected by admin-hamburger.js -->
     </div>
   </nav>
 
@@ -45,6 +43,8 @@
     <div id="formAlert"></div>
 
     <div class="card">
+
+      <!-- ── CORE ── -->
       <div class="form-group">
         <label class="form-label">Event Title *</label>
         <input type="text" class="form-input" id="title" placeholder="e.g. Annual Tech Symposium 2025" />
@@ -60,7 +60,7 @@
         <input type="text" class="form-input" id="venue" placeholder="e.g. Main Auditorium, Block A" />
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;min-width:0;overflow:hidden;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
         <div class="form-group">
           <label class="form-label">Capacity *</label>
           <input type="number" class="form-input" id="capacity" min="1" placeholder="e.g. 200" />
@@ -77,151 +77,153 @@
           <label class="form-label">End Time *</label>
           <input type="time" class="form-input" id="end_time" />
         </div>
-        <!-- EVENT IDENTITY -->
-        <div
-          style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
-          Event Identity</div>
+      </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-          <div class="form-group">
-            <label class="form-label">Event Type</label>
-            <select class="form-input" id="event_type">
-              <option value="">-- select --</option>
-              <option value="workshop">Workshop</option>
-              <option value="seminar">Seminar</option>
-              <option value="hackathon">Hackathon</option>
-              <option value="cultural">Cultural</option>
-              <option value="sports">Sports</option>
-              <option value="technical">Technical</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Mode</label>
-            <select class="form-input" id="mode">
-              <option value="">-- select --</option>
-              <option value="offline">Offline</option>
-              <option value="online">Online</option>
-              <option value="hybrid">Hybrid</option>
-            </select>
-          </div>
+      <!-- ── EVENT IDENTITY ── -->
+      <div style="margin:1.5rem 0 1rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.06);padding-top:1.25rem;">
+        Event Identity
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label class="form-label">Event Type</label>
+          <select class="form-input" id="event_type">
+            <option value="">-- select --</option>
+            <option value="workshop">Workshop</option>
+            <option value="seminar">Seminar</option>
+            <option value="hackathon">Hackathon</option>
+            <option value="cultural">Cultural</option>
+            <option value="sports">Sports</option>
+            <option value="technical">Technical</option>
+            <option value="other">Other</option>
+          </select>
         </div>
-
+        <div class="form-group">
+          <label class="form-label">Mode</label>
+          <select class="form-input" id="mode">
+            <option value="">-- select --</option>
+            <option value="offline">Offline</option>
+            <option value="online">Online</option>
+            <option value="hybrid">Hybrid</option>
+          </select>
+        </div>
         <div class="form-group">
           <label class="form-label">Organizer Department</label>
           <input type="text" class="form-input" id="organizer_dept" placeholder="e.g. Computer Science Dept" />
         </div>
-
         <div class="form-group">
           <label class="form-label">Speaker Name</label>
           <input type="text" class="form-input" id="speaker_name" placeholder="e.g. Dr. John Smith" />
         </div>
+      </div>
 
-        <div class="form-group">
-          <label class="form-label">Tags</label>
-          <input type="text" class="form-input" id="tags" placeholder="e.g. AI, ML, Python (comma-separated)" />
-        </div>
+      <div class="form-group">
+        <label class="form-label">Tags</label>
+        <input type="text" class="form-input" id="tags" placeholder="e.g. AI, ML, Python (comma-separated)" />
+      </div>
 
-        <!-- MEDIA -->
-        <div
-          style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
-          Media</div>
+      <!-- ── MEDIA ── -->
+      <div style="margin:1.5rem 0 1rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.06);padding-top:1.25rem;">
+        Media
+      </div>
 
-        <div class="form-group">
-          <label class="form-label">Banner URL</label>
-          <input type="file" class="form-input" id="banner_file" accept="image/*" onchange="uploadBanner(this)" />
-          <input type="hidden" id="banner_url" />
-          <div id="bannerPreview" style="display:none;margin-top:0.5rem;">
-            <img id="bannerPreviewImg"
-              style="width:100%;max-height:160px;object-fit:cover;border-radius:var(--radius);" />
-            <p style="font-size:0.75rem;color:var(--slate);margin-top:0.25rem;" id="bannerStatus"></p>
+      <div class="form-group">
+        <label class="form-label">Event Banner</label>
+        <input type="file" id="banner_file" accept="image/*" style="display:none;" onchange="uploadBanner(this)" />
+        <input type="hidden" id="banner_url" />
+        <div id="bannerPreview"
+          style="width:100%;height:160px;border-radius:var(--radius);border:2px dashed rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(255,255,255,0.03);"
+          onclick="document.getElementById('banner_file').click()">
+          <img id="bannerPreviewImg" style="width:100%;height:100%;object-fit:cover;display:none;" />
+          <div id="bannerPlaceholder" style="text-align:center;color:var(--slate);">
+            <div style="font-size:2rem;margin-bottom:0.25rem;">🖼️</div>
+            <div style="font-size:0.82rem;">Click to upload banner image</div>
+            <div style="font-size:0.72rem;margin-top:0.25rem;opacity:0.6;">PNG, JPG, WEBP supported</div>
           </div>
         </div>
+        <p style="font-size:0.75rem;color:var(--slate);margin-top:0.4rem;" id="bannerStatus"></p>
+      </div>
 
-        <!-- REGISTRATION CONTROL -->
-        <div
-          style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
-          Registration Control</div>
+      <!-- ── REGISTRATION CONTROL ── -->
+      <div style="margin:1.5rem 0 1rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.06);padding-top:1.25rem;">
+        Registration Control
+      </div>
 
-        <div class="form-group">
-          <label class="form-label">Registration Deadline</label>
-          <input type="datetime-local" class="form-input" id="registration_deadline" />
+      <div class="form-group">
+        <label class="form-label">Registration Deadline <span style="font-weight:400;opacity:0.6;">(optional — if blank, open until event starts)</span></label>
+        <input type="datetime-local" class="form-input" id="registration_deadline" />
+      </div>
+
+      <div style="display:flex;gap:1.5rem;align-items:center;margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <input type="checkbox" id="has_certificate" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
+          <label for="has_certificate" class="form-label" style="margin:0;cursor:pointer;">Has Certificate</label>
         </div>
-
-        <div style="display:flex;gap:1.5rem;align-items:center;margin-bottom:1rem;">
-          <div style="display:flex;align-items:center;gap:0.5rem;">
-            <input type="checkbox" id="has_certificate"
-              style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
-            <label for="has_certificate" class="form-label" style="margin:0;cursor:pointer;">Has Certificate</label>
-          </div>
-          <div style="display:flex;align-items:center;gap:0.5rem;">
-            <input type="checkbox" id="is_paid" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;"
-              onchange="toggleEntryFee(this.checked)" />
-            <label for="is_paid" class="form-label" style="margin:0;cursor:pointer;">Paid Event</label>
-          </div>
-        </div>
-
-        <div class="form-group" id="entryFeeGroup" style="display:none;">
-          <label class="form-label">Entry Fee (₹)</label>
-          <input type="number" class="form-input" id="entry_fee" min="0" step="0.01" placeholder="e.g. 199" />
-        </div>
-
-        <!-- PRIVATE LINKS -->
-        <div
-          style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
-          Private Links <span style="font-size:0.7rem;font-weight:400;color:var(--slate)">(shown only after
-            registration)</span></div>
-
-        <div class="form-group">
-          <label class="form-label">WhatsApp Group Link</label>
-          <input type="text" class="form-input" id="whatsapp_link" placeholder="https://chat.whatsapp.com/..." />
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Meet / Zoom Link</label>
-          <input type="text" class="form-input" id="meet_link" placeholder="https://meet.google.com/..." />
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-          <div class="form-group">
-            <label class="form-label">Contact Name</label>
-            <input type="text" class="form-input" id="contact_name" placeholder="e.g. Riya Sharma" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Contact Phone</label>
-            <input type="text" class="form-input" id="contact_phone" placeholder="e.g. 9876543210" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Venue Map Link</label>
-          <input type="text" class="form-input" id="venue_map_link" placeholder="https://maps.google.com/..." />
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <input type="checkbox" id="is_paid" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" onchange="toggleEntryFee(this.checked)" />
+          <label for="is_paid" class="form-label" style="margin:0;cursor:pointer;">Paid Event</label>
         </div>
       </div>
 
-      <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;">
-        <input type="checkbox" id="is_published"
-          style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
-        <label for="is_published" class="form-label" style="margin:0;cursor:pointer;">Publish immediately</label>
+      <div class="form-group" id="entryFeeGroup" style="display:none;">
+        <label class="form-label">Entry Fee (₹)</label>
+        <input type="number" class="form-input" id="entry_fee" min="0" step="0.01" placeholder="e.g. 199" />
       </div>
 
-      <!-- AI FORECAST PREVIEW -->
-      <div
-        style="background:rgba(59,111,232,0.06);border:1px solid rgba(59,111,232,0.15);border-radius:var(--radius);padding:1rem;margin-bottom:1.25rem;">
+      <!-- ── PRIVATE LINKS ── -->
+      <div style="margin:1.5rem 0 1rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,0.06);padding-top:1.25rem;">
+        Private Links <span style="font-size:0.7rem;font-weight:400;text-transform:none;">(shown only after registration)</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">WhatsApp Group Link</label>
+        <input type="text" class="form-input" id="whatsapp_link" placeholder="https://chat.whatsapp.com/..." />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Meet / Zoom Link</label>
+        <input type="text" class="form-input" id="meet_link" placeholder="https://meet.google.com/..." />
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label class="form-label">Contact Name</label>
+          <input type="text" class="form-input" id="contact_name" placeholder="e.g. Riya Sharma" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contact Phone</label>
+          <input type="text" class="form-input" id="contact_phone" placeholder="e.g. 9876543210" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Venue Map Link</label>
+        <input type="text" class="form-input" id="venue_map_link" placeholder="https://maps.google.com/..." />
+      </div>
+
+      <!-- ── PUBLISH ── -->
+      <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:1.25rem;margin-top:0.5rem;">
+        <div class="form-group" style="flex-direction:row;align-items:center;gap:0.75rem;margin-bottom:1.25rem;">
+          <input type="checkbox" id="is_published" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
+          <label for="is_published" class="form-label" style="margin:0;cursor:pointer;">Publish immediately</label>
+        </div>
+      </div>
+
+      <!-- ── AI FORECAST ── -->
+      <div style="background:rgba(59,111,232,0.06);border:1px solid rgba(59,111,232,0.15);border-radius:var(--radius);padding:1rem;margin-bottom:1.25rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
           <span style="font-size:0.82rem;font-weight:600;color:var(--blue-light);">🤖 AI Attendance Forecast</span>
           <button class="btn btn-sm btn-secondary" id="previewForecastBtn" type="button">Preview</button>
         </div>
-        <div id="forecastPreview" class="text-slate text-sm">Fill in event details, then click Preview to see the AI
-          estimate.</div>
+        <div id="forecastPreview" class="text-slate text-sm">Fill in event details, then click Preview to see the AI estimate.</div>
       </div>
 
       <div style="display:flex;gap:0.75rem;">
         <a href="events" class="btn btn-secondary">Cancel</a>
         <button class="btn btn-primary" style="flex:1" id="createBtn">Create Event</button>
       </div>
-    </div>
 
+    </div>
   </main>
 
   <div class="toast hidden" id="toast"></div>
@@ -229,7 +231,7 @@
   <script src="../js/api.js?v=9"></script>
   <script src="../js/auth.js?v=6"></script>
   <script src="../js/admin/admin-hamburger.js?v=7"></script>
-  <script src="../js/admin/create-event.js?v=9"></script>
+  <script src="../js/admin/create-event.js?v=10"></script>
   <script>
     function toggleEntryFee(checked) {
       document.getElementById('entryFeeGroup').style.display = checked ? '' : 'none';
