@@ -10,6 +10,13 @@
     rel="stylesheet" />
   <link rel="stylesheet" href="../css/main.css?v=5" />
   <link rel="stylesheet" href="../css/dashboard.css?v=5" />
+  <style>
+    @media (max-width: 600px) {
+      .two-col-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -105,7 +112,8 @@
         <label class="form-label">Venue</label>
         <input type="text" class="form-input" id="editVenue" />
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+
+      <div class="two-col-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
         <div class="form-group">
           <label class="form-label">Capacity</label>
           <input type="number" class="form-input" id="editCapacity" min="1" />
@@ -123,17 +131,18 @@
           <input type="time" class="form-input" id="editEnd" />
         </div>
       </div>
+
       <!-- LOCK REASON BANNER -->
       <div id="editLockReason" class="hidden"
-        style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:var(--radius);padding:0.65rem 1rem;font-size:0.82rem;color:#fbbf24;margin-bottom:1rem;">
+        style="background:var(--amber-soft);border:1px solid rgba(217,119,6,0.3);border-radius:var(--radius);padding:0.65rem 1rem;font-size:0.82rem;color:var(--amber);margin-bottom:1rem;">
       </div>
 
       <!-- EVENT IDENTITY -->
-      <div
-        style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
-        Event Identity</div>
+      <div style="margin:1.25rem 0 0.75rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);padding-top:1.25rem;">
+        Event Identity
+      </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="two-col-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
         <div class="form-group">
           <label class="form-label">Event Type</label>
           <select class="form-input" id="editEventType">
@@ -162,41 +171,35 @@
         <label class="form-label">Organizer Department</label>
         <input type="text" class="form-input" id="editOrgDept" />
       </div>
-
       <div class="form-group">
         <label class="form-label">Speaker Name</label>
         <input type="text" class="form-input" id="editSpeaker" />
       </div>
-
       <div class="form-group">
         <label class="form-label">Tags (comma-separated)</label>
         <input type="text" class="form-input" id="editTags" />
       </div>
 
       <!-- MEDIA -->
-      <div
-        style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
-        Media</div>
-
+      <div style="margin:1.25rem 0 0.75rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);padding-top:1.25rem;">
+        Media
+      </div>
       <div class="form-group">
         <label class="form-label">Banner URL</label>
         <input type="text" class="form-input" id="editBannerUrl" />
       </div>
 
       <!-- REGISTRATION CONTROL -->
-      <div
-        style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
-        Registration Control</div>
-
+      <div style="margin:1.25rem 0 0.75rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);padding-top:1.25rem;">
+        Registration Control
+      </div>
       <div class="form-group">
         <label class="form-label">Registration Deadline</label>
         <input type="datetime-local" class="form-input" id="editRegDeadline" />
       </div>
-
-      <div style="display:flex;gap:1.5rem;align-items:center;margin-bottom:1rem;">
+      <div style="display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;margin-bottom:1rem;">
         <div style="display:flex;align-items:center;gap:0.5rem;">
-          <input type="checkbox" id="editHasCertificate"
-            style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
+          <input type="checkbox" id="editHasCertificate" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;" />
           <label for="editHasCertificate" class="form-label" style="margin:0;cursor:pointer;">Has Certificate</label>
         </div>
         <div style="display:flex;align-items:center;gap:0.5rem;">
@@ -205,29 +208,25 @@
           <label for="editIsPaid" class="form-label" style="margin:0;cursor:pointer;">Paid Event</label>
         </div>
       </div>
-
       <div class="form-group" id="editEntryFeeGroup" style="display:none;">
         <label class="form-label">Entry Fee (₹)</label>
         <input type="number" class="form-input" id="editEntryFee" min="0" step="0.01" />
       </div>
 
       <!-- PRIVATE LINKS -->
-      <div
-        style="margin:1.25rem 0 0.5rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;">
-        Private Links <span style="font-size:0.7rem;font-weight:400;color:var(--slate)">(shown only after
-          registration)</span></div>
-
+      <div style="margin:1.25rem 0 0.75rem;font-size:0.78rem;font-weight:700;color:var(--slate);letter-spacing:0.08em;text-transform:uppercase;border-top:1px solid var(--border);padding-top:1.25rem;">
+        Private Links <span style="font-size:0.7rem;font-weight:400;text-transform:none;">(shown only after registration)</span>
+      </div>
       <div class="form-group">
         <label class="form-label">WhatsApp Group Link</label>
         <input type="text" class="form-input" id="editWhatsapp" />
       </div>
-
       <div class="form-group">
         <label class="form-label">Meet / Zoom Link</label>
         <input type="text" class="form-input" id="editMeetLink" />
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="two-col-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
         <div class="form-group">
           <label class="form-label">Contact Name</label>
           <input type="text" class="form-input" id="editContactName" />
@@ -242,10 +241,11 @@
         <label class="form-label">Venue Map Link</label>
         <input type="text" class="form-input" id="editVenueMap" />
       </div>
-      <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem;flex-wrap:wrap;">
         <button class="btn btn-secondary" id="editCancel">Cancel</button>
         <button class="btn btn-success hidden" id="publishBtn">Publish</button>
-        <button class="btn btn-primary" style="flex:1" id="saveEditBtn">Save Changes</button>
+        <button class="btn btn-primary" style="flex:1;min-width:120px;" id="saveEditBtn">Save Changes</button>
       </div>
     </div>
   </div>
