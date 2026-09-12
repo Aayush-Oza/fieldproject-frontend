@@ -104,20 +104,36 @@
 
   </main>
 
-  <!-- QR MODAL -->
-  <div class="modal-overlay hidden" id="qrModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title">Your QR code</h3>
-        <button class="modal-close" id="qrModalClose">✕</button>
-      </div>
-      <div class="qr-modal-body">
-        <p class="qr-event-name" id="qrEventName"></p>
-        <div class="qr-img-wrap">
-          <img id="qrImg" src="" alt="QR Code" />
+  <!-- EVENT MODAL -->
+  <div class="modal-overlay hidden" id="eventModal">
+    <div class="modal" style="max-width:560px;padding:0;overflow:hidden;">
+      <div id="modalBannerGradient"
+        style="position:relative;min-height:140px;display:flex;flex-direction:column;justify-content:flex-end;padding:1.25rem 1.5rem 1rem;">
+        <img id="modalBannerImg" src="" alt=""
+          style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;" />
+        <button class="modal-close" id="eventModalClose"
+          style="position:absolute;top:0.75rem;right:0.75rem;z-index:2;">✕</button>
+        <div style="position:relative;z-index:1;">
+          <div id="modalBannerBadges" style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.5rem;"></div>
+          <h3 id="modalBannerTitle" style="color:#fff;font-size:1.2rem;font-weight:700;margin:0;"></h3>
         </div>
-        <p class="qr-hint">Show this at the gate for check-in</p>
-        <a class="btn btn-primary btn-full" id="qrDownload" href="#" download>Download QR</a>
+      </div>
+      <div style="padding:1.25rem 1.5rem;">
+        <div id="modalMeta" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem;"></div>
+        <p id="modalDescription" style="font-size:0.875rem;color:var(--slate);margin-bottom:1rem;"></p>
+        <div id="modalExtraInfo" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1rem;"></div>
+
+        <div id="modalStateDetails">
+          <p id="modalRegClosedMsg" class="hidden" style="font-size:0.85rem;color:var(--slate);margin-bottom:0.75rem;">
+          </p>
+          <button id="modalRegisterBtn" class="btn btn-primary btn-full hidden">Register</button>
+        </div>
+
+        <div id="modalStateQR" class="hidden" style="text-align:center;padding:1rem 0;">
+          <p style="font-size:0.85rem;color:var(--slate);margin-bottom:1rem;">Show this QR at the gate</p>
+          <div id="modalQRWrap" style="display:flex;justify-content:center;margin-bottom:1rem;"></div>
+          <a id="modalQRDownload" class="btn btn-secondary btn-sm" href="#" download>Download QR</a>
+        </div>
       </div>
     </div>
   </div>
